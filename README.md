@@ -4,6 +4,14 @@ This repository aims to collect all the work (projects and/or homeworks) done du
 
 In the following sections a brief description of each work will be provided along with the respective contributors.
 
+# Advanced algorithms
+## Description
+An handout (written in Italian) taken from the course of Advanced algorithms. This handout was not agreed with or reviewed by the lecturer.
+
+## Contributors
+* Luca Vallerini
+* Geppino Pucci (lecturer)
+
 # Computer networks
 ## Project description
 TODO
