@@ -1,0 +1,179 @@
+\documentclass[a4paper]{scrartcl}
+\usepackage[utf8x]{inputenc}
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+\usepackage{tabularx}
+\usepackage{lastpage}
+\usepackage{fancyhdr}
+\usepackage{helvet}
+\usepackage{longtable}
+\usepackage{booktabs}
+\renewcommand{\familydefault}{\sfdefault}
+
+% Informazioni generali
+\newcommand{\corso}{Basi di Dati}
+\newcommand{\anac}{ A.A. 2014/2015}
+\newcommand{\laurea}{Corso di Laurea Magistrale in Ingegneria Informatica}
+\newcommand{\matricola}{1110975}
+\newcommand{\nome}{Luca}
+\newcommand{\cognome}{Vallerini}
+\newcommand{\data}{Data di consegna: 26 marzo 2015}
+\newcommand{\consegna}{Homework 1 - Analisi dei requisiti}
+
+\pagestyle{fancy}
+\fancyhf{}% to clear existing header/footer if you don't want it
+\renewcommand\headrulewidth{0pt}
+\cfoot{\flushright Pagina [\thepage] di [\pageref{LastPage}]}
+
+\begin{document}
+
+% Intestazione con loghi
+\begin{figure}
+	\begin{minipage}[t]{\textwidth}
+		\includegraphics[height=25mm]{img/logounipd}
+		\hfill
+		\includegraphics[height=25mm]{img/logodei}
+	\end{minipage}
+\end{figure}
+
+% Intestazione corso
+{
+
+\vspace{5pt}
+\centering
+\textbf{\corso ,\anac} \\
+\textbf{\laurea} \\
+\vspace{15pt}
+\textbf{\consegna} \\
+\textbf{\small\data}
+
+
+% Intestazione dati studente
+\vspace{5pt}
+\begin{table}[h]
+	\begin{tabularx}{\textwidth}{|X|X|c|}
+		\hline
+		\multicolumn{1}{|c|}{\textbf{Cognome}} &
+		\multicolumn{1}{c|}{\textbf{Nome}} &
+		\multicolumn{1}{c|}{\textbf{Numero di matricola}} \\
+		\centering\cognome &
+		\centering\nome &
+		\matricola \\
+		\hline
+	\end{tabularx}
+\end{table}
+
+}
+
+% Documento vero e proprio
+\section*{Scopo e obiettivi del sistema}
+L'obiettivo del progetto consiste nella creazione di un sito web per una fumetteria con il quale gestire le vendite. Oltre a fornire informazioni generali riguardanti la fumetteria ed essere la vetrina virtuale del negozio, il sito permetterà alla fumetteria di gestire le vendite dei suoi prodotti e una parte della clientela potrà gestire i propri acquisti. 
+
+\section*{Interviste}
+La definizione del progetto è avvenuta a seguito di vari incontri con il cliente. Nel primo incontro il cliente ha descritto come gestisce le vendite all'interno della sua fumetteria e ha specificato che il sito da realizzare non si dovrà occupare della gestione finanziara (stipendi, fatture, scontrini, ecc.) della fumetteria, rimandata ad applicativi di terze parti. In incontri successivi sono stati richiesti degli approfondimenti circa il mondo dell'editoria italiana e il cliente ha specificato che la fumetteria è specializzata esclusivamente in materiale di origine giapponese. È stata inoltre elaborata con maggior dettaglio la politica di fidelizzazione del cliente adottata. In tutti gli incontri è sempre stato revisionato il lavoro eseguito con lo scopo di eliminare tutte le ambiguità e soddisfare le richieste del cliente.
+
+\section*{Utenti e stakeholder del sistema}
+Gli utenti che accedono al sistema sono di quattro tipologie. L'utente \textit{occasionale} si limita a consultare il catalogo della fumetteria. L'utente \textit{tesserato}, oltre a consultare il catalogo, può gestire i suoi acquisti anche attraverso un profilo personale. L'utente \textit{venditore} gestisce il catalogo e le vendite della fumetteria nonché i clienti tesserati: un caso particolare di utente venditore è l'utente \textit{proprietario} il quale, in aggiunta a ciò che può fare un venditore, gestisce i rifornimenti dei prodotti dai distributori e gli utenti venditore. Un utente proprietario ha il completo controllo del sistema.
+
+\section*{Frasi in linguaggio naturale}
+La fumetteria è specializzata nella vendita di prodotti di origine giapponese. I prodotti che vengono inseriti a catalogo vengono acquistati da vari fornitori. I fumetti venduti possono essere volumi singoli oppure si sviluppano in serie composte da più volumi; nel corso degli anni per ogni fumetto o anime possono essere messe in vendita edizioni di tipo diverso o, all'interno di una stessa edizione, ci possono essere delle variazioni nelle caratteristiche del prodotto. I prodotti a catalogo vengono venduti in negozio e la vendita (rapporto con il cliente e registrazione dell'acquisto) viene gestita dai venditori. Ai clienti è data la possibilità di tesserarsi: al corrispettivo di una quota annuale possono accedere a vari vantaggi come sconti, richieste di arretrati, abbonamenti e casella personale. Il cliente tesserato può esercitare i suoi privilegi sia in fumetteria che sul sito web della fumetteria. Il tesseramento dei clienti, la gestione dei loro acquisti e dei loro ordini è affidata ai venditori. Solo il proprietario può acquistare i prodotti dai rifornitori mentre i venditori si limitano a notificargli i prodotti che sono in esaurimento o esauriti.
+
+\section*{Frasi filtrate}
+La fumetteria è specializzata in prodotti di origine giapponese quali manga e anime. Questi prodotti vengono pubblicati da varie case editrici che si appoggiano a dei distributori per rifornire le fumetterie sparse sul territorio italiano. Nel corso degli anni tali prodotti possono essere pubblicati da diverse case editrici e/o subire diversi tipi di edizione; in alcuni casi è possibile che una stessa edizione subisca delle modifiche in corso di pubblicazione o a seguito di ristampe. I titoli editi da una casa editrice possono essere volumi unici oppure delle serie le cui uscite, generalmente periodiche, sono sviluppate in più volumi.
+
+Il catalogo dei prodotti in vendita è costituito da tutte le edizioni italiane di manga e anime. L'inserimento a catalogo viene effettuato sia dai venditori che dal proprietario.   L'inserimento a catalogo consiste nell'indicare le caratteristiche principali di un dato titolo, le caratteristiche dell'edizione italiana e la disponibilità (in termini quantitativi) del prodotto in fumetteria.
+
+I clienti hanno la possibilità di tesserarsi ricevendo alcuni vantaggi: prezzo scontato sui prodotti in vendita, possibilità di abbonarsi ai titoli che si sviluppano in più volumi, possibilità di richiedere gli arretrati, possibilità di usufruire di una casella personale nella quale possono venire conservati i prodotti in abbonamento o gli arretrati per un determinato periodo di tempo. Il tesseramento comporta la creazione di un profilo personale del cliente con il quale sia il cliente che la fumetteria possono gestire i suoi ordini e la sua casella personale. Il tesseramento ha validità annuale, comporta il versamento di una quota una tantum e richiede alcuni dati anagrafici e di contatto del cliente. Il tesseramento viene effettuato in fumetteria dai venditori.
+
+Ogni acquisto che viene effettuato in fumetteria viene registrato indicando i prodotti acquistati, la quantità e la data. Ogni ordine effettuato da un cliente tesserato viene gestito (ovvero lavorato, rifiutato o sospeso) da un venditore. Analogamente i venditori si occupano della gestione delle caselle dei clienti tesserati: deposito dei prodotti in abbonamento e degli arretrati, tutto registrando data di inserimento in casella e termine ultimo della giacenza. Ogni operazione compiuta da un venditore o dal proprietario viene registrata con il proprio account personale.
+
+Solo il proprietario si occupa del rifornimento dei prodotti dai distributori e tutti gli ordini vengono registrati. In questo ambito i venditori si possono occupare solo dell'inserimento a catalogo dei nuovi prodotti e/o del loro aggiornamento ed eventualmente possono notificare al proprietario i prodotti in via di esaurimento o esauriti richiesti dai clienti. 
+
+
+\section*{Glossario dei termini}
+\begin{longtable}{c p{2.8in} c}
+	\toprule
+	\multicolumn{1}{c}{\textbf{Nome concetto}} &
+	\multicolumn{1}{c}{\textbf{Descrizione}} &
+	\multicolumn{1}{c}{\textbf{Sinonimi}} \\
+	\midrule
+	\endfirsthead
+	\multicolumn{3}{l}{\textit{\footnotesize continua dalla pagina precedente}} \\
+	\toprule
+	\multicolumn{1}{c}{\textbf{Nome concetto}} &
+	\multicolumn{1}{c}{\textbf{Descrizione}} &
+	\multicolumn{1}{c}{\textbf{Sinonimi}} \\
+	\midrule
+	\endhead
+	\midrule
+	\multicolumn{3}{r}{\textit{\footnotesize continua nella pagina successiva}} \\
+	\endfoot
+	\bottomrule
+	\endlastfoot
+	ABBONAMENTO &
+	servizio che assicura al cliente la disponibilità di un prodotto o di una serie di prodotti nel caso di uscite future e/o periodiche &
+	- \\
+	ARRETRATO &
+	prodotto la cui data di uscita in fumetteria è antecedente alla data di un ordine (o di un acquisto) &
+	- \\
+	CATALOGO &
+	raccolta di tutti i prodotti disponibili alla vendita, dello loro caratteristiche, della loro disponibilità e di qualunque dato che possa risultare utile ai fini della 			compravendita e all'estrazione di statistiche &
+	- \\
+	CASELLA &
+	luogo fisico nel quale la fumetteria conserva per un determinato periodo di tempo gli ordini di un cliente tesserato &
+	- \\
+	DISTRIBUTORE & 
+	attività imprenditoriale che cura la distribuzione fisica dei prodotti di un editore &
+	FORNITORE \\
+	EDITORE &
+	attività imprenditoriale che si occupa di realizzare la versione italiana di un manga o un anime &
+	CASA EDITRICE \\
+	EDIZIONE &
+	insieme delle caratteristiche della versione italiana di un titolo edito da un editore &
+	- \\
+	ORDINE &
+	richiesta di un servizio: abbonamenti, arretrati, acquisti &
+	- \\
+	PRODOTTO &
+	edizione di un manga o di un anime in vendita presso la fumetteria &
+	TITOLO, SERIE \\
+	PROPRIETARIO &
+	proprietario della fumetteria o suo pari: ha il controllo completo su di essa &
+	- \\
+	RISTAMPA &
+	ripubblicazione di una determinata edizione di un manga o di un anime; la ripubblicazione può subire leggere modifiche rispetto all'edizione di riferimento &
+	- \\ 
+	TESSERAMENTO &
+	proposta di fidelizzazione del cliente che, a cospetto di una quota annuale una tantum, garantisce al cliente alcune agevolazioni e/o servizi aggiuntivi &
+	TESSERA \\
+	VENDITORE &
+	dipendente della fumetteria addetto alle vendite &
+	- \\
+\end{longtable}
+
+\section*{Requisiti funzionali}
+Vengono elencati i requisiti raggruppati per categorie: ogni tipologia di utente avrà delle opportune limitazioni nell'eseguire le operazioni elencate.
+\begin{itemize}
+\item \textbf{Catalogo} Visualizzazione, ricerca semplice e avanzata, estrazione di statistiche, inserimento e modifica dei prodotti a catalogo;
+\item \textbf{Ordini} Visualizzazione, inserimento, modifica, ricerca semplice e avanzata degli ordini di acquisto verso i distributori e degli ordini dei clienti;
+\item \textbf{Vendite} Registrazione, visualizzazione avanzata dello storico delle vendite, ricerca semplice e avanzata;
+\item \textbf{Tesseramento e profilo cliente} Creazione, sospensione, riattivazione e eliminazione di un profilo cliente, registrazione del tesseramento, inserimento e modifica dei dati anagrafici e di contatto, generazione di un identificativo univoco e di una password casuale, modifica della password, predisposizione e gestione di una casella virtuale, visualizzazione, inserimento e modifica degli ordini di abbonamenti e arretrati, ricerca semplice e avanzata nello storico degli ordini e nella casella personale, invio automatico di una mail ad ogni cambiamento di stato di un ordine o della casella personale;
+\item \textbf{Profilo venditore} Creazione, sospensione, riattivazione e eliminazione di un profilo venditore, generazione di un identificativo univoco e di una password casuale, modifica della password, registrazione degli acquisti, registrazione delle operazioni di gestione degli ordini e delle caselle dei clienti tesserati, ricerca semplice e avanzata nello storico delle operazioni eseguite e nel registro dei clienti tesserati, notifica dei prodotti in esaurimento o esauriti;
+\item \textbf{Profilo proprietario} Creazione, sospensione, riattivazione e eliminazione di un profilo proprietario, generazione di un identificativo univoco e di una password casuale, modifica della password, registrazione degli acquisti, registrazione delle operazioni di gestione degli ordini e delle caselle dei clienti tesserati, registrazione delle operazioni di gestione dei venditori, registrazione degli ordini verso i distributori, ricerca semplice e avanzata in ogni parte del sistema;
+\item \textbf{Stampa} Stampa degli esiti delle ricerche, delle statistiche di disponibilità e di vendita.
+\end{itemize}
+
+\section*{Requisiti non funzionali}
+Ai requisti precedenti si aggiungono i seguenti:
+\begin{itemize}
+\item l'aggiornamento del catalogo con i dati di vendita e di disponibilità dei prodotti nonché l'aggiornamento dei profili cliente, venditore e proprietario, degli ordini e delle caselle personali deve avvenire in automatico con la registrazione delle operazioni eseguite; 
+\item dove necessario la compilazione di un modulo deve presentare una forma di auto completamento che pesca i dati necessari dal catalogo e/o dal registro dei clienti tesserati;
+\item il sistema deve integrarsi con un dispositivo per la lettura di codici a barre per agevolare la registrazione di ogni acquisto; in ogni caso deve essere assicurato l'inserimento manuale;
+\item la stampa avviene generando un file PDF opportunamente impaginato per una visualizzazione ottimale dei dati: nel caso ciò non sia possibile è necessario avvisare l'utente.
+\end{itemize}
+
+\section*{Vincoli}
+Il sito web viene ospitato da un servizio di web hosting. L'hosting si appoggia a dei server con installata una distro Linux (Debian) sulla quale sono installati PostgreSQL e Apache Tomcat. Il sito web quindi si appoggerà ad un'applicazione Java che comunica con il DBMS tramite JDBC.
+
+\end{document}

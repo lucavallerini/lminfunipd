@@ -1,0 +1,1202 @@
+\chapter{Algoritmi di approssimazione}\label{ch:algapprox}
+\setcounter{page}{1}\pagenumbering{arabic}
+\section{Introduzione}
+Esistono molti problemi NP-completi di grande importanza. È possibile affrontare la risoluzione di questi in vari modi:
+\begin{itemize}
+\item se l'input del problema è sufficientemente piccolo l'algoritmo esponenziale potrebbe essere affrontabile (algoritmi pseudopolinomiali, ad esempio per SUBSET-SUM);
+\item è possibile restringere la classe delle istanze a casi particolari per i quali esistono degli algoritmi polinomiali;
+\item ricerca esaustiva dello spazio delle soluzioni guidata da strategie atte a eliminare parte delle soluzioni (ad esempio, Branch-and-Bound);
+\item è possibile trovare approcci che permettono di trovare soluzioni \textit{vicine all'ottimo} in tempo polinomiale: in questo caso si parla di \textit{algoritmi di approssimazione}.
+\end{itemize}
+
+
+Sia dato il problema (di ottimizzazione) $\Pi \subseteq \mathit{I} \times \mathit{S}, s(i) \in \mathit{S}, i \in \mathit{I}$, sia $c: \mathit{I} \mapsto \mathbb{R}^{+}$ una funzione di costo e sia $A_\pi(i) \in s(i)$ l'algoritmo di approssimazione che risolve il problema dato (in modo approssimato). Allora, un algoritmo è di $\mathbf{\rho (n)}$ \textbf{approssimazione} se vale
+\[
+\forall i \in \mathit{I} : |i|=n \quad \max\left\lbrace\frac{c(s^*(i))}{c(A_\pi(i))},\frac{c(A_\pi(i))}{c(s^*(i))}\right\rbrace \leq \rho (n)
+\]
+e $\rho (n)$ è detto \textbf{fattore di approssimazione}.
+
+Data l'assunzione che il costo delle soluzioni sia sempre positivo, i rapporti nella funzione di max sono sempre sensati.
+Per un problema di MAX, si ha che $0 < c(A_\pi(i)) \leq c(s^*(i))$, per cui il fattore di approssimazione sarà $\frac{c(s^*(i))}{c(A_\pi(i))}$; di converso, per un problema di MIN, si ha che $0 < c(s^*(i)) \leq c(A_\pi(i))$, per cui il fattore di approssimazione sarà $\frac{c(A_\pi(i))}{c(s^*(i))}$. Si noti che il rapporto di approssimazione non può mai essere minore di 1: il valore minimo che può raggiungere è 1 e ciò avviene quando l'algoritmo di approssimazione restituisce una soluzione ottima.
+
+Alcuni problemi NP-completi ammettono algoritmi di approssimazione in tempo polinomiale che riescono a raggiungere fattori di approssimazione sempre migliori mano a mano che si usa un tempo computazionale maggiore.
+
+\begin{definizione}
+Uno \textbf{schema di approssimazione} per un problema di approssimazione è un algoritmo di approssimazione che prende in input l'istanza del problema e un valore $\epsilon > 0$ tale per cui, per ogni $\epsilon$ fissato, lo schema è un algoritmo di (1+$\epsilon$)-approssimazione.
+\end{definizione}
+
+\begin{definizione}
+Uno schema di approssimazione è uno \textbf{schema di approssimazione in tempo polinomiale (PTAS)} se, fissato $\epsilon > 0$, lo schema esegue in tempo polinomiale rispetto alla taglia dell'istanza.
+\end{definizione}
+
+Il tempo di esecuzione di uno schema di approssimazione può aumentare molto velocemente al diminuire di $\epsilon$: ad esempio $T=O(n^{2/\epsilon})$. Idealmente, se $\epsilon$ decresce di un fattore costante, il tempo necessario per raggiungere l'approssimazione desiderata non dovrebbe crescere più che di un fattore costante.
+
+\begin{definizione}
+Uno schema di approssimazione è uno \textbf{schema di approssimazione in tempo pienamente polinomiale (FPTAS)} se è uno schema di approssimazione e il tempo di esecuzione è polinomiale sia nella taglia $n$ dell'istanza sia rispetto a $1/\epsilon$.
+\end{definizione}
+
+Un possibile esempio di uno schema FPTAS è $T=O((1/\epsilon)^2n^3)$. In tal modo se $\epsilon$ decresce di un fattore costante allora il tempo di esecuzione cresce anch'esso di un fattore costante.
+
+\section{Il problema VERTEX-COVER}
+\subsection{Un algoritmo di 2-approssimazione}
+Sia dato il problema NP-completo {VERTEX-COVER}, definito come segue:
+\[
+\begin{cases}
+I=\langle G=(V,E)\rangle , \mbox{G grafo non diretto}, |V|=n, |E|=m \\
+\\
+\mbox{Determinare il sottoinsieme $V^* \subseteq V$ di cardinalità minima tale che} \\
+\forall u,v \in V$ \mbox{se} $\{u,v\} \in E \Rightarrow (u \in V^*) \lor (v \in V^*)
+\end{cases}
+\]
+
+In \textit{Dati e algoritmi 2} abbiamo dimostrato che VERTEX-COVER è NPH tramite la riduzione polinomiale CLIQUE $<_p$ VERTEX-COVER che opera la trasformazione
+\[
+\langle G=(V,E)\rangle  \longrightarrow \langle G^c=(V,E^c)\rangle
+\]
+dove $G^c$ rappresenta il grafo complementare di $G$. Allora, si noti che se un grafo contiene una CLIQUE $V^*$ di cardinalità massima, allora il suo complementare contiene un VERTEX-COVER di cardinalità minima $V-V^*$.
+
+Un possibile algoritmo risolutivo potrebbe sfruttare una strategia greedy:
+\begin{itemize}
+\item $E=\{e_1, e_2, ..., e_m\}$
+\item scelta greedy $e_1=\{u,v\}$
+\item $V' \longleftarrow \{u,v\}$
+\item CLEAN-UP: elimino tutti gli archi che hanno almeno un loro vertice in $V'$
+\item termino quando $E=\emptyset$
+\end{itemize}
+
+Lo pseudo-codice di tale algoritmo è riportato come algoritmo \ref{alg:approxvc}.
+\begin{algorithm}
+\caption{Algoritmo di approssimazione per VERTEX-COVER}
+\label{alg:approxvc}
+\begin{algorithmic}
+\Function{APPROX\_VC}{$(G=(V,E)$}
+	\State $V' \gets \emptyset$
+	\State $E' \gets E$
+	\State $A \gets \emptyset$
+	\While{ $E'\neq\emptyset$ }
+		\State ** let $\{u,v\}\in E'$ **
+		\State $A \gets A \cup \{\{u,v\}\}$
+		\State $V' \gets V' \cup \{u,v\}$
+		\State $E' \gets E' - \{e \in E'\ |\ \exists z \in V : (e=\{u,z\}) \lor (e=\{v,z\})\}$
+	\EndWhile
+	\State \Return $V'$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+L'algoritmo prende in ingresso il grafo di cui si vuole determinare il vertex cover di cardinalità minima. All'inizio istanzia l'insieme $V'$ che alla fine conterrà i vertici che formeranno il vertex cover, effettua una copia dell'insieme dei lati del grafo e crea l'insieme $A$ che conterrà le scelte greedy effettuate dall'algoritmo (tornerà utile per determinare il fattore di approssimazione). L'algoritmo esegue fintantoché $E'$ contiene dei lati: la scelta greedy viene aggiunta all'insieme $A$ e i vertici estremi del lato selezionato dalla scelta greedy vanno a far parte del vertex cover $V'$. Infine, la fase di clean-up rimuove tutti i lati che hanno origine dai due vertici che sono gli estremi del lato selezionato dalla scelta greedy.
+
+\paragraph*{Analisi della correttezza}
+L'algoritmo termina quando $E'=\emptyset$, quindi ogni arco viene eliminato in una qualche iterazione. Considerata una iterazione, il lato $e$ viene eliminato poiché almeno uno dei due suoi estremi è un vertice già appartenente al vertex cover $V'$: viene infatti eliminato l'arco selezionato dalla scelta greedy assieme a tutti i lati uscenti dai due estremi della scelta greedy (il vertice di "origine" fa già parte di $V'$). Poiché tale procedura avviene per ogni arco, allora l'insieme $V'$ che ottengo è un vertex cover.
+
+\paragraph*{Analisi temporale}
+Memorizzando il grafo tramite liste di adiacenza, l'algoritmo può operare in $T=\Theta(n+m)=\Theta(|\langle G\rangle |)$. La scelta greedy corrisponderà alla prima lista "nodale" non vuota: determinata tale lista (scansione lineare), si scansiona la lista concatenata associata a tale lista per determinare i lati da rimuovere (fase di clean-up).
+
+\paragraph*{Fattore di approssimazione}
+Per determinare il fattore di approssimazione torna utile la raccolta delle scelte greedy effettuate dall'algoritmo (l'insieme $A$ nel codice).
+
+\begin{proposizione}
+L'insieme $A$ forma un matching: $\forall e,e'\in A\ :\ e \cap e' = \emptyset$. Inoltre tale matching è massimale.
+\end{proposizione}
+\begin{proof}
+Per assurdo, suppongo che $\exists e,e'\in A : e \cap e' \neq \emptyset$. Ipotizzando, senza perdita di generalità, che $e$ venga selezionato prima di $e'$, quando $e$ viene selezionato, $e'$ viene eliminato dalla fase di clean-up avendo un vertice in comune con $e$ e di conseguenza non verrebbe selezionato in una successiva iterazione, assurdo.
+
+Se il matching è massimale significa che $\forall f\in E\ :\ f\notin A$ l'insieme $A\cup \{ f\}$ non è più un matching. Poiché il lato $f$ non fa parte di $A$, allora in una qualche iterazione è stato eliminato dalla fase di clean-up dell'algoritmo perché un suo vertice era in comune con uno dei vertici del lato selezionato come scelta greedy nella stessa iterazione: tale lato $e$ è stato aggiunto ad $A$, pertanto, se aggiungessimo anche $f$ avremmo sicuramente che $e\cap f\neq\emptyset$, violando così la definizione di matching. Segue quindi che $A$ è un matching massimale.
+\end{proof}
+
+Fatto questo è ora possibile dimostrare la seguente proposizione.
+
+\begin{proposizione}
+L'algoritmo APPROX\_VC ha come fattore di approssimazione $\rho (n)=2$.
+\end{proposizione}
+\begin{proof}
+Iniziamo con il dimostrare che $|V^*| \geq |A|$. Se $e=\{u,v\}\in A$ allora qualunque vertex cover, incluso quindi quello ottimo, deve contenere $u$ o $v$ (o entrambi), altrimenti il lato $e$ non sarebbe coperto. Di conseguenza ogni vertex cover contiene \textbf{almeno} un estremo di ogni lato del matching, da cui la tesi.
+
+Proseguiamo con il dimostrare che $|V'|=2|A|$. Ad ogni iterazione, considerata la scelta greedy $\{u,v\}$, a $V'$ vengono aggiunti i vertici estremi di quel lato, mentre il lato stesso viene aggiunto ad $A$. Date le caratteristiche dei due insiemi, uno un vertex cover, l'altro un matching, e gli elementi che vengono aggiunti ad ogni iterazione, $V'$ conterrà necessariamente il doppio degli elementi di $A$ (di fatto $V'$ è la collezione di nodi che formano i lati di $A$).
+
+Combinando i risultati ottenuti si ha:
+\[
+|V^*| \geq \frac{|V'|}{2} \Rightarrow \frac{|V'|}{|V^*|} \leq 2 \Leftrightarrow \frac{c(A_\pi (i))}{c(s^*(i))} \leq 2 = \rho (n) \, \mbox{,}
+\]
+ottenendo quindi che l'algoritmo APPROX\_VC è di 2-approssimazione.
+\end{proof}
+
+\begin{esempio}
+\begin{figure}
+\begin{subfigure}{.5\textwidth}
+	\centering
+	\begin{tikzpicture}
+    		\node[main node] (1) {a};
+    		\node[main node] (2) [above =of 1] {b};
+    		\node[main node] (3) [right =of 2] {c};
+    		\node[main node] (4) [right =of 3] {d};
+    		\node[main node] (5) [right =of 1] {e};
+    		\node[main node] (6) [right =of 5] {f};
+    		\node[main node] (7) [right =of 6] {g};
+    		
+    		\path[draw]
+    		(1) edge node {} (2)
+    		(2) edge node {} (3)
+    		(3) edge node {} (4)
+    		(3) edge node {} (5)
+    		(4) edge node {} (5)
+    		(4) edge node {} (6)
+    		(4) edge node {} (7)
+    		(5) edge node {} (6);
+	\end{tikzpicture}
+	\label{fig:approxvca}
+	\caption{Grafo di partenza}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+	\centering
+	\begin{tikzpicture}
+    		\node[main node] (1) {a};
+    		\node[fill=black!20, draw, main node] (2) [above =of 1] {b};
+    		\node[fill=black!20, draw, main node] (3) [right =of 2] {c};
+    		\node[main node] (4) [right =of 3] {d};
+    		\node[main node] (5) [right =of 1] {e};
+    		\node[main node] (6) [right =of 5] {f};
+    		\node[main node] (7) [right =of 6] {g};
+    		
+    		\path[draw]
+    		(4) edge node {} (5)
+    		(4) edge node {} (6)
+    		(4) edge node {} (7)
+    		(5) edge node {} (6);
+    		
+    		\path[draw, very thick]
+    		(2) edge node {} (3);
+    		
+    		\path[draw, dashed]
+    		(1) edge node {} (2)
+    		(3) edge node {} (4)
+    		(3) edge node {} (5);
+	\end{tikzpicture}
+	\label{fig:approxvcb}
+	\caption{Prima iterazione}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+	\centering
+	\begin{tikzpicture}
+    		\node[main node] (1) {a};
+    		\node[fill=black!20, draw, main node] (2) [above =of 1] {b};
+    		\node[fill=black!20, draw, main node] (3) [right =of 2] {c};
+    		\node[main node] (4) [right =of 3] {d};
+    		\node[fill=black!20, draw, main node] (5) [right =of 1] {e};
+    		\node[fill=black!20, draw, main node] (6) [right =of 5] {f};
+    		\node[main node] (7) [right =of 6] {g};
+    		
+    		\path[draw]
+    		(4) edge node {} (7);
+    		
+    		\path[draw, very thick]
+    		(2) edge node {} (3)
+    		(5) edge node {} (6);
+    		
+    		\path[draw, dashed]
+    		(1) edge node {} (2)
+    		(3) edge node {} (4)
+    		(3) edge node {} (5)
+    		(4) edge node {} (5)
+    		(4) edge node {} (6);
+	\end{tikzpicture}
+	\label{fig:approxvcc}
+	\caption{Seconda iterazione}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+	\centering
+	\begin{tikzpicture}
+    		\node[main node] (1) {a};
+    		\node[fill=black!20, draw, main node] (2) [above =of 1] {b};
+    		\node[fill=black!20, draw, main node] (3) [right =of 2] {c};
+    		\node[fill=black!20, draw, main node] (4) [right =of 3] {d};
+    		\node[fill=black!20, draw, main node] (5) [right =of 1] {e};
+    		\node[fill=black!20, draw, main node] (6) [right =of 5] {f};
+    		\node[fill=black!20, draw, main node] (7) [right =of 6] {g};
+    		
+    		\path[draw, very thick]
+    		(2) edge node {} (3)
+    		(5) edge node {} (6)
+    		(4) edge node {} (7);
+    		
+    		\path[draw, dashed]
+    		(1) edge node {} (2)
+    		(3) edge node {} (4)
+    		(3) edge node {} (5)
+    		(4) edge node {} (5)
+    		(4) edge node {} (6);
+	\end{tikzpicture}
+	\label{fig:approxvcd}
+	\caption{Terza iterazione}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+	\centering
+	\begin{tikzpicture}
+    		\node[main node] (1) {a};
+    		\node[fill=black!20, draw, main node] (2) [above =of 1] {b};
+    		\node[fill=black!20, draw, main node] (3) [right =of 2] {c};
+    		\node[fill=black!20, draw, main node] (4) [right =of 3] {d};
+    		\node[fill=black!20, draw, main node] (5) [right =of 1] {e};
+    		\node[fill=black!20, draw, main node] (6) [right =of 5] {f};
+    		\node[fill=black!20, draw, main node] (7) [right =of 6] {g};
+    		
+    		\path[draw]
+    		(1) edge node {} (2)
+    		(2) edge node {} (3)
+    		(3) edge node {} (4)
+    		(3) edge node {} (5)
+    		(4) edge node {} (5)
+    		(4) edge node {} (6)
+    		(4) edge node {} (7)
+    		(5) edge node {} (6);
+	\end{tikzpicture}
+	\label{fig:approxvce}
+	\caption{Il vertex cover approssimato}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+	\centering
+	\begin{tikzpicture}
+    		\node[main node] (1) {a};
+    		\node[fill=black!20, draw, main node] (2) [above =of 1] {b};
+    		\node[main node] (3) [right =of 2] {c};
+    		\node[fill=black!20, draw, main node] (4) [right =of 3] {d};
+    		\node[fill=black!20, draw, main node] (5) [right =of 1] {e};
+    		\node[main node] (6) [right =of 5] {f};
+    		\node[main node] (7) [right =of 6] {g};
+    		
+    		\path[draw]
+    		(1) edge node {} (2)
+    		(2) edge node {} (3)
+    		(3) edge node {} (4)
+    		(3) edge node {} (5)
+    		(4) edge node {} (5)
+    		(4) edge node {} (6)
+    		(4) edge node {} (7)
+    		(5) edge node {} (6);
+	\end{tikzpicture}
+	\label{fig:approxvcf}
+	\caption{Il vertex cover ottimo}
+\end{subfigure}
+\caption{Esempio grafico di applicazione dell'APPROX\_VC}
+\label{fig:esempio_approx_vc}
+\end{figure}
+
+Applichiamo l'algoritmo di 2-approssimazione per il problema VERTEX-COVER al grafo in figura \ref{fig:esempio_approx_vc}
+\begin{itemize}
+\item come scelta greedy nella prima iterazione scegliamo il lato $\{b,c\}$, quindi $V'=\{b,c\}$ e possiamo eliminare dal grafo i lati $\{a,b\}, \{c,d\}, \{c,e\}$;
+\item alla seconda iterazione scegliamo come scelta greedy il lato $\{e,f\}$, quindi $V'=\{b,c,e,f\}$ e possiamo eliminare i lati $\{e,d\}, \{d,f\}$;
+\item alla terza (ed ultima) iterazione scegliamo l'unico lato rimasto, $\{d,g\}$, quindi $V'=\{b,c,d,e,f,g\}$ e l'algoritmo termina non essendo disponibili ulteriori lati.
+\end{itemize}
+
+L'esempio restituisce un vertex cover di cardinalità $6$, tuttavia, data la semplicità del grafo, è facilmente verificabile che il vertex cover ottimo è $V^*=\{b,d,e\}$, di cardinalità $3$: l'algoritmo di approssimazione, con le scelte effettuate, ha fornito il risultato approssimato peggiore.
+\end{esempio}
+
+\subsection{La riduzione polinomiale non preserva l'approssimazione}
+In questo paragrafo forniremo un esempio di come un algoritmo di approssimazione per un problema NPH non si trasforma in un algoritmo di approssimazione per un altro problema NPH con la stessa qualità (ovvero lo stesso fattore di approssimazione).
+
+Definiamo il problema (decisionale) CLIQUE come segue:
+\[
+\begin{cases}
+\langle G=(V,E),k\rangle , \mbox{G grafo non diretto}, |V|=n, |E|=m, k \in \mathbb{N}^+ \\
+\\
+\mbox{Esiste in G una clique di taglia k?}
+\end{cases}
+\]
+
+Sappiamo che vale la seguente equivalenza:
+\[
+\langle G,k\rangle  \in \mbox{CLIQUE} \Leftrightarrow \langle G^c,|V|-k\rangle  \in \mbox{VERTEX-COVER}
+\]
+dove $G^c=(V,E^c),\,E^c=\{\{u,v\}\ |\ \forall u,v \in |V|, u \neq v, \{u,v\} \notin E\}$, è il grafo complementare di $G$.
+
+Per risolvere il problema di ottimizzazione CLIQUE sfrutto la riduzione polinomiale $CLIQUE <_p VERTEX-COVER$: si vuole trovare la clique di taglia massima di $G$ supponendo che tale clique esista e sia $|V^*|=k \geq n/2$. Come prima cosa trasformo l'istanza di CLIQUE in una istanza di VERTEX-COVER secondo la funzione di riduzione vista in precedenza. Successivamente, si applica l'algoritmo di approssimazione per VERTEX-COVER all'istanza trasformata, ottenendo il VERTEX-COVER minimo (approssimato) $V'$, dal quale si può ricavare la clique (massima?) $V-V'$.
+
+Avendo supposto che l'istanza di CLIQUE sia una istanza positiva la cui clique abbia taglia almeno pari alla metà della cardinalità di $V$, com'è la qualità dell'algoritmo esposto sopra? Se $|V^*|=k$ in G, allora $|V^*_{VC}|=n-k$ in $G^c$. L'algoritmo APPROX\_VC restituisce il vertex cover di taglia $|V'| \leq 2|V^*_{VC}|=2(n-k)$, per cui la taglia della clique sarà $|V-V'| \geq n - 2(n-k) = 2k-n$. Ora, supponendo che $|V^*|=k=n/2+1$, si ottiene che $|V-V'|=2k-n=2(n/2+1)-n=2$, quindi:
+\[
+\frac{c(s^*(\langle G,k\rangle ))}{c(A_{VC}(\langle G^c, |V|-k\rangle ))}=\frac{\frac{n}{2}+1}{2} \approx \frac{n}{4} \leq \rho(n) \mbox{.}
+\]
+
+L'esempio mostra come l'algoritmo di 2-approssimazione per VERTEX-COVER porti ad un algoritmo per CLIQUE di $\frac{n}{4}$-approssimazione.
+\section{Il problema TSP}
+\label{sez:tsp}
+Dato $G=(V,E)$, grafo non diretto, si chiama \textit{circuito hamiltoniano} un ciclo semplice\footnote{Un ciclo semplice è un ciclo che non passa per lo stesso vertice più di una volta (eccetto che per il primo e l'ultimo vertice del ciclo).} che tocca tutti i vertici del grafo. Il problema di HAMILTON è definito come segue:
+\[
+\begin{cases}
+\langle G=(V,E)\rangle  \\
+\mbox{Esiste in G un ciclo hamiltoniano?}
+\end{cases}
+\]
+
+Il problema di HAMILTON ci permette di definire il problema del \textit{Traveling Salesman Problem (TSP)}:
+\[
+\begin{cases}
+\langle G_c=(V,E),c,k\rangle ,G_c \mbox{ grafo completo su $V$,} \\
+c : V \times V \rightarrow \mathbb{N}-\{0\} \mbox{ simmetrica}, k \in \mathbb{N}-\{0\} \\
+\\
+\mbox{Esiste in $G_c$ un ciclo hamiltoniano la cui somma dei costi} \\
+\mbox{sugli archi del circuito sia minore o uguale a $k$?}
+\end{cases}
+\]
+
+\begin{definizione}
+Un circuito hamiltoniano in un grafo completo è chiamato \textbf{tour}.
+\end{definizione}
+
+
+\begin{teorema}
+Il problema TSP è un problema NP-completo.
+\end{teorema}
+\begin{proof}
+Utilizzo la riduzione $ HAMILTON <_p TSP$.
+
+L'istanza $\langle G=(V,E)\rangle $ di HAMILTON è un grafo generico: la funzione di riduzione polinomiale trasformerà tale istanza in $\langle G_c=(V,E'),c,k\rangle $, dove $G_c$ sarà il grafo completo di $G$, $E'=\{\{u,v\}\ |\ \forall u,v \in V, u \neq v\}$, $k=|V|$ e la funzione di costo sarà
+\[
+c(u,v)=
+\begin{cases}
+1 &\mbox{ se } \{u,v\} \in E \\
+2 &\mbox{ altrimenti}
+\end{cases}
+\]
+
+Sia $\langle G=(V,E)\rangle \in$ HAMILTON: allora il tour esistente in $G$ esiste anche in $G_c$ essendo semplicemente il grafo completo ottenuto da $G$ aggiungendo i lati mancanti (ovviamente nessuno di loro farà parte di quel tour). Per la funzione di riduzione, abbiamo che il costo del tour sarà pari a $1\cdot|V|$, essendo il tour di lunghezza $|V|$ e formato completamente da lati in $E$: la somma dei costi è uguale a $k$, pertanto soddisfa il problema TSP.
+
+Di converso, si supponga che $\langle G=(V,E)\rangle\notin$ HAMILTON: allora, un qualsiasi tour in $G_c$ potrà essere formato da lati di $G$ e necessariamente da almeno un lato non in $G$. Supponiamo che il tour in $G_c$ abbia $|V|-1$ lati di $E$ e un lato di $E'-E$: allora la somma dei costi sugli archi vale $1\cdot(|V|-1) + 2\cdot1=|V|+1 > k$, non soddisfacendo TSP.
+\end{proof}
+
+Definiamo il problema di ottimizzazione per TSP come segue:
+\[
+\begin{cases}
+\langle G_c=(V,E),c\rangle ,G_c \mbox{ grafo completo su $V$,} \\
+c : |V| \times |V| \rightarrow \mathbb{N}-\{0\} \mbox{ simmetrica}\\
+\\
+\mbox{Esiste in $G_c$ un ciclo hamiltoniano la cui somma dei costi è minima?} \\
+\end{cases}
+\]
+
+\begin{teorema}
+Se P$\neq$NP, non può esistere alcun algoritmo di approssimazione per TSP con $\rho(n)$ calcolabile in tempo polinomiale, con $n=|V|$.
+\end{teorema}
+\begin{proof}
+Dimostriamo che se esistesse un algoritmo $A^{\rho(n)}_{TSP}$ di $\rho(n)$-approssimazione per TSP allora potrei decidere HAMILTON in tempo polinomiale.
+
+Sia $\langle G=(V,E) \rangle$ l'istanza per HAMILTON. Costruisco l'istanza per TSP similmente a quanto fatto nella dimostrazione precedente: $\langle G_c=(V,E_c), c \rangle$ con
+\[
+c(u,v)=
+\begin{cases}
+1 &\mbox{ se } \{u,v\} \in E \\
+|V|\rho(|V|)+1 &\mbox{ se } \{u,v\} \notin E.
+\end{cases}
+\]
+La taglia dell'istanza è polinomiale essendo polinomiale $\rho(|V|)$.
+
+Applico quindi $A^{\rho(n)}_{TSP}$ all'istanza $\langle G_c=(V,E_c), c \rangle$ ottenendo un tour $T$ di costo $c_T$.
+\begin{enumerate}
+\item $\langle G=(V,E) \rangle \in$ HAMILTON $\Rightarrow \exists T^*$ in $G_c$ di costo $|V|$. Allora $A^{\rho(n)}_{TSP}$ restituisce un tour $T$ di costo $c_T \leq |V|\rho(|V|)$: questo è vero perché l'approssimazione garantisce che il costo della soluzione approssimata non sia maggiore di un fattore $\rho(|V|)$ della soluzione ottima;
+\item $\langle G=(V,E) \rangle \notin$ HAMILTON $\Rightarrow$ un qualsiasi tour $T$ in $G_c$ deve contenere almeno un lato non in $E$ di costo $|V|\rho(|V|)+1$. Allora, per $T^*$ si ha che $c_{T^*} \geq |V|-1+|V|\rho(|V|)+1 = |V| + |V|\rho(|V|) > |V|\rho(|V|)$, ovvero $A^{\rho(n)}_{TSP}$ ritorna una soluzione di costo maggiore di $|V|\rho(|V|)$.
+\end{enumerate}
+
+In \ref{alg:hamiltontsp} è riportato l'algoritmo che permette(rebbe) di decidere HAMILTON sfruttando $A^{\rho(n)}_{TSP}$.
+\begin{algorithm}
+\caption{Algoritmo polinomiale per HAMILTON}
+\label{alg:hamiltontsp}
+\begin{algorithmic}
+\Function{DECIDE\_HAMILTON}{$\langle G=(V,E) \rangle$}
+	\State ** creo l'istanza $\langle G_c = (V,E_c), c \rangle$ **
+	\State $T \gets A^{\rho(n)}_{TSP}(\langle G_c = (V,E_c), c \rangle)$
+	\If{ $cost(T) \leq |V|\rho(|V|)$ }
+		\State \Return 1
+	\Else
+		\State \Return 0
+	\EndIf
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+Ovviamente, avendo ipotizzato che P$\neq$NP, tutto ciò è assurdo, concludendo quindi la dimostrazione.
+\end{proof}
+
+\section{Il problema TRIANGLE-TSP}
+Per quanto abbiamo visto, TSP è un problema NP-completo che non può essere approssimato. Nonostante ciò, è possibile considerare una sottoclasse di TSP, chiamata TRIANGLE-TSP, che considera il caso in cui la funzione di costo soddisfa la disuguaglianza triangolare, ovvero
+\[
+c(u,w) \leq c(u,v) + c(v,w) \,\,\,\, \forall u,w\in V, u \neq w \neq v \mbox{.}
+\]
+
+Definiamo inoltre la funzione di costo su un sottoinsieme di archi come segue:
+\[
+c(A)=\sum_{\{u,v\}\in A}c(u,v) \,\,\,\, \forall A \subseteq E \mbox{.}
+\]
+
+Tale problema rimane un problema NP-completo\footnote{La dimostrazione è identica a quella per dimostrare che TSP $\in$ NPC, è sufficiente notare che la funzione di costo utilizzata nella riduzione polinomiale soddisfa la disuguaglianza triangolare.}. È possibile formulare due algoritmi di approssimazione che risolvono TRIANGLE-TSP.
+
+\subsection{Un algoritmo di 2-approssimazione}
+Un possibile algoritmo che risolve TRIANGLE-TSP calcola il MINIMUM SPANNING TREE (MSP)\footnote{Un albero ricoprente di un grafo è un albero che contiene tutti i vertici del grafo e un sottoinsieme degli archi, costituito da tutti e soli gli archi che connettono i vertici con uno e un solo cammino.} del grafo completo $G=(V,E)$ e in seguito procede con una visita in pre-ordine di tale albero: la lista dei vertici visitati restituisce un tour. Il motivo per cui si calcola un albero ricoprente di costo minimo è che tale costo rappresenta un limite inferiore alla lunghezza di un tour ottimo per TSP. L'algoritmo \ref{alg:2ttsp} descrive lo pseudocodice dell'algoritmo in questione.
+
+\begin{algorithm}
+\caption{Algoritmo di 2-approssimazione per TRIANGLE-TSP}
+\label{alg:2ttsp}
+\begin{algorithmic}
+\Function{APPROX\_TRIANGLE-TSP\_TOUR}{$\langle G=(V,E), c \rangle$}
+	\State $r \gets$ ** scegli un nodo in $V$ come radice **
+	\State $T \gets $MINIMUM\_SPANNING\_TREE($\langle G=(V,E), c, r \rangle$)
+	\State $H \gets $PREORDER\_VISIT($T$)
+	\State \Return $H$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{teorema}
+APPROX\_TRIANGLE-TSP\_TOUR è un algoritmo in tempo polinomiale di 2-approssimazione per TRIANGLE-TSP.
+\end{teorema}
+\begin{proof}
+È chiaro che questo algoritmo esegue in tempo polinomiale: MINIMUM\_SPANNING\_TREE($\cdot$) è un algoritmo quadratico nel numero di nodi del grafo mentre PREORDER\_VISIT($\cdot$) esegue in tempo lineare.
+
+Sia $H^*$ il tour ottimo per il grafo completo $G=(V,E)$ dato. Eliminando un qualsiasi arco dal tour otteniamo un albero ricoprente $T$, per cui
+\[
+c(T) \leq c(H^*) \mbox{.}
+\]
+
+Una visita completa di $T$ lista i vertici quando vengono visitati per la prima volta e quando vengono rivisitati tornado dalla visita di un loro sotto-albero: sia quindi $W$ tale lista. La visita completa attraversa ogni arco di $T$ esattamente due volte (una per "scendere" nel sotto-albero e una per "risalire" il sotto-albero verso il nodo genitore e proseguire con la visita):
+\[
+c(W) = 2c(T) \leq 2c(H^*) \mbox{.}
+\]
+Si noti bene che $W$ non rappresenta un tour in quanto alcuni vertici vengono visitati più di una sola volta.
+
+Poiché il grafo soddisfa la disuguaglianza triangolare, è possibile eliminare dalla lista $W$ un qualsiasi vertice senza che il costo di $W$ incrementi: eseguiamo tale operazioni con tutti vertici che sono in lista come successivi alla loro prima visita. Sia quindi $H$ il ciclo associato a questa "pulitura" di $W$: questo rappresenta un tour poiché ogni vertice viene visitato esattamente una volta ed è ciò che viene calcolato dall'algoritmo proposto. Poiché $H$ è calcolato eliminando vertici da $W$, si ha
+\[
+c(H) \leq c(W) \leq 2c(H^*) \Rightarrow \frac{c(H)}{c(H^*)} \leq 2 = \rho(n) \mbox{.}
+\]
+\end{proof}
+
+\begin{esempio}
+In figura \ref{fig:esempioapproxtsp} un esempio di applicazione dell'algoritmo di approssimazione per TRIANGLE-TSP.
+In (a) il grafo non diretto completo: i vertici sono stati posizionati sulle intersezioni della griglia così da rendere la funzione di costo la distanza euclidea, la quale soddisfa la diseguaglianza triangolare. In (b) il MST di radice $\mathrm{a}$. In (c) la visita completa in pre-ordine: la sequenza dei vertici visitati è $W=\langle a,b,c,b,h,a,d,e,f,e,g,e,d,a\rangle$. Con un puntino sono indicati i vertici visitati per la prima volta e che sopravvivono la "pulitura" di $W$. In (d) il tour ottenuto dalla visita completa, ovvero il risultato dell'algoritmo di approssimazione (costo totale di circa 19,074). In (e) una soluzione ottima per il grafo originale (costo totale di circa 14,715).
+
+\begin{figure}
+\begin{subfigure}{.5\textwidth}
+	\centering
+	\begin{tikzpicture}
+	\draw[step=1cm, gray, very thin] (-0.5,-0.5) grid (5.5,4.5);
+	\draw (1,4) node[fill=black!20, circle, draw, main](a) {a};
+	\draw (1,2) node[fill=black!20, circle, draw, main](b) {b};
+	\draw (0,1) node[fill=black!20, circle, draw, main](c) {c};
+	\draw (3,4) node[fill=black!20, circle, draw, main](d) {d};
+	\draw (4,3) node[fill=black!20, circle, draw, main](e) {e};
+	\draw (3,2) node[fill=black!20, circle, draw, main](f) {f};
+	\draw (5,2) node[fill=black!20, circle, draw, main](g) {g};
+	\draw (2,0) node[fill=black!20, circle, draw, main](h) {h};
+	
+	\path[draw]
+	(a) edge node {} (b)
+	(a) edge node {} (d)
+	(a) edge node {} (e)
+	(a) edge node {} (f)
+	(a) edge node {} (g)
+	(a) edge node {} (h);
+	
+	\path[draw]
+	(b) edge node {} (c)
+	(b) edge node {} (d)
+	(b) edge node {} (e)
+	(b) edge node {} (f)
+	(b) edge node {} (h);
+	
+	\path[draw]
+	(c) edge node {} (e)
+	(c) edge node {} (f)
+	(c) edge node {} (g)
+	(c) edge node {} (h);
+	
+	\path[draw]
+	(d) edge node {} (e)
+	(d) edge node {} (f)
+	(d) edge node {} (h);
+	
+	\path[draw]
+	(e) edge node {} (f)
+	(e) edge node {} (g);
+	
+	\path[draw]
+	(f) edge node {} (g)
+	(f) edge node {} (h);
+	
+	\path[draw, bend left]
+	(g) edge node {} (h);
+	
+	\path[draw, bend left]
+	(c) edge node {} (d);
+	
+	\path[draw, bend right]
+	(a) edge node {} (c)
+	(h) edge node {} (e)
+	(b) edge node {} (g)
+	(d) edge node {} (g);
+	\end{tikzpicture}
+	\label{fig:approxtspa}
+	\caption{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+	\centering
+	\begin{tikzpicture}
+    	\draw[step=1cm, gray, very thin] (-0.5,-0.5) grid (5.5,4.5);
+	\draw (1,4) node[fill=black!20, circle, draw, main](a) {a};
+	\draw (1,2) node[fill=black!20, circle, draw, main](b) {b};
+	\draw (0,1) node[fill=black!20, circle, draw, main](c) {c};
+	\draw (3,4) node[fill=black!20, circle, draw, main](d) {d};
+	\draw (4,3) node[fill=black!20, circle, draw, main](e) {e};
+	\draw (3,2) node[fill=black!20, circle, draw, main](f) {f};
+	\draw (5,2) node[fill=black!20, circle, draw, main](g) {g};
+	\draw (2,0) node[fill=black!20, circle, draw, main](h) {h};
+	
+	\path[draw, very thick]
+	(a) edge node {} (b)
+	(a) edge node {} (d)
+	(b) edge node {} (c)
+	(b) edge node {} (h)
+	(d) edge node {} (e)
+	(e) edge node {} (f)
+	(e) edge node {} (g);
+	\end{tikzpicture}
+	\label{fig:approxtspb}
+	\caption{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+	\centering
+	\begin{tikzpicture}
+    	\draw[step=1cm, gray, very thin] (-0.5,-0.5) grid (5.5,4.5);
+	\draw (1,4) node[fill=black!20, circle, draw, main](a) {a};
+	\draw (1,2) node[fill=black!20, circle, draw, main](b) {b};
+	\draw (0,1) node[fill=black!20, circle, draw, main](c) {c};
+	\draw (3,4) node[fill=black!20, circle, draw, main](d) {d};
+	\draw (4,3) node[fill=black!20, circle, draw, main](e) {e};
+	\draw (3,2) node[fill=black!20, circle, draw, main](f) {f};
+	\draw (5,2) node[fill=black!20, circle, draw, main](g) {g};
+	\draw (2,0) node[fill=black!20, circle, draw, main](h) {h};
+	
+	\path[draw, very thick]
+	(a) edge node {} (b)
+	(a) edge node {} (d)
+	(b) edge node {} (c)
+	(b) edge node {} (h)
+	(d) edge node {} (e)
+	(e) edge node {} (f)
+	(e) edge node {} (g);
+	
+	\draw [->] (a) to[bend right] (b);
+	\draw [->] (b) to[bend right] (c);
+	\draw [->] (c) to[bend right] (b);
+	\draw [->] (b) to[bend right] (h);
+	\draw [->] (h) to[bend right] (b);
+	\draw [->] (b) to[bend right] (a);
+	\draw [->] (a) to[bend right] (d);
+	\draw [->] (d) to[bend right] (e);
+	\draw [->] (e) to[bend right] (f);
+	\draw [->] (f) to[bend right] (e);
+	\draw [->] (e) to[bend right] (g);
+	\draw [->] (g) to[bend right] (e);
+	\draw [->] (e) to[bend right] (d);
+	\draw [->] (d) to[bend right] (a);
+	 
+	\end{tikzpicture}
+	\label{fig:approxtspc}
+	\caption{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+	\centering
+	\begin{tikzpicture}
+    	\draw[step=1cm, gray, very thin] (-0.5,-0.5) grid (5.5,4.5);
+	\draw (1,4) node[fill=black!20, circle, draw, main](a) {a};
+	\draw (1,2) node[fill=black!20, circle, draw, main](b) {b};
+	\draw (0,1) node[fill=black!20, circle, draw, main](c) {c};
+	\draw (3,4) node[fill=black!20, circle, draw, main](d) {d};
+	\draw (4,3) node[fill=black!20, circle, draw, main](e) {e};
+	\draw (3,2) node[fill=black!20, circle, draw, main](f) {f};
+	\draw (5,2) node[fill=black!20, circle, draw, main](g) {g};
+	\draw (2,0) node[fill=black!20, circle, draw, main](h) {h};
+	
+	\path[draw, very thick]
+	(a) edge node {} (b)
+	(b) edge node {} (c)
+	(c) edge node {} (h)
+	(h) edge node {} (d)
+	(d) edge node {} (e)
+	(e) edge node {} (f)
+	(f) edge node {} (g)
+	(g) edge node {} (a);
+	\end{tikzpicture}
+	\label{fig:approxtspd}
+	\caption{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+	\centering
+	\begin{tikzpicture}
+    	\draw[step=1cm, gray, very thin] (-0.5,-0.5) grid (5.5,4.5);
+	\draw (1,4) node[fill=black!20, circle, draw, main](a) {a};
+	\draw (1,2) node[fill=black!20, circle, draw, main](b) {b};
+	\draw (0,1) node[fill=black!20, circle, draw, main](c) {c};
+	\draw (3,4) node[fill=black!20, circle, draw, main](d) {d};
+	\draw (4,3) node[fill=black!20, circle, draw, main](e) {e};
+	\draw (3,2) node[fill=black!20, circle, draw, main](f) {f};
+	\draw (5,2) node[fill=black!20, circle, draw, main](g) {g};
+	\draw (2,0) node[fill=black!20, circle, draw, main](h) {h};
+	
+	\path[draw, very thick]
+	(a) edge node {} (b)
+	(b) edge node {} (c)
+	(c) edge node {} (h)
+	(h) edge node {} (f)
+	(f) edge node {} (g)
+	(g) edge node {} (e)
+	(e) edge node {} (d)
+	(d) edge node {} (a);
+	\end{tikzpicture}
+	\label{fig:approxtspe}
+	\caption{}
+\end{subfigure}
+\caption{Esempio di applicazione dell'algoritmo di approssimazione per TSP}
+\label{fig:esempioapproxtsp}
+\end{figure}
+\end{esempio}
+
+
+\subsection{L'algoritmo di Christofides}
+Per introdurre l'algoritmo di Christofides dobbiamo prima introdurre il concetto di multigrafo.
+
+\begin{definizione}
+Un multigrafo è un grafo il quale, ad ogni arco, è associata una molteplicità:
+\[
+\mathcal{G}=(\mathcal{V}, \mathcal{E})
+\]
+\[
+\forall e \in \mathcal{E}\,\,\,\, m(e) \geq 1
+\]
+\end{definizione}
+
+\begin{definizione}
+Dato un multigrafo $\mathcal{G}$ non diretto, esso è \textbf{euleriano} se esiste un ciclo euleriano, ovvero esiste un ciclo non semplice che attraversa ogni copia di ogni arco una sola volta.
+\end{definizione}
+
+\begin{teorema}
+Un multigrafo è euleriano se e solo se è connesso ed ogni suo vertice ha grado pari.
+\end{teorema}
+
+Un ciclo euleriano (\textit{euler tour}), può essere determinato in tempo lineare $\Theta (|\mathcal{V}|+|\mathcal{E}|)$.
+
+L'obiettivo è quello di determinare un sottografo $\mathcal{G}'$ di $\mathcal{G}$ (possibilmente con archi replicati) che contenga tutti i nodi di $\mathcal{V}$ e che sia euleriano, con $\sum_{e\in\mathcal{E}_{\mathcal{G}'}} \approx c(C^*)$. In pratica è lo stesso concetto dell'albero di copertura minimo poiché tale albero può essere visto come un multi-grafo dove ogni arco dell'albero vale per due per "contare" i due attraversamenti della visita completa in pre-ordine.
+
+Christofides parte anch'esso dell'albero di copertura minimo (sia $T^*$), per il quale sappiamo che $c(T) \leq c(C^*)$, con $C^*$ il ciclo hamiltoniano ottimo. All'MST aggiungo il minimo numero di lati in modo da far diventare l'MST euleriano (attenzione: devono costare poco, altrimenti rischio di trovare una soluzione di molto peggiore rispetto l'ottimo). È possibile determinare un sottoinsieme $\mathcal{M}$ di archi tale per cui $\bar{\mathcal{G}}(\mathcal{V}, \mathcal{E}_{T^*} \cup \mathcal{M})$ è euleriano e $c(\mathcal{E}_{T^*} \cup \mathcal{M}) \leq \frac{3}{2}c(C^*)$. Non rimane quindi che trovare $\mathcal{M}$.
+
+\begin{proposizione}
+Dato un multi-grafo non orientato, sia $\mathcal{V}_{ODD}$ l'insieme dei nodi di grado dispari\footnote{Il grado di un nodo è il numero di lati incidenti in quel nodo è ed definito come $deg(v)$, $v\in\mathcal{V}$.}. Allora, $|\mathcal{V}_{ODD}|$ è pari.
+\end{proposizione}
+\begin{proof}
+È noto che
+\[
+\sum_{v\in\mathcal{V}} deg(v)=2|\mathcal{E}|.
+\]
+La sommatoria può essere spezzata considerando da una parte i nodi di grado pari e dell'altra i nodi di grado dispari:
+\[
+\sum_{v\in\mathcal{V}} deg(v) = \sum_{v\in\mathcal{V}_{ODD}} deg(v) + \sum_{v\in\mathcal{V}_{EVEN}} deg(v) = 2|\mathcal{E}|.
+\]
+Ora, la sommatoria dei gradi dei nodi di grado pari è pari e sapendo che la somma complessiva deve essere pari, si deduce che anche la somma dei gradi dei nodi di grado dispari debba essere pari. Per l'appunto, poiché la sommatoria dei gradi dei nodi di grado dispari deve sommare ad un numero pari, significa che il numero di termini che vengono sommati (e che sono dispari) è pari, da cui la tesi.
+\end{proof}
+
+Dalla proposizione precedente sappiamo che il numero di nodi di grado dispari è pari e sappiamo inoltre che per rendere l'MST euleriano è necessario che tutti i nodi siano di grado pari: l'insieme dei lati che cerchiamo forma un \textbf{matching}.
+
+\begin{definizione}
+Dato un multi-grafo $\mathcal{G}=(\mathcal{V}, \mathcal{E})$, un sottoinsieme $\mathcal{M} \subseteq \mathcal{E}$ forma un \textbf{matching} se $\forall e_1,e_2 \in \mathcal{M}$ si ha che $e_1 \cap e_2 = \emptyset$.
+\end{definizione}
+
+\begin{definizione}
+Un matching $M$ è \textbf{perfetto} se $\forall v\in\mathcal{V}\,\, \exists e\in\mathcal{M}\,\, |\,\, v\in e$.
+\end{definizione}
+
+Dalla definizione segue che una condizione necessaria affinché il matching sia perfetto è che $|\mathcal{V}|$ sia pari.
+
+L'algoritmo procede come segue:
+\begin{itemize}
+\item si considera il sottografo di $\mathcal{G}$ (l'istanza di TRIANGLE-TSP) indotto da $\mathcal{V_{ODD}^{T^*}}$:
+\[
+\mathcal{G'} = (\mathcal{V_{ODD}^{T^*}}, \mathcal{E'})
+\]
+\[
+\mathcal{E'}: \forall u,v \in \mathcal{V_{ODD}^{T^*}},\, u \neq v,\, \exists \{u,v\}\in\mathcal{E} \Rightarrow \{u,v\}\in\mathcal{E'};
+\]
+\item si determina un matching perfetto $\mathcal{M^*}$ di costo minimo in $\mathcal{G'}$: per fare ciò è possibile utilizzare l'algoritmo ungherese che restituisce la risposta in tempo $\Theta(|\mathcal{V_{ODD}^{T^*}}|^3)=O(n^3)$;
+\item si considera il sottografo $\bar{\mathcal{G}}=(\mathcal{V},\mathcal{E}_{T^*} \cup \mathcal{M^*})$: poiché ora tutti i nodi hanno grado pari allora il grafo è euleriano;
+\item si determina un ciclo euleriano;
+\item si determina il tour $C$ tramite \textit{short-cutting} (si ricorda che vale la disuguaglianza triangolare tra i costi dei lati).
+\end{itemize}
+
+La procedura restituisce un tour $C$ che soddisfa la relazione
+\[
+c(C) \leq c(\mathcal{E_{T^*}}) + c(\mathcal{M^*}) \leq c(C^*) + c(\mathcal{M^*});
+\]
+è quindi sufficiente dimostrare che $c(\mathcal{M^*}) \leq c(\mathcal{T^*})/2$.
+
+Sia $C^*=\langle v_1, v_2, v_3, \cdots, v_{|\mathcal{V}|}, v_1 \rangle$ il tour hamiltoniano di costo ottimo. Tramite \textit{short-cutting} elimino da $C^*$ tutti i vertici che hanno grado pari in $T^*$: si ottiene così un ciclo $O^*=\langle v_1^{ODD}, v_2^{ODD}, \cdots, v_{|\mathcal{V_{ODD}^{T^*}}|}^{ODD}, v_1^{ODD} \rangle$ tale per cui $c(O^*) \leq c(C^*)$. Ora, poiché i vertici di grado dispari sono in numero pari, è possibile identificare un matching perfetto. In particolare, se coloro di bianco e di nero in maniera alternata i lati che compongono il ciclo $O^*$, ottengo due matching perfetti, rispettivamente $\mathcal{M^*_B}$ e $\mathcal{M^*_N}$, e vale $c(\mathcal{M^*_B}) + c(\mathcal{M^*_N}) = c(O^*) \leq c(C^*)$. Dall'ultima relazione segue che
+\[
+\min\{c(\mathcal{M^*_B}), c(\mathcal{M^*_N})\} \leq \frac{1}{2}c(C^*),
+\]
+ovvero esiste un matching perfetto tra i nodi di $\mathcal{V_{ODD}^{T^*}}$ di costo al più uguale a $c(C^*)/2$.
+
+Si noti che il matching perfetto potrebbe riutilizzare un lato di $\mathcal{E_{T^*}}$: ciò è lecito in quanto si sta lavorando su multi-grafi.
+
+Per il problema TRIANGLE-TSP la miglior approssimazione che si è riusciti ad ottenere è proprio l'approssimazione $3/2$ di Christofides. Un noto risultato riguardante questo problema è il seguente: se P$\neq$NP, un algoritmo di $\rho (n)$-approssimazione per TRIANGLE-TSP è tale per cui $\rho (n) \geq 220/219 \approx 1,0045$.
+
+Un sottocaso importante di TRIANGLE-TSP è EUCLIDEAN-TSP, dove l'insieme dei vertici rappresenta dei punti del piano mentre i costi rappresentano distanze euclidee (le quali soddisfano la disuguaglianza triangolare). Tale problema ammette un PTAS con $\rho (n) \leq (1+\epsilon)\,\, \forall\epsilon$ e tempo $T=\Theta(n^{1/\epsilon})$. Non esiste invece un FPTAS.
+
+\section{Il problema SET-COVER}
+Nel problema SET-COVER, l'istanza è una coppia di insiemi $(X, \mathcal{F})$, dove $X$ è l'insieme universo, di cardinalità finita, e rappresenta un insieme di oggetti, mentre $\mathcal{F}$ è il booleano di $X$, ovvero
+\[
+\mathcal{F} \subseteq \{S: S \subseteq X\} = B(X) \,\, : \,\, \forall x \in X \,\, \exists S \in \mathcal{F} \,\, | \,\, x \in S;
+\]
+da ciò segue che $X=\cup_{S\in\mathcal{F}}S$, detta \textbf{proprietà di copertura}.
+L'obiettivo del problema SET-COVER è quello di determinare un insieme di copertura di $X$, ovvero, dato l'insieme di copertura $\mathcal{C}\in\mathcal{F}$, deve valere $X=\cup_{S\in\mathcal{C}}S$: in particolare, l'insieme di copertura ottimo $\mathcal{C^*}$ è tale da essere quello di cardinalità minima. È banale affermare che $|\mathcal{C^*}| \leq |\mathcal{F}|$.
+
+La versione decisionale del problema è la seguente:
+\[
+\begin{cases}
+\langle X,\mathcal{F},k \rangle, k\in\mathbb{N} \\
+\\
+\exists \mathcal{C} \in \mathcal{F} \mbox{ che copre } X \,\, : \,\, |\mathcal{C}| \leq k?
+\end{cases}
+\]
+
+\begin{proposizione}
+Il problema SET-COVER è NP-completo.
+\end{proposizione}
+\begin{proof}
+È possibile dimostrare che il problema è NP-hard tramite la riduzione polinomiale VERTEX-COVER $<_p$ SET-COVER come segue:
+\[
+f(\langle G=(V,E), k \rangle) = \langle X, \mathcal{F}_G, k_G \rangle
+\]
+dove $X=E$, $\mathcal{F}_G = \{S_{v_1}, S_{v_2}, \cdots, S_{v_{|V|}}\}$ con $S_{v_i} = \{e\in E \,\, | \,\, v_i\in E\}$, $k_G = k$.
+
+Se $\langle G=(V,E), k \rangle \in$ VERTEX-COVER significa che $\exists V'\subseteq V\ :\ |V'|=k$ tale da coprire ogni lato del grafo. Allora, per ogni nodo $v_i\in V'$, $i=1, 2, \cdots, k$, esiste un corrispondente insieme $S_{v_i} = \{e\in E \,\, | \,\, v_i\in E\}$. Tali insiemi formano un set cover di cardinalità $k$ poiché, essendo ogni $v_i$ facente parte del vertex cover, significa che i lati selezionati dai vari $S_{v_i}$ coprono ogni lato del grafo: se esistesse un lato $e=\{w,z\}\in E$ tale da non venir selezionato da nessun $S_{v_i}$ allora $w,z\neq v_i\ \forall\ i=1, 2, \cdots, k$, contraddicendo il fatto che $V'$ sia un vertex cover.Segue quindi che $f(\langle G=(V,E), k \rangle)\in$ SET-COVER.
+
+Di converso, se $f(\langle G=(V,E), k \rangle)\in$ SET-COVER significa che $\exists \mathcal{C} = \{S_{v_1}, S_{v_2}, \cdots, S_{v_{k_G}}\}$ il quale copre l'intero insieme di lati $X_G$. Quindi, per ogni lato $\{w,z\}\in X_G = X$ esiste un insieme $S_{v_i}\subseteq \mathcal{C}$ tale che $(v_i = w) \lor (v_i = z)$. Segue che l'insieme $\{v_1, v_2, \cdots, v_{k_G}\}$ forma un vertex cover di cardinalità $k=k_G$ di $G$ e quindi $\langle G=(V,E), k \rangle\in$ VERTEX-COVER.
+\end{proof}
+
+
+Un algoritmo di approssimazione per SET-COVER è possibile trovarlo in \ref{alg:approxsetcover}.
+\begin{algorithm}
+\caption{Algoritmo di approssimazione per SET-COVER}
+\label{alg:approxsetcover}
+\begin{algorithmic}
+\Function{APPROX\_SET\_COVER}{$\langle X, \mathcal{F} \rangle$}
+	\State $U \gets X$
+	\State $\mathcal{C} \gets \emptyset$
+	\While{$U\neq\emptyset$}
+		\State $S \gets \argmax\{|T\cap U|\,:\,T\in\mathcal{F}\}$
+		\State $U \gets U-S$
+		\State $\mathcal{C} \gets \mathcal{C} \cup \{S\}$
+	\EndWhile
+	\State \Return $C$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\subparagraph{Analisi di correttezza} Quando l'insieme $U$ è vuoto, significa che tutti gli elementi sono stati coperti. Poiché $\forall x \in X \, \exists S \, : \, x \in S$, allora prima o poi $S$ verrà selezionato in quanto la cardinalità degli insiemi della funzione $\arg max$ è almeno pari a 1, pertanto l'insieme $U$ decresce monotonicamente fino a ridursi all'insieme vuoto.
+
+\subparagraph{Analisi di complessità} Poiché $|S\cap U|\geq 1$, il numero di iterazioni al caso peggiore è $O(|X|)$. Analogamente, poiché ogni sottoinsieme di $\mathcal{F}$ può essere selezionato al più una volta, un altro limite superiore al numero delle iterazioni è $O(|\mathcal{F}|)$. Segue che il numero di iterazioni è $O(\min\{|X|,|\mathcal{F}|\})$.
+
+Come implemento la funzione $\argmax (\cdot)$? Nella maniera banale, posso scandire gli elementi di $\mathcal{F}$ e, per ognuno di essi, i propri elementi: segue che il tempo necessario per tale funzione è $O(|\mathcal{F}|\cdot|X|)$, quindi $T=O(\min\{|X|,|\mathcal{F}|\}\cdot|X|\cdot|\mathcal{F}|)$ che, al caso peggiore, può essere cubica nella taglia dell'istanza ($\Theta(|\langle X,\mathcal{F} \rangle|^3)$). Tramite liste concatenate e un array di supporto è possibile implementare questa funzione in tempo $T=O(\sum_{S\in\mathcal{F}}|S|)=O(|\langle X,\mathcal{F} \rangle|)$.
+
+\subparagraph{Fattore di approssimazione}
+Sia $U_t$ l'insieme degli elementi scoperti all'\textbf{inizio} dell'iterazione $t\geq 1$ ($U_1 = X$). Sia $U_{\bar{t}}=\emptyset$. Si vuole determinare un limite superiore a $t$, $\bar{t}$: $\bar{t}-1$ iterazioni sono sufficienti a coprire $X$ (inoltre, se $\bar{t}$ è il minimo, $|\mathcal{C}| \leq \bar{t}-1$).
+
+Supponiamo che il costo della soluzione ottima (quindi non approssimata) sia $k=|\mathcal{C^*}|$.
+Considero l'iterazione $t$: all'inizio di tale iterazione abbiamo che $U_t \subseteq X$ e $\exists S_1, S_2, \cdots, S_k \in \mathcal{F} \, | \, U_t \subseteq \cup_{i=1}^{k}S_i$.
+
+Tecnica del \textit{pigeonhole}: deve esistere un insieme che contiene almeno il numero medio di elementi di $U_t$, ovvero
+\[
+\exists \bar{i} \,\, | \,\, |U_t \cap S_{\bar{i}}| \geq \frac{|U_t|}{k}.
+\]
+Prova:
+\[
+U_t = U_t \cap (\cup_{i=1}^k S_i) = \cup_{i=1}^k (U_t \cap S_i)
+\]
+\[
+|U_t| = |\cup_{i=1}^k (U_t \cap S_i)| \leq \sum_{i=1}^k |U_t \cap S_i|
+\]
+Ora, se supponessimo che $\forall i \, : \, |U_t \cap S_i| < |U_t|/k$, otterremmo il seguente assurdo:
+\[
+|U_t| \leq \sum_{i=1}^k |U_t \cap S_i| < \sum_{i=1}^k \frac{|U_t|}{k} = |U_t|.
+\]
+
+Per cui, alla fine dell'iterazione $t$, seleziono necessariamente un insieme di almeno $|U_t|/k$ elementi, coprendo così almeno $|U_t|/k$ elementi di $U_t$, pertanto all'inizio della seguente iterazione avremo che $|U_{t+1}|\leq |U_t|-|U_t|/k$. Tale disequazione forma la ricorrenza
+\[
+|U_{t+1}| \leq |U_t|\left(1-\frac{1}{k}\right)
+\]
+che per \textit{unfolding} diviene (sia $n=|X|$)
+\[
+|U_{t+1}| \leq |U_1|\left(1-\frac{1}{k}\right)^t = n\left(1-\frac{1}{k}\right)^t
+\]
+e poiché è sempre vero che $(1-x)\leq e^{-x}$ (dove l'uguaglianza vale solo per $x=0$), ottengo
+\[
+|U_{t+1}| < ne^{-t/k}.
+\]
+
+Scegliendo $\bar{t} = k\ln{n}$ si ottiene che
+\[
+|U_{\bar{t}+1}| < ne^{-\frac{k}{k}\ln{n}} = 1 \Rightarrow |U_{\bar{t}+1}| = 0 \Rightarrow |\mathcal{C}| \leq \bar{t} = k\ln{n} = |\mathcal{C^*}|\ln{n}
+\]
+da cui segue
+\[
+\rho (n) = \frac{|C|}{|C^*|} \leq \ln{n}.
+\]
+Si noti l'uso improprio della taglia di $X$ piuttosto che della taglia dell'istanza.
+
+\subparagraph{Fattore di approssimazione: analisi più fine} È possibile effettuare una analisi più fine del fattore di approssimazione ricorrendo ai \textbf{numeri armonici}.
+
+\begin{definizione}
+Per ogni numero naturale, il k-esimo numero armonico è definito come segue:
+\[
+H_k = \sum_{i=1}^k \frac{1}{i}
+\]
+con $H_0 = 0$.
+\end{definizione}
+
+\begin{proposizione}
+Per il k-esimo numero armonico valgono le seguenti diseguaglianze:
+\[
+\ln{(k+1)} = \int_1^{k+1} \! \frac{1}{x}\,\mathrm{d}x \leq H_k < 1 + \int_1^k \! \frac{1}{x}\,\mathrm{d}x = 1 + \ln{k}
+\]
+\end{proposizione}
+
+Premesso ciò, è possibile dimostrare il seguente risultato.
+\begin{proposizione}
+Per il problema SET-COVER, il fattore di approssimazione soddisfa la seguente diseguaglianza:
+\[
+\rho (\langle X, \mathcal{F} \rangle) \leq H_{\max\{|S|\,\,:\,\,S\in\mathcal{F}\}}
+\]
+\end{proposizione}
+\begin{proof}
+Innanzitutto, cominciamo con l'effettuare la \textit{pesatura} degli elementi di $X$: ad ogni elemento $x\in X$ associo un peso $c_x$ che dipende dalle condizioni sotto le quali $x$ viene coperto durante l'algoritmo. Ciò che si vuole ottenere con la pesatura è quello di catturare il tasso di decrescita dell'insieme $U$, quindi ad $x$ associamo un peso piccolo se viene catturato assieme a molti altri suoi colleghi (ovvero "in un colpo solo" copro tanti elementi di $X$), mentre gli associamo un peso grande nel caso opposto. Quindi, $\forall x \in X$, sia $i$ la prima iterazione che copre $x$: allora il peso associato ad $x$ è
+\[
+c_x = \frac{1}{|S_i \cap U_i|}
+\]
+con $S_1, S_2, \cdots, S_t$ l'insieme selezionato durante la $1, 2, \cdots, t$-esima iterazione.
+
+Si osservi che
+\[
+\sum_{x\in S_i\cap U_i} c_x = \frac{|S_i \cap X_i|}{|S_i \cap X_i|} = 1.
+\]
+
+Segue che
+\[
+|\mathcal{C}| = \sum_{i=1}^{|\mathcal{C}|} 1 = \sum_{i=1}^{|\mathcal{C}|} \sum_{x\in S_i\cap U_i} c_x = \sum_{x\in X} c_x
+\]
+da cui
+\[
+\sum_{S\in \mathcal{C^*}} \sum_{x\in S} c_x \geq \sum_{x\in X} c_x = |\mathcal{C}|
+\]
+poiché $\forall x \in X\ \exists S \subseteq \mathcal{C^*}\ :\ x \in S$, essendo $\mathcal{C^*}$ un insieme ricoprente, e l'elemento $x$ compare in \textbf{almeno uno} degli insiemi $S$ selezionati per l'insieme ricoprente.
+
+Ora, quello che noi vogliamo dimostrare è che $\forall S\in\mathcal{F}$
+\[
+\sum_{x\in S} c_x \leq H_{|S|}
+\]
+da cui seguono le seguenti relazioni:
+\[
+\begin{split}
+|\mathcal{C}| &\leq \sum_{S\in\mathcal{C^*}} \sum_{x\in S} c_x \\
+&\leq \sum_{S\in\mathcal{C^*}} H_{|S|} \\
+&\leq \sum_{S\in\mathcal{C^*}} H_{\max \{|S|\ :\ S\in\mathcal{F}\}} \\
+&\leq |\mathcal{C^*}| H_{\max \{|S|\ :\ S\in\mathcal{F}\}}
+\end{split}
+\]
+ovvero
+\[
+\frac{|\mathcal{C}|}{|\mathcal{C^*}|} \leq H_{\max\{|S|\ :\ S\in\mathcal{F}\}}.
+\]
+
+Si consideri un generico insieme $S\in\mathcal{F}$ e si definisca per $1 \leq i \leq |\mathcal{C}|$ una funzione che esprima il numero di elementi \textbf{scoperti} di $S$ dopo la fine dell'$i$-esima iterazione come segue:
+\[
+\begin{split}
+n_i &= |S \cap U_{i+1}| \\
+n_0 &= |S|
+\end{split}
+\]
+Si noti che tale funzione rappresenta una successione non crescente\footnote{In generale $\exists i \, : \, n_{i-1} = n_i$, pertanto non posso affermare che sia decrescente.}:
+\[
+n_0 \geq n_1 \geq \cdots \geq n_k = 0
+\]
+dove $k \leq |C|$ è l'iterazione in cui $S$ viene coperto completamente per la prima volta.
+
+Si noti che all'$i$-esima iterazione il numero di elementi che vengono coperti per la prima volta è $|S_i \cap U_i|=\max\{|T \cap U_i| : T\in\mathcal{F}\}$. Inoltre, per definizione, $n_{i-1} = |S \cap U_{i}|$: da ciò segue che $|S_i \cap U_i| \geq n_{i-1}$ poiché la scelta greedy $S_i$ garantisce che $S$ non copra più elementi \textbf{nuovi} di $S_i$, altrimenti $S$ sarebbe stato scelto al posto di $S_i$.
+
+Allora:
+\begin{align*}
+\sum_{x\in S} c_x
+&= \sum_{i=1}^{k}\sum_{x\in (S_i \cap U_i ) \cap S} c_x \\
+\shortintertext{dove $x\in (S_i \cap U_i ) \cap S$ rappresenta l'insieme degli elementi nuovi selezionati all'$i$-esima iterazione \textbf{e} che appartengono all'insieme $S$ considerato}
+&= \sum_{i=1}^{k}\sum_{x\in (S_i \cap U_i ) \cap S} \frac{1}{|S_i \cap U_i|} \\
+&= \sum_{i=1}^{k} \frac{n_{i-1}-n_i}{|S_i \cap U_i|} \\
+\shortintertext{dove $n_{i-1}-n_i$ è da leggere come il numero di elementi scoperti di $S$ alla fine della $(i-1)$-esima iterazione, a cui viene sottratto il numero di elementi scoperti di $S$ alla fine dell'$i$-esima iterazione, ottenendo così il numero di elementi di $S$ coperti con l'$i$-esima iterazione}
+&\leq \sum_{i=1}^{k} \frac{n_{i-1}-n_i}{n_{i-1}} \\
+&= \sum_{i=1}^{k} \sum_{j=n_i+1}^{n_{i-1}} \frac{1}{n_{i-1}} \\
+&\leq \sum_{i=1}^{k} \sum_{j=n_i+1}^{n_{i-1}} \frac{1}{j} && \text{(poiché $j \leq n_{i-1}$)} \\
+&= \sum_{i=1}^{k} \left( \sum_{j=1}^{n_{i-1}} \frac{1}{j} - \sum_{j=1}^{n_i} \frac{1}{j} \right) \\
+&= \sum_{i=1}^{k} (H_{n_{i-1}} - H_{n_i}) && \text{(somma telescopica)}\\
+&= H_{n_0} - H_{n_k} \\
+&= H_{|S|} - H_0 \\
+&= H_{|S|}
+\end{align*}
+concludendo così l'analisi.
+\end{proof}
+
+Esistono dei problemi che possono beneficiare di questo fattore di approssimazione. Si consideri il problema 3-D-VERTEX-COVER, una restrizione di VERTEX-COVER per la quale il grado massimo del grafo è $3$. Nonostante la sparsità del grafo (VERTEX-COVER per un albero è un problema facile), è possibile dimostrare che il problema è difficile. Applicando la formulazione di SET-COVER per il problema 3-D-VERTEX-COVER, la collezione di sottoinsiemi sarà composta da sottoinsiemi di cardinalità al più $3$ poiché per ipotesi il grafo ha grado $3$. Segue quindi che il fattore di approssimazione è
+\[
+\rho \leq H_3 = 1+\frac{1}{2}+\frac{1}{3} = \frac{11}{6} < 2,
+\]
+migliore del fattore di approssimazione dell'algoritmo approssimato per VERTEX-COVER.
+
+\section{Il problema SUBSET-SUM}
+\label{sez:subsetsum}
+Analizziamo ora un FPTAS per il problema SUBSET-SUM.
+
+Il problema SUBSET-SUM in forma decisionale è il seguente:
+\[
+\begin{cases}
+\langle S, t \rangle,\ \forall s\in S\ :\ s\in\mathbb{N},t\in\mathbb{N}^{+} \\
+\exists S' \subseteq S | \sum_{s\in S'} s = t ?
+\end{cases}
+\]
+
+Il problema di ottimo invece, considerata una istanza $i=\langle S,t \rangle$, definito l'insieme di tutte le approssimazioni per difetto di $t$, $S(i)=\{S'\subseteq S\ |\ \sum_{s\in S'}s \leq t\}$, e definita la funzione di costo $c(S')=\sum_{s\in S'} s$, mira a trovare l'insieme $S'$ di costo massimo.
+
+Stiamo cercando un FPTAS, quindi $\forall \epsilon > 0 \,\, \exists S_{\epsilon}^{'} \,\, | \,\, c(S^*)/c(S_{\epsilon}') \leq (1+\epsilon)$ con $T(n,\epsilon)=\text{polynomial}(n,\epsilon)$.
+
+Per prima cosa forniamo un algoritmo di enumerazione esaustiva di tutte le soluzioni ammissibili: come vedremo, tale algoritmo è un algoritmo esponenziale tuttavia ci fornirà un punto di partenza per elaborare un algoritmo di approssimazione.
+
+Sia l'insieme $S=\{x_1, x_2, \cdots , x_n\}$. Allora:
+\begin{itemize}
+\item sia $L_i$ la lista ordinata e senza duplicati di tutti i costi ammissibili, ovvero minori o uguali a $t$, di sottoinsiemi di $\{x_1, x_2, \cdots , x_i\}$;
+\item sia $L_i +_t x$ una operazione che restituisce una lista ordinata ottenuta sommando $x$ ad ogni elemento di $L_i$ ed eliminando i valori non più ammissibili;
+\item sia MERGE\_SD($L_1,L_2$) la funzione che restituisce la lista ordinata ottenuta fondendo ordinatamente le liste $L_1$ e $L_2$ ed eliminandone i duplicati.
+\end{itemize}
+
+\begin{algorithm}
+\caption{Algoritmo di enumerazione esaustiva per SUBSET-SUM}
+\label{alg:essubset}
+\begin{algorithmic}
+\Function{EXP\_SS}{$S,t$}
+	\State $*\ S=\{ x_0, x_1, \cdots , x_n \}\ *$
+	\State $L_0 \gets \langle 0 \rangle$
+	\For{$i \gets {1}\ \textbf{to}\ {n}$}
+		\State $L_i \gets $MERGE\_SD($L_{i-1}, L_{i-1} +_t x_i$)
+	\EndFor
+	\State \Return MAX($L_n$)
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+L'algoritmo \ref{alg:essubset} presenta lo pseudocodice per l'algoritmo esaustivo. Al caso peggiore, l'operazione di \textit{merge} restituisce una lista di lunghezza pari al doppio della lista dell'iterazione precedente, quindi $|L_i|=2^i\in \Omega (2^i)$: come conseguenza, il tempo di esecuzione al caso peggiore è $T=O(2^n)$.
+
+L'idea che sta dietro all'FPTAS è quella di sfoltire le liste $L_i$: ogni qualvolta un costo ammissibile è ben approssimato, tengo solo il valore ammissibile come rappresentante della soluzione migliore. Utilizzo sempre una approssimazione per difetto per evitare di "sfondare" $t$ componendo le soluzioni approssimate.
+
+Per fare questo è necessario introdurre il concetto di diradamento. Dato un valore $0 < \delta < 1$, un $\delta$-TRIM di una lista $L$ è la lista $L'\subseteq L\ :\ \forall y\in L\ \exists z\in L'\ |\ \frac{y}{1+\delta} \leq z \leq y$ (approssimazione per difetto). Il diradamento tiene solo valori approssimati di $y$ tali per cui l'errore relativo compiuto è al più $\delta$:
+\[
+\frac{y-z}{y} \leq \frac{y(1-1/(1+\delta))}{y} \leq 1 - \frac{1}{1+\delta} = \frac{\delta}{1+\delta} \leq \delta
+\]
+
+\begin{algorithm}
+\caption{Algoritmo di $\delta$-diradamento}
+\label{alg:trim}
+\begin{algorithmic}
+\Function{TRIM}{$L,\delta$}
+	\State $*\ sia\ L=\langle y_0, y_1, \cdots , y_m \rangle\ *$
+	\State $\text{last} \gets 0$
+	\State $L' \gets \langle y_0 \rangle$
+	\For{$i \gets 1\ \textbf{to}\ m$}
+		\If{$y_i > y_{last}(1+\delta)$}
+			\State $L' \gets L'+y_i$
+			\State $\text{last} \gets i$
+		\EndIf
+	\EndFor
+	\State \Return $L'$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+L'algoritmo \ref{alg:trim} restituisce un $\delta$-diradamento: in particolare, il diradamento che restituisce è tale da essere di cardinalità minima.
+
+\subparagraph{Proprietà di scelta greedy}
+\begin{proof}
+La scelta greedy deve essere contenuta nella soluzione ottima poiché il primo elemento della lista non può essere approssimato da nessun'altro elemento se non da se stesso visto che la lista è ordinata.
+\end{proof}
+
+\subparagraph{Proprietà di sottostruttura ottima}
+\begin{proof}
+Sia $L^*=y_0+L'$ la soluzione ottima del problema. Bisogna dimostrare che $L'$ è la soluzione ottima del problema residuo $L_r$. Si osserva che la fase di clean up elimina tutti e solo gli elementi approssimati dalla scelta greedy ($y_0$), di conseguenza il resto della soluzione deve contenere una soluzione ammissibile del problema residuo. In particolare, questa soluzione è la soluzione ottima: se così non fosse allora esisterebbe una lista $L''\subseteq L_r\ :\ |L''|<|L'|$ tale per cui la lista $L''+y_0$ rappresenterebbe una lista ammissibile per il problema originale $L$ di taglia minore di $L^*$ che abbiamo assunto ottima per ipotesi (si avrebbe $|L^*|=|L''+y_0|<|L'|+y_0=|L^*|$). Dall'assurdo segue quindi che $L'$ è una soluzione ammissibile del problema residuo di cardinalità minima.
+\end{proof}
+
+
+La lista $L'=\langle z_0, z_1, \cdots , z_{k-1} \rangle$ restituita dall'algoritmo di diradamento è tale per cui
+\[
+\forall i > 0\ :\ \frac{z_{i+1}}{z_i} > 1+\delta;
+\]
+si faccia attenzione che tale proprietà non vale per $i=0$ perché $z_0$ potrebbe essere nullo.
+
+Lo pseudocodice per l'FPTAS per SUBSET-SUM è disponibile come algoritmo \ref{alg:fptasss}.
+
+\begin{algorithm}
+\caption{Algoritmo FPTAS per SUBSET-SUM}
+\label{alg:fptasss}
+\begin{algorithmic}
+\Function{APPROX\_SUBSET\_SUM}{$S,t, \epsilon$}
+	\State $*\ S=\{ x_0, x_1, \cdots , x_n \}\ *$
+	\State $L_0 \gets \langle 0 \rangle$
+	\For{$i \gets {1}\ \textbf{to}\ {n}$}
+		\State $L_i \gets $MERGE\_SD($L_{i-1}, L_{i-1} +_t x_i$)
+		\State $L_i \gets $TRIM($L_i, \epsilon/2n$)
+	\EndFor
+	\State \Return MAX($L_n$)
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\subparagraph{Correttezza}
+Si prova per induzione. La lista $L_0$ contiene il solo valore $0$, pertanto è ammissibile. Se ipotizzo che la lista $L_{i-1}$ sia ammissibile, allora la lista $L_i$ continua ad essere ammissibile perché i costi non ammissibili vengono scartati dall'operazione di \textit{merge}. L'operazione di diradamento non aggiunge mai costi (al più ne toglie qualcuno), pertanto al termine dell'$i$-esima iterazione la lista $L_i$ rimane ammissibile.
+
+\begin{lemma}
+Sia $y=\sum_{x\in S'} x$ un costo ammissibile di un sottoinsieme $S'\subseteq \{x_1, x_2, \cdots , x_i\}$. Allora $\exists z \in L_i$, al termine dell'iterazione $i$, tale che
+\[
+\frac{y}{\left(1+\frac{\epsilon}{2n}\right)^i} \leq z \leq y.
+\]
+\end{lemma}
+\begin{proof}
+La dimostrazione procede per induzione sul numero di iterazioni.
+
+Il caso base è rappresentato da $i=0$: in questo caso la lista contiene solo il valore nullo, il quale è l'unico ad approssimare se stesso. Ora, suppongo che la proposizione sia corretta fino a $k \leq i-1$. Considero l'iterazione $k=i$:
+\begin{enumerate}
+\item se $x_i\notin S' \Rightarrow S'\subseteq \{x_1, x_2, \cdots , x_{i-1}\}$ e vale l'ipotesi induttiva, ovvero $\exists z \in L_{i-1}$ tale che
+\[
+\frac{y}{\left(1+\frac{\epsilon}{2n}\right)^{i-1}} \leq z \leq y
+\]
+\begin{enumerate}
+\item $z$ sopravvive al diradamento dell'iterazione $i$: in tal caso $z\in L_i$ e
+\[
+\frac{y}{\left(1+\frac{\epsilon}{2n}\right)^i} < \frac{y}{\left(1+\frac{\epsilon}{2n}\right)^{i-1}} \leq z \leq y
+\]
+ed è lo $z$ cercato;
+\item $z$ non sopravvive al diradamento, ovvero $\exists z'\in L_i$ tale che
+\[
+\frac{y}{\left(1+\frac{\epsilon}{2n}\right)\left(1+\frac{\epsilon}{2n}\right)^{i-1}} \leq \frac{z}{\left(1+\frac{\epsilon}{2n}\right)} \leq z' \leq z \leq y.
+\]
+La garanzia di errore si è amplificata ma è rimasta sotto controllo.
+\end{enumerate}
+\item se $x_i\in S'$, $y=c(S')$, allora $S'=S'' \cup \{x_i\}$, $S''=\{x_1, \cdots , x_{i-1}\}$ e $c(S'')=y-x_i$. Per ipotesi induttiva $\exists z' \in L_{i-1}$ tale che
+\[
+\frac{y-x_i}{\left(1+\frac{\epsilon}{2n}\right)^{i-1}} \leq z' \leq y-x_i
+\]
+e sicuramente dopo il \textit{merge} otteniamo
+\[
+\frac{y-x_i}{\left(1+\frac{\epsilon}{2n}\right)^{i-1}} +x_i \leq z' + x_i \leq y
+\]
+\begin{enumerate}
+\item se $z'+x_i$ non viene eliminato dal diradamento nell'iterazione $i$, quindi $z'+x_i\in L_i$, si ha
+\[
+\begin{split}
+y \geq z'+x_i &\geq \frac{y-x_i}{\left(1+\frac{\epsilon}{2n}\right)^{i-1}} +x_i  \\
+&\geq \frac{y-x_i}{\left(1+\frac{\epsilon}{2n}\right)^{i-1}} +\frac{x_i}{\left(1+\frac{\epsilon}{2n}\right)^{i-1}}   \\
+&= \frac{y}{\left(1+\frac{\epsilon}{2n}\right)^{i-1}} \\
+&\geq \frac{y}{\left(1+\frac{\epsilon}{2n}\right)^{i}}
+\end{split}
+\]
+\item se $z'+x_i$ viene eliminato dal diradamento, ovvero $z'+x_i\notin L_i$, significa che $\exists z'' \in L_i$ tale che
+\[
+\begin{split}
+y \geq z'+x_i &\geq z'' \\
+&\geq \frac{z'+x_i}{\left(1+\frac{\epsilon}{2n}\right)} \\
+&\geq \frac{y-x_i}{\left(1+\frac{\epsilon}{2n}\right)^{i-1}\left(1+\frac{\epsilon}{2n}\right)} +\frac{x_i}{\left(1+\frac{\epsilon}{2n}\right)} \\
+&\geq \frac{y-x_i}{\left(1+\frac{\epsilon}{2n}\right)^{i}} +\frac{x_i}{\left(1+\frac{\epsilon}{2n}\right)^{i}} \\
+&= \frac{y}{\left(1+\frac{\epsilon}{2n}\right)^{i}}
+\end{split}
+\]
+\end{enumerate}
+\end{enumerate}
+\end{proof}
+
+Il fattore di approssimazione sarà dato dal rapporto tra il costo della soluzione ottima e il costo della soluzione ottenuta dall'algoritmo di approssimazione:
+\[
+\rho = \frac{y^*}{\max(L_n)}.
+\]
+Al termine dell'algoritmo, per il lemma precedente si ha che $\exists z\in L_n$ tale che
+\[
+\frac{y^*}{\left(1+\frac{\epsilon}{2n}\right)^n} \leq z \leq y^*
+\]
+essendo $y^*$ una soluzione ammissibile per $S$.
+Abbiamo la seguente situazione:
+\[
+\frac{y^*}{\max(L_n)} \leq \frac{y^*}{z} \leq \frac{y^*}{\frac{y^*}{\left(1+\frac{\epsilon}{2n}\right)^n}} = \left(1+\frac{\epsilon}{2n}\right)^n \overset{?}{\leq} (1+\epsilon)
+\]
+Ricordando che per $|x|<1$
+\[
+1+x \leq e^x \leq 1+x+x^2
+\]
+\[
+\ln{(1+x)} \geq \frac{x}{1+x}
+\]
+e che
+\[
+\lim_{n \to +\infty} \left(1+\frac{a}{n}\right)^n = e^a
+\]
+e notando che $\left(1+\frac{\epsilon}{2n}\right)^n$ è crescente, allora $\forall n$ vale
+\[
+\left(1+\frac{\epsilon}{2n}\right)^n \leq \lim_{n \to +\infty} \left(1+\frac{\epsilon/2}{n}\right)^n = e^{\epsilon/2} \leq 1 + \frac{\epsilon}{2} + \left(\frac{\epsilon}{2}\right)^2 \leq 1 + \frac{\epsilon}{2} + \frac{\epsilon}{2} = 1 + \epsilon.
+\]
+confermando che l'algoritmo proposto è uno schema di approssimazione.
+
+Rimane da verificare che l'algoritmo è uno FPTAS, ovvero che esegue in tempo polinomiale sia rispetto alla taglia dell'istanza che rispetto al fattore $1/\epsilon$.
+
+\begin{proposizione}
+Le liste $L_i$ sono polinomiali.
+\end{proposizione}
+\begin{proof}
+Sia $L_i= \langle z_0=0, z_1, z_2, \cdots , z_{k-1} \rangle$, $|L_i|=k$. Il diradamento garantisce che $\forall j \geq 1$
+\[
+\frac{z_{j+1}}{z_j} > \left(1+\frac{\epsilon}{2n}\right).
+\]
+
+Osservo che
+\[
+\frac{z_{k-1}}{z_1} = \frac{z_{k-1}}{z_{k-2}}\cdot\frac{z_{k-2}}{z_{k-3}}\cdots\frac{z_3}{z_2}\cdot\frac{z_2}{z_1} > \left(1+\frac{\epsilon}{2n}\right)^{k-2}
+\]
+e, tenendo conto che $z_{k-1} \leq t$ essendo un costo ammissibile e che $z_1>0$:
+\[
+t \geq z_{k-1} > \left(1+\frac{\epsilon}{2n}\right)^{k-2}z_1 \geq \left(1+\frac{\epsilon}{2n}\right)^{k-2};
+\]
+dall'ultima espressione prendo il logaritmo del primo e dell'ultimo termine:
+\[
+\ln{t} > (k-2)\ln{\left(1+\frac{\epsilon}{2n}\right)}
+\]
+da cui ricavo $k$, la lunghezza della lista:
+\[
+\begin{split}
+k &< \frac{\ln{t}}{\ln{\left(1+\frac{\epsilon}{2n}\right)}} + 2 \\
+&\leq \frac{\ln{t}}{\frac{\epsilon/2n}{1+\epsilon/2n}} +2 \\
+&= \frac{2n}{\epsilon}\left(1+\frac{\epsilon}{2n}\right)\ln{t}+2 \\
+&\leq \frac{3n}{\epsilon}\ln{t}+2
+\end{split}
+\]
+dimostrando così che le liste sono polinomiali nella taglia dell'istanza, $k=|L_i|=O\left(\frac{n}{\epsilon}\ln{t}\right)$.
+\end{proof}
+
+Da tutto ciò segue immediatamente che
+\[
+T(n,\epsilon)\in O\left(\sum_{i=1}^n |L_i|\right)=O\left(\frac{n^2}{\epsilon}\ln{t}\right)
+\]
+che è confermato intuitivamente poiché sia l'operazione di \textit{merge} che quella di \textit{trim} sono proporzionali alla lunghezza delle liste coinvolte.
+
+L'ultima analisi ci conferma che l'algoritmo che abbiamo proposto è uno FPTAS:
+\begin{itemize}
+\item fissata la grandezza dell'input, è polinomiale in $1/\epsilon$;
+\item fissato $\epsilon$, abbiamo che $n=|S|\leq|\langle S,t\rangle|$, inoltre $\ln{t}\leq|\langle S,t\rangle|$ poiché, a meno di costanti moltiplicative, è il numero di bit necessari per rappresentare $t$, pertanto è possibile concludere che $n^3\leq|\langle S,t\rangle|^3$, confermando la polinomialità rispetto alla grandezza dell'input.
+\end{itemize}
+Allora si ottiene che
+\[
+T(|\langle S,t \rangle|,\epsilon)\in O\left(\frac{1}{\epsilon}|\langle S,t \rangle|^3\right).
+\]
+Nella pratica è sostanzialmente quadratico poiché il logaritmo del target è trascurabile.

@@ -1,0 +1,1253 @@
+\chapter{Algoritmi per la teoria dei numeri}\label{ch:numeri}
+\section{Elementi di teoria dei numeri}
+La teoria dei numeri rappresenta il sostrato teorico per la comprensione dei protocolli di crittografia a chiave pubblica e privata.
+
+\begin{definizione}
+Dati $a,d\in\mathbb{Z}$, $d\neq 0$, si dice che $d$ \textbf{divide} $a$, e si scrive $d|a$ se $\exists k\in\mathbb{Z}\ |\ a=kd$.
+Se $d>0$, $d$ si dice che è un \textbf{divisore} di $a$.
+\end{definizione}
+
+\begin{proposizione}
+Valgono le seguenti proprietà.
+\begin{enumerate}
+\item $d|0\ \forall\ d\in\mathbb{Z}-\{0\}$
+\begin{proof}
+Vale
+\[
+d|0 \Rightarrow \exists k\in\Z\ |\ 0=kd 
+\]
+e scegliendo $k=0$ la proposizione vale per ogni intero $d$ non nullo.
+\end{proof}
+\item se $a\neq 0$ e $d|a$ allora $|d| \leq |a|$
+\begin{proof}
+Vale
+\[
+d|a \Rightarrow \exists k\in\Z\ |\ a=kd
+\]
+Se $a>0$, allora anche $kd>0$, e questo succede se $k$ e $d$ sono entrambi positivi o entrambi negativi. Nel primo caso, se $k=1$ allora $a=d$, altrimenti $d<a$ essendo $a$ un multiplo intero di $d$; nel secondo caso, se $k=-1$ allora $a=d$, altrimenti $d<a$ essendo $d$ negativo e $a$ positivo.
+
+Di converso, se $a<0$ allora $kd<0$, e questo succede se alternativamente $k$ e $d$ sono uno positivo e l'altro negativo. Se $k<0$ (quindi $d>0$) allora $a$ è un multiplo intero negativo di $d$, quindi $|d|\leq|a|$. Lo stesso ragionamento vale scambiando il ruolo di $k$ e $d$.
+\end{proof}
+\item se $(a|b)\ \land\ (b|a)$ allora $|a|=|b|$
+\begin{proof}
+L'ipotesi è equivalente a 
+\[
+\exists k_1,k_2\ |\ b=k_1a \land a=k_2b
+\] 
+Sostituendo la seconda espressione nella prima si ottiene che 
+\[
+b=k_1a=k_1k_2b
+\]
+e ciò è verificato se e solo se $k_1k_2=1$, da cui segue la tesi.
+\end{proof}
+\end{enumerate}
+\end{proposizione}
+
+\begin{definizione}
+Un numero $p\in\mathbb{Z}^+$, $p>1$, è \textbf{primo} se ammette come divisori solamente i numeri $1$ e $p$.
+\end{definizione}
+
+\begin{teorema}[Teorema di divisione]
+Per $\forall a\in\mathbb{Z}$, $\forall n\in\mathbb{Z}^+$, $\exists !q,r$, con $q\in\mathbb{Z}$, $r\in\mathbb{Z}^+\cup\{0\}$, $0 \leq r < n$, tali che $a=qn+r$.
+\end{teorema}
+L'intero $q$ è detto \textbf{quoziente} della divisione intera ed è spesso indicato come $q = a \divi n = \floor{a/n} $, mentre $r$ è detto \textbf{resto} della divisione intera ed è indicato come $r = a \bmod n$.
+
+\begin{definizione}
+Dato $a,b,d\in\Z$, con $d>0$, allora $d$ si dice \textbf{divisore comune} di $a$ e $b$ se $(d|a) \land (d|b)$.
+\end{definizione}
+
+\begin{proposizione}
+Se $d$ è divisore comune di $a,b\in\Z$ allora $\forall x,y\in\Z\ d|ax+by$.
+\end{proposizione}
+\begin{proof}
+Se $d$ è divisore comune sia di $a$ che di $b$, allora significa che $\exists k_1,k_2\in\Z\ : (a=k_1d)\ \land\ (b=k_2d)$.
+
+Considerati due interi arbitrari $x,y$ si ha:
+\[
+ax+by = k_1dx + k_2dy = (k_1x+k_2y)d = {k}d
+\]
+pertanto, per la definizione di divisore, $d$ divide $ax+by$, e poiché la scelta di $x$ e $y$ è arbitraria, vale $\forall x,y$.
+\end{proof}
+
+\section{Il massimo comun divisore}
+\begin{definizione}
+Siano $a,b\in\Z$ con $|a|+|b|>0$, allora il \textbf{massimo comun divisore} (greatest common divisor) è
+\[
+\gcd(a,b)=\max\{d>0\ :\ (d|a)\ \land\ (d|b)\}.
+\]
+\end{definizione}
+L'imposizione sulla somma dei moduli esclude il solo caso in cui entrambi i valori sono nulli: se infatti entrambi fossero interi nulli, l'insieme su cui calcolare il massimo non sarebbe superiormente limitato. Per convenzione si estende la definizione come $\gcd(0,0)=0$.
+
+\begin{proposizione}
+Valgono le seguenti proprietà:
+\begin{enumerate}
+\item Se $|a|,|b|\neq 0$, allora $1\leq \gcd(a,b) \leq \min\{|a|,|b|\}$
+\begin{proof}
+La minorazione è banale: il massimo comun divisore è un divisore, pertanto deve essere un intero positivo non nullo. 
+
+Per la maggiorazione, ragioniamo per assurdo e assumiamo che il massimo comun divisore, sia $d$, sia maggiore del più piccolo tra $a$ e $b$. Assumendo senza perdita di generalità che $|a| \leq |b|$, per la definizione di divisore si ha che $a = k_1d$ ma, avendo assunto per ipotesi che $d > |a|$, l'uguaglianza non può essere mai verificata, da cui la tesi.
+\end{proof}
+
+\item $\gcd(a,b)=\gcd(b,a)=\gcd(-a,b)$
+\begin{proof}
+È sufficiente notare che la definizione di massimo comun divisore non pone alcun vincolo sull'ordine o sul segno degli argomenti.
+\end{proof}
+
+\item $\gcd(a,0) = |a|$
+\begin{proof}
+Per la definizione di massimo comun divisore, l'insieme è dato dall'intersezione dell'insieme dei divisori di $a$ e di quello dei divisori di $0$: poiché il secondo è illimitato (qualunque intero non nullo divide $0$), l'intersezione restituisce il solo insieme dei divisori di $a$, e il massimo di quest'ultimo è proprio $|a|$.
+\end{proof}
+
+\item $\gcd(a, ka)=|a|\ \forall k\in\Z$
+\begin{proof}
+Il massimo divisore di un qualunque intero $a\neq0$ è $|a|$. Il secondo argomento è un multiplo intero di $a$, ovvero $|a| < |ka|$, pertanto la tesi segue dalla prima proprietà. Se $a=0$, allora la tesi segue direttamente dall'estensione della definizione al caso in cui entrambi gli argomenti sono nulli.
+\end{proof}
+\end{enumerate}
+\end{proposizione}
+
+\begin{teorema}[Identità di Bézout]
+Dati $a,b\in\Z$ tali per cui $|a|+|b|>0$, allora $\gcd(a,b)=\min\{d>0\ :\ \exists x,y\in\Z\ :\ d=ax+by\}$.
+\end{teorema}
+\begin{proof}
+Sia $s=\min\{d>0\ :\ \exists x,y\in\Z\ :\ d=ax+by\}$. 
+
+Si considerino due interi arbitrari $x,y\in\Z$ e sia $c=ax+by$. Se divido $c$ per $s$, per il teorema di divisione $\exists ! q,r\in\Z$, $0 \leq r < s$, tali che $c=ax+by=qs+r$. Per come è definito $s$, $\exists \bar{x},\bar{y}$ tali che $s=a\bar{x}+b\bar{y}$. Allora
+\[
+r=c-qs=ax+by-q(a\bar{x}+b\bar{y})=a(x-q\bar{x})+b(y-q\bar{y}).
+\]
+Poiché $0 \leq r < s$ è necessario che $r=0$: se così non fosse esisterebbe una combinazione lineare intera più piccola di $s$. Pertanto, essendo il resto nullo, si ha che $s|c$. Quindi
+\[
+s|a\cdot 1 + b\cdot 0
+\]
+\[
+s|a\cdot 0 + b\cdot 1
+\]
+ovvero $(s|a) \land (s|b)$ per cui segue che $s\leq \gcd(a,b)$.
+
+Ora, poiché $(\gcd(a,b)|a) \land (\gcd(a,b)|b)$, si ha che $\gcd(a,b)|ax+by\ \forall x,y\in\Z$: scegliendo $x=\bar{x}$ e $y=\bar{y}$ si ottiene che $\gcd(a,b)|a\bar{x}+b\bar{y}=s$ ovvero $\gcd(a,b)\leq s$. Avendo trovato precedentemente che $s\leq\gcd(a,b)$ segue che $s=\gcd(a,b)$.
+\end{proof}
+
+\subsection{L'algoritmo di Euclide}
+L'algoritmo di Euclide (circa 300 a.C.) si basa su due proprietà. 
+
+\begin{proposizione}
+Dati due numeri interi $a,b\geq 0$:
+\begin{enumerate}
+\item se $b=0$ allora $\gcd(a,b)=\gcd(a,0)=a$;
+\item altrimenti, $\gcd(a,b)=\gcd(b,a\bmod b)$.
+\end{enumerate}
+\end{proposizione}
+\begin{proof}
+Se $b=0$ la dimostrazione segue direttamente dalla definizione di massimo comun divisore.
+
+Ora, assumendo che $b>0$, definisco $d=\gcd(a,b)$ e $d'=\gcd(b,a\bmod b)$. Si vuole dimostrare che $d=d'$.
+
+Per Bézout, il $\gcd(a,b)=\min\{d>0\ :\ \exists x,y\in\Z\ :\ d=ax+by\}$. Inoltre, per il teorema di divisione, $a=qb+r=qb+a\bmod b$, da cui si ottiene che $a\bmod b=a-qb$. A questo punto, è possibile definire $d'=\gcd(b,a-qb)$ e per Bézout $\exists x',y'$ tali che $\gcd(b,a-qb)=bx' + (a-qb)y'=ay' + b(x'-qy')$. Da ciò si ha che $\gcd(a,b)\leq ay' + b(x'-qy') = \gcd(b,a\bmod b)$.
+
+Poiché $d'=\gcd(b,a\bmod b)$, allora $(d'|b)\ \land\ (d'|a\bmod b)$. Per quanto visto nel paragrafo sopra, per il teorema di divisione si ottiene $a=qb+a\bmod b$ da cui, per la considerazione precedente, $a=qb+a\bmod b=qk_1d'+k_2d'=(qk_1+k_2)d'$. Avendo ottenuto che $a$ è un multiplo intero di $d'$, è possibile concludere che $(d'|a)\ \land\ (d'|b)$, ovvero che $\gcd(a,b)\geq d'=\gcd(b,a\bmod b)$.
+
+Mettendo insieme i risultati ottenuti segue la tesi.
+\end{proof}
+
+\begin{algorithm}
+\caption{Algoritmo di Euclide}
+\label{alg:euclide}
+\begin{algorithmic}
+\Function{EUCLID}{$a,b$}
+	\If{$b=0$}
+		\State \Return $a$
+	\EndIf
+	\State \Return EUCLID($b,a\bmod b$)
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+In \ref{alg:euclide} è proposto l'algoritmo di Euclide.
+
+\begin{esempio}
+Si vuole trovare il massimo comun divisore di $10$ e $5$. La sequenza di chiamate dell'algoritmo di Euclide è la seguente:
+\[
+ EUCLID(10,5) \longrightarrow EUCLID(5,0) \longrightarrow 5
+\]
+\end{esempio}
+\begin{esempio}
+Si vuole trovare il massimo comun divisore di $100$ e $99$. La sequenza di chiamate dell'algoritmo di Euclide è la seguente:
+\[
+ EUCLID(100,99) \longrightarrow EUCLID(99,1) \longrightarrow EUCLID(1,0) \longrightarrow 1
+\]
+\end{esempio}
+
+
+Il calcolo del resto della divisione è una operazione quadratica nella taglia dell'istanza (numero di bit di $a$ e $b$). L'algoritmo termina sempre al più dopo $b$ iterazioni poiché il secondo argomento decresce monotonicamente: questo, in realtà, non è molto positivo perché significa che il numero di iterazioni è esponenziale nella rappresentazione in bit. Si vedrà che il numero di iterazioni è molto più basso.
+
+L'algoritmo presenta inoltre un caso particolare quando $0\leq a < b$: si spreca la prima iterazione poiché la prima chiamata ricorsiva effettua solo lo swap degli argomenti (si passa da EUCLID($a,b$) a EUCLID($b,a$)). 
+
+D'ora in poi analizziamo il caso $a > b > 0$. Infatti, se non ci si trova in questo caso significa che $(a\leq b)\ \lor\ (b=0)$:
+\begin{itemize}
+\item se $b=0$ ci si trova nel caso di base, quindi viene effettuata solo la chiamata esterna;
+\item se $a\leq b$: se $a=b$ vengono effettuate due chiamate, se $a<b$ viene effettuata una chiamata che ripristina la condizione $a > b > 0$.
+\end{itemize}
+
+Per poter effettuare il calcolo del numero di chiamate ricorsive che l'algoritmo effettua è necessario introdurre i numeri di Fibonacci.
+
+\paragraph*{Numeri di Fibonacci}
+{
+\begin{definizione}
+Il $k$-esimo \textbf{numero di Fibonacci} è definito ricorsivamente come segue:
+\[
+F_k=
+\begin{cases}
+1 \quad &k=1,2 \\
+F_{k-1}+F_{k-2} \quad &k>2
+\end{cases}
+\]
+Esiste inoltre una formula analitica chiusa\footnote{La notazione $[x]$ denota la funzione che restituisce il numero intero più vicino a $x\in\R$.}:
+\[
+F_k=\frac{1}{\sqrt{5}}\left(\frac{1+\sqrt{5}}{2}\right)^k-\frac{1}{\sqrt{5}}\left(\frac{1-\sqrt{5}}{2}\right)^k=\left[\frac{1}{\sqrt{5}}\left(\frac{1+\sqrt{5}}{2}\right)^k\right]
+\]
+\end{definizione}
+Il secondo addendo nella formula analitica rappresenta il coefficiente di arrotondamento all'intero più vicino del primo addendo. È possibile quindi fornire la seguente maggiorazione:
+\[
+F_k\leq\frac{1}{2\sqrt{5}}\left(\frac{1+\sqrt{5}}{2}\right)^k
+\]
+}
+
+\begin{proposizione}
+Per $a>b>0$, se EUCLID($a,b$) effettua $k\geq 1$ chiamate (compresa quella esterna), allora
+\[
+a\geq F_{k+2} \; \mbox{ e } \; b\geq F_{k+1}.
+\]
+\end{proposizione}
+\begin{proof}
+La dimostrazione procede per induzione.
+\subparagraph{Caso di base} Se $k=1$ e $a>b>0$ allora $b\geq 1=F_2$ e $a\geq 2=F_3$.
+\subparagraph{Ipotesi induttiva} Assumo la proposizione vera per un numero di chiamate minore di $k$.
+\subparagraph{Tesi} Considero $k$ chiamate. La chiamata esterna EUCLID($a,b$) comporta la chiamata EUCLID($b,a\bmod b$), la quale a sua volta effettuerà $k-1$ iterazioni: posso quindi applicare l'ipotesi induttiva. Per cui
+\[
+b\geq F_{(k-1)+2}=F_{k+1} \; \mbox{e} \; a\bmod b \geq F_{(k-1)+1}=F_k
+\]
+da cui segue
+\[
+b+a\bmod b= b+(a-qb) = b +\left(a -\floor*{\frac{a}{b}}b\right) \leq b+a-b=a
+\]
+ovvero
+\[
+a \geq b+a\bmod b= F_{k+1} + F_k = F_{k+2}.
+\]
+
+\end{proof}
+
+Come detto precedentemente, l'algoritmo effettua al più $b$ iterazioni. È quindi sufficiente trovare il primo valore di $k$, sia $\bar{k}$, tale per cui $F_{k+1}>b$ per limitare superiormente il numero di chiamate. Quindi
+\[
+b \overset{?}{<} F_{k+1} \leq \frac{1}{2\sqrt{5}}\left(\frac{1+\sqrt{5}}{2}\right)^{k+1}
+\]
+da cui
+\[
+k+1 > \log_{\frac{1+\sqrt{5}}{2}}{2\sqrt{5}b}.
+\]
+Pertanto $\bar{k}=O(\log b)$, lineare nella taglia dell'input.
+
+Combinando il risultato precedente alla quadraticità del calcolo del resto della divisione intera (si veda la sezione \ref{sez:divisione}), il tempo di esecuzione dell'algoritmo di Euclide è
+\[
+T_{EUCLID}(|<a,b>|)=O(\ceil{|<a,b>|}^3).
+\] 
+Nella pratica, il caso peggiore si ottiene quando si vuole calcolare il massimo comun divisore di due numeri di Fibonacci consecutivi, mentre per numeri di 1000 bit al massimo vengono eseguite 10 iterazioni. Inoltre, in genere non viene mai implementato l'algoritmo ricorsivo ma una sua versione iterata.
+
+\subsection{L'algoritmo esteso di Euclide}
+L'identità di Bézout stabilisce che $\gcd(a,b)=a\bar{x}+b\bar{y}$ per un qualche $\bar{x},\bar{y}\in\Z$. Si vuole quindi estendere l'algoritmo di Euclide in modo che restituisca non solo il massimo comun divisore ma anche la coppia di valori $(\bar{x},\bar{y})$.
+
+\subparagraph{Caso di base} Il $\gcd(a,0)=a=a\cdot 1 + b\cdot 0$, pertanto l'algoritmo restituirà gli elementi $\{a, (1,0)\}$.
+\subparagraph{Caso ricorsivo} Si procede per induzione. Si supponga che EXTENDED\_EUCLID($b,a\bmod b$) restituisca gli elementi $\{d, (x',y')\}$. Allora $d=bx' + a\bmod by'$, mentre per il teorema di divisione è possibile scrivere $a=\floor{a/b}b+a\bmod b$. Mettendo assieme le due espressioni si ottiene
+\[
+d=bx' + (a-\floor{a/b}b)y'=ay'+b(x'-\floor{a/b}y')
+\]
+da cui segue che $d=\gcd(a,b)$ e l'algoritmo può restituire gli elementi $\{d, (y',x'-\floor{a/b}y')\}$.
+
+
+L'algoritmo è quindi quello descritto in \ref{alg:extendedeuclid}.
+
+
+\begin{algorithm}
+\caption{Algoritmo esteso di Euclide}
+\label{alg:extendedeuclid}
+\begin{algorithmic}
+\Function{EXTENDED\_EUCLID}{$a,b$}
+	\If{$b=0$}
+		\State \Return $\{a, (1,0)\}$
+	\EndIf
+	\State $\{d, (x',y')\} \gets $EXTENDED\_EUCLID($b,a\bmod b$)
+	\State \Return $\{d, (y',x'-\floor{a/b}y')\}$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{esempio}
+ Si vuole applicare l'algoritmo estero di Euclide (abbreviato E\_E) alla coppia di numeri $10$ e $5$. La sequenza di chiamate è la seguente:
+ \[
+  E\_E(10,5) \longrightarrow E\_E(10,5)
+ \]
+ e i valori di ritorno sono i seguenti (si risale la ricorsione):
+ \[
+  \{5, (1,0)\} \longrightarrow \{5, (0,1)\}
+ \]
+ Come verifica, si ottiene:
+ \[
+  5 = 10 \cdot 0 + 5 \cdot 1
+ \]
+\end{esempio}
+
+\begin{esempio}
+ Si vuole applicare l'algoritmo estero di Euclide (abbreviato E\_E) alla coppia di numeri $100$ e $94$. La sequenza di chiamate è la seguente:
+ \[
+  E\_E(100,94) \longrightarrow E\_E(94,6) \longrightarrow E\_E(6,4) \longrightarrow E\_E(4,2) \longrightarrow E\_E(2,0)
+ \]
+ e i valori di ritorno sono i seguenti (si risale la ricorsione):
+ \[
+  \{2, (1,0)\} \longrightarrow \{2, (0,1)\} \longrightarrow \{2, (1,-1)\} \longrightarrow \{2, (-1,16)\} \longrightarrow \{2, (16-17)\}
+ \]
+ Come verifica, si ottiene:
+ \[
+  2 = 100 \cdot 16 + 94 \cdot (-17)
+ \]
+\end{esempio}
+
+
+\section{Aritmetica modulare}
+La funzione 
+\[
+mod:\ \Z \times \mathbb{Z}^{+} \longmapsto \mathbb{Z}^{+}\cup\{0\}
+\]
+calcola il resto della divisione intera.
+
+\begin{proposizione}
+Per $\forall a,b\in\Z$ valgono le seguenti proprietà:
+\begin{enumerate}
+\item $(a+b)\bmod n=(a\bmod n + b\bmod n)\bmod n$.
+\begin{proof}
+Per il teorema di divisione si ha
+\begin{align*}
+(a+b)=qn+r &\Rightarrow r=(a+b)\bmod n\\
+a=q'n+r' &\Rightarrow r'=a\bmod n\\
+b=q''n+r'' &\Rightarrow r''=b\bmod n
+\end{align*}
+Sempre per il teorema di divisione possono scrivere $r'+r''=\bar{q}n+\bar{r}$, con $\bar{r}=(a\bmod n + b\bmod n)\bmod n$. Lavorando sulla somma si ottiene
+\[
+r'+r''=a-q'n+b-q''n=\bar{q}n+\bar{r} \Rightarrow a+b=(q'+q''+\bar{q})n+\bar{r}
+\]
+e, per l'unicità di quoziente e resto, deve essere $r=\bar{r}$.
+\end{proof}
+\item $(ab)\bmod n=((a\bmod n)(b\bmod n))\bmod n$.
+\begin{proof}
+Per il teorema di divisione si ha
+\begin{align*}
+(ab)=qn+r &\Rightarrow r=(ab)\bmod n\\
+a=q'n+r' &\Rightarrow r'=a\bmod n\\
+b=q''n+r'' &\Rightarrow r''=b\bmod n
+\end{align*}
+Sempre per il teorema di divisione possono scrivere $r'r''=\bar{q}n+\bar{r}$, con $\bar{r}=((a\bmod n)(b\bmod n))\bmod n$. Lavorando sul prodotto si ottiene
+\begin{align*}
+r'r''=(a-q'n)(b-q''n)=ab-aq''n-bq'n+q'q''n^2 = \bar{q}n+\bar{n}.
+\end{align*}
+Sostituendo le espressioni di $a$ e $b$ nel secondo e terzo addendo si ottiene
+\begin{align*}
+ab&=q'q''n^2+q''nr'+q'q''n^2+q'nr''+q'q''n^2+\bar{q}n+\bar{r} \\
+&=(3q'q''n^2+q'r''+q''r'+\bar{q})n+\bar{r}
+\end{align*}
+e, per l'unicità di quoziente e resto, $r=\bar{r}$.
+\end{proof}
+\item $a\bmod n = b\bmod n \Leftrightarrow \exists k\in\Z\ :\ (a-b)=kn$.
+\begin{proof}
+Per il teorema di divisione si ha
+\begin{align*}
+a&=qn+r \\
+b&=q'n+r'
+\end{align*}
+Sottraendo $b$ da $a$ si ottiene
+\[
+a-b=qn+r-(q'n+r')=(q-q')+r-r'=\bar{q}n
+\]
+dove $\bar{q}\in\Z$ e $r-r'=0$ per ipotesi.
+\end{proof}
+\item se $m|n$ allora $(x\bmod n)\bmod m = x\bmod m$.
+\begin{proof}
+Per il teorema di divisione, si ha
+\begin{align*}
+x&=qn+r &&(r=x\bmod n)\\
+r&=q'm+r' &&(r'=(x\bmod n)\bmod m)\\
+x&=q''m + r'' &&(r''=x\bmod m)
+\end{align*}
+Per dimostrare la proposizione bisogna dimostrare che $r'=r''$. Poiché $m|n$ allora $\exists k\in\Z\ |\ n=km$, per cui
+\[
+x=qn+r=qkm+q'm+r'=(qk+q')m+r'
+\]
+e, poiché per il teorema di divisione quoziente e resto sono unici, deve essere $q''=qk+q'$ e $r''=r'$.
+\end{proof}
+\item se $a < 0$ allora $a\bmod n = (n+a)\bmod n$.
+\begin{proof} Si ha
+ \begin{align*}
+  a &= qn+r \\
+  n+a &= q'n+r'
+ \end{align*}
+ da cui segue $a=(q'-1)n+r'$, ovvero $q=q'-1$ e $r=r'$.
+\end{proof}
+\end{enumerate}
+\end{proposizione}
+
+\subsection{Strutture quozienti}
+Introduciamo ora la relazione congruenza modulo $n$.
+\begin{definizione}
+In aritmetica modulare la relazione \textbf{congruenza modulo $n$} tra i numeri interi $a,b,n$, $n\neq 0$, è definita come
+\[
+a \equiv b\bmod n \Leftrightarrow a\bmod n = b\bmod n.
+\]
+\end{definizione}
+
+La relazione di congruenza modulo $n$ è una relazione di equivalenza su $\Z\times\Z$:
+\begin{itemize}
+\item proprietà riflessiva: $a \equiv a\bmod n\ \forall a\in\Z, \forall n\in\Z^+$.
+\begin{proof}
+Per la terza proprietà della funzione $\bmod$ si ha 
+\[
+a\bmod n = a\bmod n \Leftrightarrow \exists k\in\Z\ |\ (a-a)=kn.
+\]
+La tesi segue dal fatto che ogni intero non nullo divide $0$.
+\end{proof}
+\item proprietà simmetrica: $a \equiv b\bmod n\ \Rightarrow b \equiv a\bmod n\ \forall a,b\in\Z, \forall n\in\Z^+$.
+\begin{proof}
+L'implicazione è equivalente alla seguente implicazione
+\[
+(a-b)=kn \Rightarrow (b-a)=k'n.
+\]
+Per giungere alla tesi è sufficiente scegliere $k'=k$, ovvero se $n$ divide $(a-b)$ allora divide anche l'opposto.
+\end{proof}
+\item proprietà transitiva: $a \equiv b\bmod n\ \land\ b \equiv c\bmod n\ \Rightarrow a \equiv c\bmod n\ \forall a,b,c\in\Z, \forall n\in\Z^+$.
+\begin{proof}
+La proprietà è equivalente a
+\[
+((a-b)=kn)\ \land\ ((b-c)=k'n) \Rightarrow (a-c)=k''n.
+\]
+Ricavando $b$ dalla seconda espressione e sostituendola nella prima si ottiene
+\[
+a-c=kn-k'n=(k-k')n
+\]
+e scegliendo $k''=k-k'$ si ottiene la tesi.
+\end{proof}
+\end{itemize}
+
+La relazione congruenza modulo $n$ partiziona il suo supporto, $\Z$, in partizioni di equivalenza: in particolare, individua $n$ \textbf{classi di equivalenza}, essendo $n$ il numero di resti distinti. Per un dato $a\in\Z$, la classe di equivalenza si indica come
+\[
+[a]_n = \{x\in\Z\ :\ x\bmod n = a\bmod n\}.
+\]
+Si noti che le classi di equivalenza $0, 1, 2, \cdots , n-1$ sono in corrispondenza biunivoca con i primi $n$ numeri naturali, detti \textbf{rappresentanti principali} delle classi, poiché ognuno di essi appartiene ad una classe differente. In particolare, $\forall r\in\Z\ :\ 0\leq r < n$ è possibile esprimere la classe di equivalenza tramite una progressione aritmetica:
+\[
+[r]_n=\{r+kn\ :\ k\in\Z\}.
+\]
+
+\begin{definizione}
+Si definisce \textbf{struttura quoziente} l'insieme di insiemi
+\[
+\Zn=\{[r]_n\ :\ 0\leq r < n\}.
+\]
+\end{definizione}
+
+Passiamo ora a definire le operazioni di somma e prodotto.
+
+\begin{definizione}
+La somma in $\Zn$ è definita come $[a]_n+[b]_n=[a+b]_n$.
+\end{definizione}
+
+\begin{proposizione}
+La somma è ben definita.
+\end{proposizione}
+\begin{proof}
+Perché l'operazione sia ben definita è necessario che il risultato della somma sia indipendente dai rappresentanti delle classi. È necessario dimostrare che $\forall k_1,k_2\in\Z$
+\[
+[a+k_1n]_n+[b+k_2n]_n=[a+b]_n.
+\]
+Si ha
+\begin{align*}
+(a+k_1n+b+k_2n)\bmod n &= (a+b + (k_1+k_2)n)\bmod n \\ 
+&= (a+b)\bmod n \in [a+b]_n
+\end{align*}
+per ogni $k_1,k_2\in\Z$.
+\end{proof}
+
+\begin{definizione}
+Il prodotto in $\Zn$ è definito come $[a]_n\cdot[b]_n=[ab]_n$.
+\end{definizione}
+
+\begin{proposizione}
+Il prodotto è ben definito.
+\end{proposizione}
+\begin{proof}
+Perché l'operazione sia ben definita è necessario che il risultato del prodotto sia indipendente dai rappresentanti delle classi. È necessario dimostrare che $\forall k_1,k_2\in\Z$
+\[
+[a+k_1n]_n\cdot[b+k_2n]_n=[ab]_n.
+\]
+Si ha
+\begin{align*}
+((a+k_1n)(b+k_2n))\bmod n &= (ab + ak_2n + bk_1n + k_1k_2n^2)\bmod n \\ 
+&= (ab + (ak_2 + bk_1 +k_1k_2n)n)\bmod n \\
+&= (ab)\bmod n \in [ab]_n
+\end{align*}
+per ogni $k_1,k_2\in\Z$.
+\end{proof}
+
+Utilizzando i soli rappresentanti principali di una classe, $a,b\in\Zn$, è possibile denotare la somma e il prodotto con l'usuale notazione ma con i seguenti significati:
+\begin{align*}
+a+b&=(a+b)\bmod n \\
+ab&=(ab)\bmod n
+\end{align*}
+
+\begin{proposizione}
+L'operazione di somma sopra definita rende $(\Zn, +)$ un gruppo (additivo).
+\end{proposizione}
+\begin{proof}
+Per dimostrare che la struttura algebrica $(\Zn, +)$ è un gruppo è necessario dimostrare le seguenti quattro proprietà:
+\begin{enumerate}
+\item \textbf{Proprietà di chiusura.} Per ogni $a,b\in\Zn$, si ha $a+b=(a+b)\bmod n \in\Zn$, pertanto l'operazione di somma è chiusa rispetto a $\Zn$.
+\item \textbf{Proprietà associativa.} La proprietà associativa viene ereditata dalla somma tra interi. Infatti, dati tre rappresentanti principali $a,b,c\in\Zn$, si ha:
+\[
+(a+b)+c=((a+b)+c)\bmod n=(a+(b+c))\bmod n = a+(b+c)
+\]
+\item \textbf{Esistenza dell'elemento neutro.} L'elemento neutro è rappresentato dalla classe $[0]_n$, infatti, $\forall [a]_n\in\Zn$,
+\[
+[0]_n+[a]_n=[0+a]_n=[a]_n \ \mbox{ e } \ [a]_n+[0]_n=[a+0]_n=[a]_n
+\]
+\item \textbf{Esistenza dell'inverso (opposto).} Per ogni $a\in\Zn$, il suo inverso è $(-a)\in\Zn$. Infatti
+\begin{align*}
+a+(-a)&=(a+(-a))\bmod n=(a-a)\bmod n=0 \\
+(-a)+a&=((-a)+a)\bmod n=(-a+a)\bmod n=0
+\end{align*}
+\end{enumerate}
+\end{proof}
+
+\begin{proposizione}
+L'operazione di prodotto sopra definita non rende $(\Zn, \cdot)$ un gruppo.
+\end{proposizione}
+\begin{proof}
+La proprietà di gruppo che non viene verificata è quella dell'esistenza dell'inverso per ogni elemento di $\Zn$: in particolare, non esiste l'inverso per la classe $[0]_n$. 
+
+È possibile dimostrare che l'elemento neutro è $[1]_n$, infatti, per ogni $[a]_n\in\Zn$:
+\[
+[a]_n \cdot [1]_n = [a\cdot 1]_n = [a]_n \ \mbox{ e } \  [1]_n \cdot [a]_n = [1\cdot a]_n = [a]_n
+\]
+
+Calcolando l'elemento neutro di $[0]_n$ si ottiene
+\[
+[0]_n \cdot [b]_n = [0\cdot b]_n \neq [1]_n \ \mbox{ e } \  [b]_n \cdot [0]_n = [b\cdot 0]_n \neq [1]_n
+\]
+per ogni $[b]_n\in\Zn$.
+\end{proof}
+
+Per quanto visto sopra, eliminiamo da $\Zn$ la classe $[0]_n$. Anche in questo caso l'esistenza dell'inverso è problematica.
+
+\begin{proposizione}
+L'operazione di prodotto sopra definita non rende $(\Zn - \{[0]_n\}, \cdot)$ un gruppo.
+\end{proposizione}
+\begin{proof}
+L'elemento neutro rimane $[1]_n$ (vedi dimostrazione precedente). Dimostriamo ora la mancanza dell'inverso per ogni elemento di $\Zn$ con un controesempio. Si consideri $\Z_4$:
+\begin{align*}
+[2]_4[1]_4&=[2]_4 \\
+[2]_4[3]_4&=[6]_4=[2]_4 \\
+[2]_4[2]_4&=[4]_4=[0]_4 \notin (\Zn - \{[0]_n\})
+\end{align*}
+da cui segue che in $\Z_4$ non esiste l'inverso. Si noti che dall'ultima espressione segue inoltre che in $\Zn - \{[0]_n\}$ il prodotto non è chiuso.
+\end{proof}
+
+\begin{definizione}
+Sia $\Zns=\{a\in\Zn \ | \ \gcd(a,n)=1 \}$.
+\end{definizione}
+Si osservi che se $a$ e $n$ sono primi tra loro, allora la classe di equivalenza $[0]_n$ \textbf{non} appartiene a $\Zns$.
+È una definizione sensata? Dimostriamolo.
+\begin{proof}
+È necessario dimostrare che per ogni $k\in\Z$ si ha 
+\[
+\gcd(a,n)=1 \Rightarrow \gcd(a+kn,n)=1.
+\] 
+Infatti, se $\gcd(a,n)=1$, allora, $\forall x,y\in\Z$,
+\[
+1=ax+ny=ax+knx-knx+ny=(a+kn)x+n(y-kn)
+\]
+da cui segue che $\gcd(a+kn,n)=1$, $\forall k\in\Z$.
+\end{proof}
+
+L'insieme $\Zns$ raccoglie tutte le classi di $\Zn$ per le quali il loro rappresentante è un numero primo rispetto a $n$.
+
+\begin{proposizione}
+Il prodotto sopra definito rende $(\Zns, \cdot)$ un gruppo (moltiplicativo).
+\end{proposizione}
+\begin{proof}
+Dimostriamo le quattro proprietà che rendono una struttura algebrica un gruppo.
+\begin{enumerate}
+\item \textbf{Proprietà di chiusura.} Siano $a,b\in\Zns$: bisogna dimostrare che
+\[
+(\gcd(a,n)=1) \land (\gcd(b,n)=1) \Rightarrow \gcd((ab)\bmod n, n)=1.
+\]
+Per l'identità di Bézout si ha
+\[
+1=ax_1 + ny_1 \ \mbox{ e } \ 1=bx_2 + ny_2
+\]
+e moltiplicando i due membri tra loro si ottiene
+\[
+1=ab(x_1x_2)+n(ax_1y_2+bx_2y_1+y_1y_2n) 
+\]
+da cui $\gcd(ab,n)=1 \Rightarrow \gcd((ab)\bmod n,n)=1$.
+
+\item \textbf{Proprietà associativa.} Per ogni $a,b,c\in\Zns$ si ha
+\[
+(ab)c=((ab)c)\bmod n=(a(bc))\bmod n=a(bc).
+\] 
+
+\item \textbf{Esistenza dell'elemento neutro.} L'elemento neutro è $[1]_n$, infatti, per ogni $[a]_n\in\Zns$:
+\[
+[a]_n \cdot [1]_n = [a\cdot 1]_n = [a]_n \ \mbox{ e } \  [1]_n \cdot [a]_n = [1\cdot a]_n = [a]_n.
+\]
+
+\item \textbf{Esistenza dell'inverso\footnote{Data una classe $[a]_n\in\Zn$, si denota il suo inverso come $[a]_n^{-1}$, o, lasciando sottintesa la notazione di classe, $a^{-1}$.}.} Bisogna dimostrare che 
+\[
+\forall a\in\Zns \ \exists a^{-1} \ | \ aa^{-1}=a^{-1}a=1.
+\]
+
+Poiché $a\in\Zns$, si ha che
+\begin{align*}
+\gcd(a,n)=1 &\Rightarrow 1=ax+ny \\
+&\Rightarrow ax=1-ny \\
+&\Rightarrow (ax)\bmod n=1 &&\text{(teorema di divisione)} \\
+&\Rightarrow ((a\bmod n)(x\bmod n))\bmod n=1 \\
+&\Rightarrow a^{-1}=x\bmod n.
+\end{align*}
+Rimane da dimostrare se $a^{-1}\in\Zns$:
+\begin{align*}
+1 = xa+ny &\Rightarrow \gcd(x,n)=1 \\
+&\Rightarrow \gcd(x\bmod n, n)= 1 \\
+&\Rightarrow x\bmod n \in\Zns
+\end{align*}
+concludendo così la dimostrazione.
+\end{enumerate}
+\end{proof}
+
+\begin{definizione}
+Si definisce come segue la \textbf{funzione di Eulero}:
+\[
+\phi (n) = |\Zns|=|\{a \ :\ 1\leq a\leq n-1 \ | \ \gcd(a,n)=1\}|.
+\]
+
+La sua descrizione analitica compatta è la seguente:
+\[
+\phi (n) = n\prod_{\substack{p|n \\ p \text{ primo}}} \left(1-\frac{1}{p}\right).
+\]
+\end{definizione}
+
+Dalla definizione è possibile osservare che
+\begin{itemize}
+\item se $n$ è primo, allora $\forall x \ : \ 1\leq x \leq n-1$, si ha $\gcd(x,n)=1$, da cui si ricava facilmente che $|\Zns|=n-1=\phi (n)$;
+\item se $n=pq$ con $p$ e $q$ numeri primi molto grandi, allora
+\[
+\phi (n)=pq\left(1-\frac{1}{p}\right)\left(1-\frac{1}{q}\right)=(p-1)(q-1).
+\]
+\end{itemize}
+
+\begin{teorema}[Teorema di Eulero]
+Per ogni $a\in\Zns$ si ha $a^{\phi (n)} \bmod n = 1$.
+\end{teorema}
+
+\begin{corollario}[Piccolo teorema di Fermat]
+Se $n\in\Z$ è primo, allora $\forall a\in\Z\ :\ 1\leq a < n$
+\[
+a^{n-1} \equiv 1\bmod n.
+\]
+\end{corollario}
+
+\section{Il teorema cinese del resto}
+Il teorema cinese del resto fornisce una corrispondenza tra una sistema di equazioni modulo un insieme di numeri primi tra loro a coppie e un'equazione modulo il loro prodotto.
+
+Il teorema cinese del resto ha due applicazioni importanti. Consideriamo l'intero $n$ fattorizzato come $n=n_1n_2\cdots n_k$, dove i fattori $n_i$ sono primi tra loro a coppie. Come prima cosa, il teorema descrive la struttura di $\Zn$ come identica alla struttura di $\Z_{n_1} \times \Z_{n_2} \times \cdots \times \Z_{n_k}$ come addizioni e moltiplicazioni modulo $n_i$ componente per componente nella componente $i$. Inoltre, il poter lavorare in $\Z_{n_i}$ è più efficiente che lavorare nell'intera struttura $\Zn$ potendo quindi progettare algoritmi più efficienti in termini di operazioni sui bit.
+
+\begin{teorema}[Il teorema cinese del resto]
+Sia $n=n_1n_2\cdots n_k$, dove i fattori $n_i$ sono primi tra loro a coppie. Si consideri la corrispondenza 
+\[
+a \leftrightarrow (a_1, a_2, \cdots , a_k)
+\]
+dove $a\in\Zn$, $a_i\in\Z_{n_i}$ e $a_i=a\bmod n_i \ i=1,2,\cdots , k$.
+Allora la corrispondenza di cui sopra è una mappa uno-a-uno (biunivoca) tra $\Zn$ e $\Z_{n_1} \times \Z_{n_2} \times \cdots \times \Z_{n_k}$. Le operazioni eseguite su $\Zn$ possono essere equivalentemente eseguite sulla corrispondente $k$-esima tupla eseguendo le operazioni indipendentemente in ogni coordinata nel sistema appropriato. Cioè, se
+\begin{align*}
+a &\leftrightarrow (a_1, a_2, \cdots , a_k) \\
+b &\leftrightarrow (b_1, b_2, \cdots , b_k) \\
+\end{align*}
+allora
+\begin{align*}
+(a+b)\bmod n &\leftrightarrow ((a_1+b_1)\bmod n_1, (a_2+b_2)\bmod n_2, \cdots , (a_k+b_k)\bmod n_k) \\
+(a-b)\bmod n &\leftrightarrow ((a_1-b_1)\bmod n_1, (a_2-b_2)\bmod n_2, \cdots , (a_k-b_k)\bmod n_k) \\
+(ab)\bmod n &\leftrightarrow ((a_1b_1)\bmod n_1, (a_2b_2)\bmod n_2, \cdots , (a_kb_k)\bmod n_k)
+\end{align*}
+\end{teorema}
+\begin{proof}
+La trasformazione tra le due rappresentazioni è abbastanza immediata. Passare da $a$ a $(a_1, a_2, \cdots , a_k)$ è facile e richiede solo $k$ operazioni modulo.
+
+Calcolare $a$ da $(a_1, a_2, \cdots , a_k)$ è un po' più complicato. Definiamo $m_i=n/n_i$ per $i=1,2,\cdots,k$; quindi $m_i$ è il prodotto di tutti gli $n_j$ diversi da $n_i$: $m_i=n_1n_2\cdots n_{i-1}n_{i+1}\cdots n_k$. Definiamo
+\[
+c_i = m_i(m_i^{-1}\bmod n_i)
+\]
+per $i=1,2,\cdots,k$. Questa equazione è sempre ben definita: poiché $m_i$ e $n_i$ sono numeri primi tra loro, allora è garantita l'esistenza di $m_i^{-1}\bmod n_i$. Così è possibile calcolare $a$ in funzione degli $a_1,a_2,\cdots,a_k$ come segue:
+\[
+a \equiv (a_1c_1+a_2c_2+\cdots+a_kc_k)\bmod n.
+\]
+
+Ora dimostriamo che tale equazione assicura che $a\equiv a_i \bmod n_i$ per $i=1,2,\cdots,k$. Si noti che se $j\neq i$, allora $m_j \equiv 0 \bmod n_i$, implicando che $c_j \equiv m_j \equiv 0 \bmod n_i$. Si noti inoltre che $c_i \equiv 1\bmod n_i$. Otteniamo quindi la seguente corrispondenza:
+\[
+c_i \leftrightarrow (0,0,\cdots,0,1,0,\cdots,0),
+\]
+un vettore di 0 eccetto che nell'$i$-esima componente, dove c'è un 1. Pertanto per ogni $i$, si ha
+\begin{align*}
+a &\equiv a_ic_i \bmod n_i \\
+&\equiv a_im_i(m_i^{-1} \bmod n_i) \bmod n_i \\
+&\equiv a_i \bmod n_i
+\end{align*}
+ovvero il metodo di calcolo descritto produce come risultato $a$ che soddisfa i vincoli $a\equiv a_i \bmod n_i$ per $i=1,2,\cdots,k$.
+La corrispondenza è biunivoca potendo effettuare la trasformazione in entrambi i versi.
+\end{proof}
+
+Si hanno i seguenti corollari.
+
+\begin{corollario}
+Se $n_1,n_2,\cdots,n_k$ sono numeri primi tra loro a coppie e $n=n_1n_2\cdots n_k$, allora per ogni intero $a_1, a_2, \cdots, a_k$, il sistema di equazioni
+\[
+x \equiv a_i \bmod n_i,
+\]
+per $i=1,2,\cdots,k$, ha un'unica soluzione modulo $n$ per l'incognita $x$.
+\end{corollario}
+
+\begin{corollario}
+Se $n_1,n_2,\cdots,n_k$ sono numeri primi tra loro a coppie e $n=n_1n_2\cdots n_k$, allora per ogni intero $a$ e $x$,
+\[
+x \equiv a\bmod n_i
+\]
+per $i=1,2,\cdots,k$ se e solo se
+\[
+x \equiv a\bmod n.
+\]
+\end{corollario}
+
+\begin{esempio}
+Sia trovare il valore dell'incognita $x$ del seguente sistema di equazioni:
+\begin{align*}
+ x &\equiv 2\bmod 5 \\
+ x &\equiv 3\bmod 13
+\end{align*}
+
+Si vuole trovare il valore di $x$, che sappiamo essere unico per il secondo corollario. Per risolvere questo esercizio si applica la stessa procedura applicata per la dimostrazione del teorema cinese del resto. 
+
+Dal sistema si identificano i seguenti valori: $a_1=2$, $a_2=3$, $n_1=5$, $n_2=13$, con $n_1$ e $n_2$ primi tra loro, e $n=n_1n_2=65$.
+Allora, $m_1=n/n_1=13$ e $m_2=n/n_2=5$. È necessario calcolare i valori $m_i^{-1}\bmod n_i$, $i=1,2$: per far ciò è necessario applicare l'algoritmo esteso di Euclide\footnote{Si veda la dimostrazione dell'esistenza dell'inverso in $\Zns$.} ai valori $m_i$ e $n_i$. Facendo ciò si ottiene che $13^-1 \equiv 2\bmod 5$ e $5^-1 \equiv -5\bmod 13 \equiv 8\bmod 13$. A seguire si calcolano i valori $c_i = m_i(m_i^{-1}\bmod n_i)$:
+\begin{align*}
+ c_1 &= 13(2\bmod 5)=26 \\
+ c_2 &= 5(8\bmod 13)=40 
+\end{align*}
+da cui segue
+\[
+ x\equiv (a_1c_1 + a_2c_2)\bmod n \equiv 42\bmod 65.
+\]
+\end{esempio}
+
+\section{Crittografia e RSA}
+\subsection{Introduzione}
+L'utente $X$ genera due chiavi: una chiave pubblica $P_X$ e una chiave privata (segreta) $S_X$. Queste due chiavi vengono utilizzate per criptare un messaggio $m$. La chiave pubblica è una chiave che deve essere condivisa (conosciuta) tra i due interlocutori mentre la chiave privata deve rimanere segreta. Si osservi che:
+\begin{itemize}
+\item $P_X(m)$ e $S_X(m)$ devono essere calcolabili efficientemente;
+\item $S_X(m)=P_X^{-1}(m)$, ovvero $P_X(S_X(m))=S_X(P_X(m))=m$;
+\item nota $P_X$, la funzione $S_X$ non può essere calcolata efficientemente in assenza di altre informazioni.
+\end{itemize}
+
+\paragraph{Dove si usa RSA?}
+Principalmente in protocolli di comunicazione e di autenticazione (che possono anche essere combinati tra loro).
+\subparagraph{Protocolli di comunicazione} Si supponga che Bob voglia inviare un messaggio $M$ ad Alice attraverso un canale non sicuro, ovvero un canale dove può essere in ascolto Charlie, e che questo messaggio debba essere conosciuto solo da Alice. Bob, anziché inviare sul canale il messaggio in chiaro, invia la sua versione criptata $y=P_A(M)$ con la chiave \textbf{pubblica} di Alice: alla ricezione, Alice può decrittare con successo il messaggio inviato da Bob tramite la propria chiave privata, ovvero $M=S_A(y)$.
+
+\subparagraph{Protocolli di autenticazione} Si supponga che Alice voglia autenticarsi nei confronti di Bob e quest'ultimo vuole essere certo che la persona che si vuole autenticare sia proprio Alice e non Charlie (ancora una volta, il canale di comunicazione è da assumere come non sicuro). Per raggiungere questo scopo, Alice invia un messaggio $\langle M, S_A(M)\rangle$ a Bob: quest'ultimo può assicurarsi che esso sia stato inviato proprio da Alice se $M=P_A(S_A(M))$.
+
+\paragraph{La forza di RSA}
+La forza di RSA sta nel fatto che le chiavi private generate non sono calcolabili efficientemente a partire da quelle pubbliche senza avere ulteriori informazioni. In particolare, il tutto si basa sulla complessità dei problemi PRIMALITY e FACTORING.
+
+Il problema (decisionale) PRIMALITY è definito come segue:
+\[
+\begin{cases}
+I= \langle n \rangle\ |\ n\in\N \\
+D= "n\text{ è primo?"}
+\end{cases}
+\]
+Nel 2004 è stato dimostrato che tale problema appartiene alla classe P, tuttavia l'algoritmo migliore al momento disponibile (algoritmo dei tre indiani) è di fatto impraticabile.
+
+Il problema (decisionale) FACTORING è definito come segue:
+\[
+\begin{cases}
+I= \langle n,l,u \rangle \\
+D= \exists p,q\in\N\ :\ (n=pq)\ \land\ (l\leq p\leq u)
+\end{cases}
+\]
+dove $l$ e $u$ sono rispettivamente un \textit{lower bound} e un \textit{upper bound}. È noto che tale problema è un problema in NP tuttavia non è ancora dimostrato che tale problema appartenga a NPC (si ritiene che non vi appartenga). Il miglior algoritmo per FACTORING ha complessità $T(n)=\Theta(e^{\sqrt[3]{\frac{64}{9}|n|(\log_2 n)^2}})$, impossibile da utilizzare in pratica. Anche entrando nel campo della quantistica, il miglior algoritmo ha complessità cubica (algoritmo di Shor).
+
+\subsection{Calcolo delle chiavi}
+Ogni partecipante genera casualmente due \textbf{grandi} numeri primi $p$ e $q$ (con $p\neq q$): per far ciò, si estraggono a caso due numeri grandi e si verifica se essi sono primi o meno. Il numero di bit utilizzati dipende dalla tecnologia: attualmente si utilizzano circa $512$ bit, ottenendo quindi $n=pq$ a $1024$ bit. In seguito il dominio di lavoro sarà $\Zn$. Viene inoltre calcolata la funzione di Eulero $\phi(n)=(p-1)(q-1)$. A questo punto è possibile procedere con il calcolo delle chiavi:
+\begin{itemize}
+\item \textbf{Chiave pubblica} Si seleziona un $e\in\Z$ \textbf{piccolo} (scelto casualmente su pochi bit) primo con $\phi(n)$. La chiave pubblica sarà $P_X=(e,n)$: un messaggio $M$ viene cifrato come $P_X(M)=M^e\bmod n$;
+\item \textbf{Chiave privata} Si prende in considerazione l'intero $e$ scelto per la chiave pubblica: allora, poiché $e\in\Z_{\phi(n)}^*$, esiste un $d$ tale per cui $d \equiv e^{-1}\bmod\phi(n)$, e tale valore è facilmente calcolabile tramite EXTENDED\_EUCLID($e,\phi(n)$). La chiave segreta sarà $S_X=(d,n)$ e un messaggio $M$ verrà cifrato come $S_X(M)=M^d\bmod n$.
+\end{itemize}
+
+Tali funzioni sono calcolabili efficientemente? Si ha
+\begin{align*}
+M^e\bmod n &= (M\cdot M\cdots M)\bmod n \\
+&=(((MM)\bmod n) M\bmod n)\cdots )\bmod n
+\end{align*}
+L'algoritmo \ref{alg:power} effettua tale calcolo. Considerando il numero di prodotti, tale algoritmo ha complessità
+\[
+T(e)=T\left(\floor{e/2}\right) + 2 = \Theta(\log e)
+\]
+per il \textit{master theorem}. Come è noto da \textit{Dati e algoritmi 2}, l'algoritmo di \textit{squaring} è più efficiente.
+
+\begin{algorithm}
+\caption{Elevazione a potenza modulo $n$}
+\label{alg:power}
+\begin{algorithmic}
+\Function{POWER}{$M,e,n$}
+	\If{$e=0$}
+		\State \Return $1$
+	\EndIf
+	\If{$e=1$}
+		\State \Return $M$
+	\EndIf
+	\If{EVEN($e$)}
+		\State $temp\gets$ POWER($M,e/2,n$)
+		\State \Return $(temp * temp)\bmod n$
+	\Else
+		\State $temp\gets$ POWER($M,(e-1)/2,n$)
+		\State \Return $(temp * temp * M)\bmod n$
+	\EndIf
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{proposizione}
+Le chiavi generate secondo la ricetta descritta sopra sono tali per cui
+\[
+P_X(S_X(M))=S_X(P_X(M))=M
+\]
+per ogni $M\in\Zn$.
+\end{proposizione}
+\begin{proof}
+Si ha
+\begin{align*}
+P_X(S_X(M))&=(M^d\bmod n)^e\bmod n \\
+&=(\underbrace{(M^d\bmod n)(M^d\bmod n)\cdots(M^d\bmod n)}_{e\text{ volte}})\bmod n \\
+&=M^{ed}\bmod n \\
+&=S_X(P_X(M))
+\end{align*}
+pertanto la dimostrazione verte nel dimostrare la relazione
+\[
+M^{ed}\bmod n \overset{?}{=} M = M\bmod n
+\]
+Essendo $n=pq$ con $\gcd(p,q)=1$, possiamo applicare il secondo corollario del teorema cinese del resto e quindi è sufficiente provare che 
+\[
+\begin{cases}
+M^{ed}\bmod p = M\bmod p \\
+M^{ed}\bmod q = M\bmod q
+\end{cases}
+\]
+
+Si ha che $d=e^{-1}\bmod\phi(n)$, ovvero $ed\equiv 1\bmod\phi(n)$ (inverso moltiplicativo): questo significa che $\exists h\in\Zp$ tale per cui
+\[
+ed=1+h\phi(n)=1+h(p-1)(q-1).
+\]
+Segue che
+\[
+M^{ed}\bmod p = M^{1+h(p-1)(q-1)}\bmod p
+\]
+da cui
+\begin{enumerate}
+\item se $M\bmod p=0$ allora $M^{ed}\bmod p=0$ e quindi segue immediatamente che $M^{ed}\equiv M\bmod p$;
+\item se $M\bmod p\neq 0$ allora 
+\begin{align*}
+M^{ed}\bmod p &= M^{1+h(p-1)(q-1)}\bmod p \\
+&=(M(M^{h(q-1)})^{p-1})\bmod p \\
+&=(M(M^{p-1})^{h(q-1)})\bmod p \\
+&=((M\bmod p)((1)^{h(q-1)}\bmod p))\bmod p \\
+&=M\bmod p
+\end{align*}
+applicando il piccolo teorema di Fermat e considerando che $M^{p-1}\bmod p = 1 = 1\bmod p$ e che, poiché $M\in \Zn$ e $n>p$, $M\bmod p = p$.
+\end{enumerate}
+Si conclude così che $M^{ed}\bmod p = M\bmod p$.
+
+Applicando la stessa identica procedura alla seconda relazione si giunge alla tesi.
+\end{proof}
+
+\subsection{Attacchi ad RSA}
+Si noti quanto sia importante la fattorizzazione in RSA: se la fattorizzazione fosse semplice RSA sarebbe assolutamente insicuro. 
+
+Introduciamo ora il problema del \textbf{logaritmo discreto}: dati $a,b\in\Zns$ si vuole determinare un $k$ tale che $a^k\equiv b\bmod n$. Tale problema si applica al fatto che, data $P_X(M)=M^e\bmod n$, con $M$ un messaggio qualunque, determinando $x$ tale per cui $(M^e)^x\equiv M\bmod n$ si è trovato il valore $d$ utile per generare la chiave privata. Con abuso di notazione possiamo affermare che il problema della fattorizzazione è riducibile polinomialmente al problema del logaritmo discreto.
+
+Come visto nel paragrafo precedente, dalla tripla $(n,p,q)$ siamo in grado di calcolare la coppia $(n,\phi(n))$ utile per la generazione delle chiavi. È possibile effettuare il contrario? Ovvero, a partire da $\phi(n)$, si riesce a fattorizzare $n$?
+\begin{proof}
+Ipotesi: $n=pq$, $p$ e $q$ primi e ignoti, $\phi(n)$ noto.
+Si ha
+\[
+\phi(n)=(p-1)(q-1)=pq-(p+q)+1 \Rightarrow p+q=n-\phi(n)+1.
+\]
+Inoltre
+\begin{align*}
+(p-q)^2&=p^2+q^2-2pq \\
+&=p^2+q^2-2pq+2pq-2pq \\
+&=p^2+q^2+2pq -4pq \\
+&=(p+q)^2-4pq \\
+&=(n-\phi(n)+1)^2-4n
+\end{align*}
+da cui $p-q=\sqrt{(n-\phi(n)+1)^2-4n}$ (la radice è calcolabile facilmente).
+
+Allora
+\[
+\begin{cases}
+p+q=n-\phi(n)+1 \\
+p-q=\sqrt{(n-\phi(n)+1)^2-4n}
+\end{cases}
+\Leftrightarrow 
+\begin{cases}
+p=\frac{n-\phi(n)+1+\sqrt{(n-\phi(n)+1)^2-4n}}{2} \\
+q=\frac{n-\phi(n)+1-\sqrt{(n-\phi(n)+1)^2-4n}}{2}
+\end{cases}
+\]
+\end{proof}
+
+Analizziamo ora alcune tecniche di attacco a RSA.
+\begin{enumerate}
+\item \textbf{Decomposizione di $n=pq$ se $p$ e $q$ sono molto vicini tra loro}
+
+Sia $p>q$ e $q=p-k$ con $k$ "piccolo". Allora $n=pq=p(p-k)=p^2-kp$ che è equivalente all'equazione $p^2-kp-n=0$: essendo $k$ "piccolo" posso permettermi un algoritmo esaustivo che risolve l'equazione provando ogni $k$, fermandosi appena le soluzioni $p_1$ e $p_2$ sono intere. L'algoritmo esegue in un tempo $T\sim c(p-q)$, quindi è necessario che la differenza $p-q$ sia sufficiente grande da rendere impraticabile questa soluzione.
+
+\item \textbf{Attacchi per scelte di chiavi pubbliche con lo stesso esponente}
+
+In genere l'intero $e$ viene scelto di pochi bit. Sia $e$ "molto piccolo", siano presenti nel sistema $1\leq i\leq e$ utenti e sia $(e,n_i)$ la coppia di dati da cui generare le chiavi pubbliche e private per ogni utente. Si intercettino $e$ messaggi
+\[
+M^e\bmod n_1, M^e\bmod n_2, \cdots, M^e\bmod n_e
+\]
+assumendo che $n_i\neq n_j$ per $\forall i\neq j$. È inoltre ragionevole assumere che $\gcd(n_i,n_j)=1\ \forall i\neq j$ poiché la probabilità di scegliere due numeri primi che abbiano un fattore in comune è praticamente nulla, pertanto $n=\prod_{i=1}^e n_i$.
+I messaggi intercettati formano le coordinate di un punto in $\Zn$. Ragionando con il teorema cinese del resto, si ha
+\[
+f(M^e\bmod n) = (M^e\bmod n_1, M^e\bmod n_2, \cdots, M^e\bmod n_e)
+\]
+ovvero
+\[
+M^e\bmod n = f^{-1}(M^e\bmod n_1, M^e\bmod n_2, \cdots, M^e\bmod n_e)
+\]
+Posso quindi ricostruire il valore $M^e\bmod n$ efficientemente. Si consideri un messaggio $M$ che viene criptato rispetto a $n_1, n_2,\cdots, n_e$. Allora
+\[
+M\in
+\begin{cases}
+\Z_{n_1} \\
+\Z_{n_2} \\
+\cdots \\
+\Z_{n_e} \\
+\end{cases}
+\Rightarrow
+M < 
+\begin{cases}
+n_1 \\
+n_2 \\
+\cdots \\
+n_e
+\end{cases}
+\Rightarrow M^e < n_1n_2\cdots n_e=n
+\]
+poiché $M$ è un rappresentante principale dei domini dei messaggi.
+Da ciò posso ricostruire direttamente il valore \textit{non modulare} $M^e$, allora è sufficiente calcolare $\sqrt[e]{M^e}$ in $\Z$ (calcolabile polinomialmente nel numero di bit che compongono $M$).
+
+\item \textbf{Attacchi per scelte di chiavi pubbliche con lo stesso modulo}
+
+Consideriamo ora il caso in cui due utenti condividano lo stesso modulo $n$ ma usino esponenti $e_1$, $e_2$ differenti, con la particolarità che $\gcd(e_1,e_2)=1$. Anche in questo caso un messaggio di broadcast $M$ potrebbe essere catturato da un malintenzionato decrittando i messaggi cifrati $C_1=M^{e_1}\bmod n$ e $C_2=M^{e_2}\bmod n$. Poiché $e_1$ e $e_2$ sono primi tra loro, posso scrivere l'identità di Bézout
+\[
+1=e_1r + e_2s\,\,\,\,\, r,s\in\Z\
+\]
+con $r<0$ (siccome sia $e_1,e_2>0$, allora uno tra $r$ e $s$ deve essere negativo). Allora è possibile esprimere il messaggio originario come
+\begin{align*}
+M&=M^1 \\
+&=M^{e_1r+e_2s} \\
+&=(C_1^rC_2^s)\bmod n \\
+&=((C_1^{-1})^{-r}C_2^s)\bmod n 
+\end{align*}
+Ciò è lecito se $C_1$ ammette inverso moltiplicativo in $\Zn$, ovvero $\gcd(C_1,n)=1$: ciò è sempre "quasi" vero perché se non fosse così il massimo comun divisore tra $C_1$ e $n$ sarebbe uguale ad uno dei fattori di $n$, da cui cadrebbe l'intero criptosistema. Questo fatto è praticamente impossibile perché in $\Zn$ il numero di numeri primi multipli di $p$ (o di $q$) è piccolissimo e quindi la generazione casuale difficilmente becca questo tipo di numeri durante la cifratura.
+
+\item \textbf{Attacchi basati sull'autenticazione}
+
+Supponiamo che un utente malizioso abbia intercettato un messaggio $y=M^e\bmod n$ mandato da Bob ad Alice (quindi si è usata la chiave pubblica di Alice) e supponiamo che tale utente malizioso sia interessato a conoscere il messaggio inviato da Bob. Supponiamo inoltre che Alice sia disposta a firmare a cuor leggero qualsiasi messaggio. 
+
+Charlie sceglie a caso un intero $r$ tale che $\gcd(r,n)=1$ (ovvero un numero in $\Zns$, e la probabilità che tale numero non sia in $\Zns$ è assolutamente trascurabile). Allora Charlie manda ad Alice da firmare il messaggio $y'=r^ey$ ($e$ è noto essendo l'esponente di Alice, la chiave pubblica). Alice ritorna a Charlie il messaggio 
+\[
+(y')^d\bmod n = r^{ed}y^d\bmod n = rM\bmod n
+\]
+da cui si ottiene $M=r^{-1}$. Si noti che $r$ è utile per confondere Alice: in questo modo Alice non si accorge di firmare nuovamente un messaggio firmato precedentemente.
+\end{enumerate}
+
+\section{Numeri primi}
+Come visto nella sezione precedente, alla base della crittografia RSA vi è la teoria dei numeri primi: si ha la necessità di generare dei numeri primi molto grandi e casuali. L'approccio per generare un grande numero primo casualmente consiste nel generare un numero intero casualmente e poi effettuare un test di primalità sul numero generato: la prima operazione è molto semplice (effettuo un lancio di una moneta per ogni bit del numero da generare) mentre la verifica se un numero intero è primo o meno non è triviale. Dal 2004 esiste un algoritmo che verifica se un numero intero è primo in tempo polinomiale (algoritmo dei tre indiani), tuttavia odiernamente rimane impraticabile. 
+
+\subsection{Teoria dei numeri primi}
+Sia $\Pi(n)=|\{p\in\Zp\ |\ p\leq n\ \land\ p\ \text{primo}\}|$. Si può dimostrare che
+\[
+\lim_{n \to +\infty} \frac{\Pi(n)}{\frac{n}{\ln n}} = 1.
+\]
+Segue che i numeri primi sono densi in $\Z$, infatti\footnote{Si reitera con un processo di Bernoulli per circa $\ln n$ volte.}
+\[
+P(\text{numero estratto sia primo})\geq \frac{1}{\ln n}.
+\]
+Sappiamo che per qualsiasi numero composto $n=pq$ si ha che $q\leq\sqrt{n}$. Forti di questo vincolo, si potrebbe pensare di applicare il crivello di Eratostene per verificare la primalità di $n$: tale approccio è infattibile poiché la complessità di un algoritmo del genere è $\Theta(\sqrt{n})=\Theta({\sqrt{2}}^{|\langle n \rangle|})$.
+
+Dal piccolo teorema di Fermat possiamo ricavare il seguente corollario.
+\begin{corollario}[Corollario del piccolo teorema di Fermat]
+Se $n\in\Z$ è primo, allora $\forall a\in\Zns$ si ha $a^{n-1} \equiv 1\bmod n$.
+\end{corollario}
+
+Diamo la seguente definizione.
+\begin{definizione}
+Sia $n\in\Z$ un numero composto. Dato $a\in\Zns$, $n$ è detto \textbf{pseudoprimo di base} $a$ se $a^{n-1} \equiv 1\bmod n$.
+\end{definizione}
+
+Esistono dei numeri composti tali per cui la definizione appena fornita è valida $\forall a\in\Zns$: tali numeri sono detti \textbf{numeri di Carmichael}. 
+
+\subsection{Test di primalità di Pomerance}
+Il corollario e la definizione fornite nel paragrafo precedente potrebbero costituire un criterio per il test di primalità. Seppur molto pochi, il test di primalità può incappare in un numero di Carmichael. L'algoritmo che verrà fornito è un algoritmo deterministico e basa il test sui numeri pseudoprimi in base 2, ovvero, se $n$ è composto, si ha
+\[
+2^{n-1} \bmod n \not\equiv 1
+\]
+con alta probabilità. Vale infatti il seguente teorema.
+
+\begin{teorema}[Teorema di Pomerance]
+Dato un intero $x$ composto tale che $x\leq n$, allora
+\[
+P(x\ \text{è uno pseudoprimo in base}\ 2) \leq c\cdot e^{-\frac{1}{2}\ln n \cdot \frac{\ln\ln\ln n}{\ln\ln n}}.
+\]
+\end{teorema}
+Si noti che al crescere di $n$ l'esponenziale scende molto velocemente a zero.
+
+L'algoritmo \ref{alg:pomerance} descrive il test di pseudoprimalità: si noti che l'algoritmo può sbagliare quando ritorna che il numero di input è primo poiché tale numero potrebbe essere uno pseudoprimo in base $2$.
+
+\begin{algorithm}
+\caption{Test di pseudoprimalità}
+\label{alg:pomerance}
+\begin{algorithmic}
+\Function{PSEUDOPRIMALITY}{$x$}
+	\If{MOD\_EXP($2,x-1,x$)$\neq 1$}
+		\State \Return COMPOSITE \Comment{sicuramente}
+	\EndIf
+	\State \Return PRIME \Comment{si spera!}
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+L'algoritmo \ref{alg:randompomerance} fornisce un numero intero primo casuale. L'input $S$ di tale algoritmo è utile per dimensionare la probabilità di errore dell'algoritmo.
+
+\begin{algorithm}
+\caption{Generazione di un numero primo casuale (Pomerance)}
+\label{alg:randompomerance}
+\begin{algorithmic}
+\Function{SELECT\_RANDOM\_PRIME}{$S,n$}
+	\Repeat
+		\State $x \gets $ RANDOM($1,n$)
+		\If{PSEUDOPRIME($x$)$=$PRIME}
+			\State \Return $x$
+		\EndIf
+	\Until{$S\ln n$}
+	\State \Return FAILURE
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Analisi} L'analisi di un algoritmo di questo tipo consiste nel determinare la probabilità di correttezza (o analogamente la probabilità di errore). Calcoliamo quindi la probabilità che l'algoritmo fallisca, ovvero che tutti i numeri estratti siano numeri che imbrogliano il test di pseudoprimalità:
+\begin{align*}
+P(\text{FAILURE})&\leq P(\text{tutti i numeri estratti sono composti}) \\
+&\leq \left( 1-\frac{\Pi(n)}{n} \right)^{S\ln n} \\
+&\leq \left( 1-\frac{1}{\ln n} \right)^{S\ln n} \\
+&\leq e^{-S}
+\end{align*}
+essendo che
+\[
+\left( 1-\frac{1}{k} \right)^k \leq e^{-1}\ \forall k\neq 0.
+\]
+
+Definendo l'evento
+\[
+E_i=\text{"all'}i\text{-esima iterazione viene selezionato uno pseudoprimo in base 2"}
+\]
+segue che 
+\begin{align*}
+&P(\text{SELECT\_RANDOM\_PRIME ritorna COMPOSITE}) \\
+&\leq P(\text{viene selezionato \textit{almeno} uno pseudoprimo in base 2}) \\
+&=P(\bigcup_{i=1}^{S\ln n} E_i) \\
+&\leq \sum_{i=1}^{S\ln n} P(E_i) \\
+&\leq S\ln n\cdot ce^{-\frac{1}{2}\ln n \cdot \frac{\ln\ln\ln n}{\ln\ln n}} \\
+&\leq \frac{S}{\log^k n}\ \ \forall k\neq 0 \ \ \xrightarrow[S \text{ costante}]{} 0
+\end{align*}
+
+\paragraph{Tempo di esecuzione} L'algoritmo esegue delle esponenziazioni modulari, pertanto l'algoritmo ha complessità cubica rispetto alla lunghezza della rappresentazione binaria di $n$ \textit{per ogni invocazione} di PSEUDOPRIME: ogni operazione modulare costa circa $n^2$ e ne devono essere fatte circa lunghezza di $n$ (l'esponenziazione richiede di fare un numero di moltiplicazioni che è circa lineare nella lunghezza dell'esponente). Di conseguenza l'algoritmo di selezione ha una complessità temporale di circa $S|\langle n \rangle |^4$.
+
+\subsection{Test di primalità di Miller Rabin}
+Nella sezione precedente abbiamo visto un algoritmo per l'estrazione di un numero primo casuale. In questa sezione vediamo invece come determinare se un numero $n$ fissato è primo o composto. Per far ciò introduciamo prima due algoritmi: il primo effettua la conversione in base decimale a partire dalla rappresentazione binaria mentre il secondo si occupa dell'esponenziazione veloce.
+
+Data un numero $e\in\Z$, la sua rappresentazione binaria è data da
+\[
+\vec{e}=\langle e_k, e_{k-1}, \cdots, e_0 \rangle, \ \ k=\floor{\log_2 e}
+\]
+e da essa è possibile ricavare la sua rappresentazione decimale come
+\[
+e=\sum_{j=0}^k 2^j e_j.
+\]
+L'algoritmo \ref{alg:bin2dec} implementa, in una versione leggermente differente, quanto appena descritto.
+
+\begin{algorithm}
+\caption{Conversione da rappresentazione binaria a rappresentazione decimale}
+\label{alg:bin2dec}
+\begin{algorithmic}
+\Function{BIN2DEC}{$\vec{e}$}
+	\State $k \gets \vec{e}.length-1$
+	\State $c \gets 0$
+	\For{$i\gets k\ \textbf{downto}\ 0$}
+		\State $c \gets c*2$
+		\If{$e_i=1$}
+			\State $c \gets c+1$
+		\EndIf
+	\EndFor
+	\State \Return $c$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+L'algoritmo \ref{alg:fastexp} implementa l'esponenziazione veloce.
+
+\begin{algorithm}
+\caption{Esponenziazione veloce}
+\label{alg:fastexp}
+\begin{algorithmic}
+\Function{MOD\_EXP}{$M,\vec{e},n$}
+	\State $k \gets \vec{e}.length-1$
+	\State $d \gets 1$
+	\For{$i\gets k\ \textbf{downto}\ 0$}
+		\State $d \gets (d*d)\bmod n$
+		\If{$e_i=1$}
+			\State $d \gets (M*d)\bmod n$
+		\EndIf
+	\EndFor
+	\State \Return $d$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+Terminata questa premessa, procediamo con l'introduzione dell'algoritmo di Miller Rabin partendo dal certificato di non primalità. Per determinare un certificato di non primalità effettuiamo i seguenti due passi:
+\begin{enumerate}
+\item a differenza del test di pseudoprimalità di Pomerance, che prova la primalità solo sugli pseudoprimi in base 2, Miller Rabin effettua il test per vari valori di $a\in\Zns$ estratti casualmente;
+\item l'esponenziazione $a^{n-1}\bmod n$ viene calcolata con una leggera modifica dell'algoritmo per l'esponenziazione veloce in maniera tale da individuare in una qualche iterazione se $\exists d \not\equiv \pm 1\bmod n\ |\ d^2\equiv 1\bmod n$.
+\end{enumerate}
+Miller Rabin cerca l'esistenza di radici quadrate non banali dell'unità: se ne esiste almeno una allora $n$ non è un numero primo.
+
+\begin{teorema}
+Se $\exists d\in\Zns\ |\ d \not\equiv \pm 1\bmod n\ |\ d^2\equiv 1\bmod n $ allora $n$ è un numero composto.
+\end{teorema}
+\begin{proof}
+Provo la contropositiva, ovvero che se $n$ è primo allora le uniche radici quadrate dell'unità sono congruenti a $\pm 1\bmod n$. Sia $x$ una radice dell'unità. Allora
+\begin{align*}
+x^2-1 &\equiv 0\bmod n \\
+(x+1)(x-1) &\equiv 0\bmod n \\
+(x+1)(x-1) &= kn\ \ k\in\Z
+\end{align*}
+Poiché $n$ è primo, se vale l'ultima espressione, allora $n\mid(x+1)\ \lor\ n\mid(x-1)$. Per assurdo, se così non fosse, ovvero se $n \not\mid (x+1)\ \land\ n \not\mid (x-1)$, allora 
+\[
+\gcd(n,x+1)=1\ \land\ \gcd(n,x-1)=1 \Rightarrow \gcd(n, (x+1)(x-1))=1
+\]
+e ciò è impossibile avendo assunto che $(x+1)(x-1)$ sia un multiplo intero di $n$.
+Di conseguenza,
+\begin{itemize}
+\item se $n\mid(x+1)$ allora esiste $k\ |\ (x+1)=kn$, da cui segue 
+\[
+x=-1+kn \Rightarrow x \equiv -1\bmod n;
+\]
+\item se $n\mid(x-1)$ allora esiste $k\ |\ (x-1)=kn$, da cui segue 
+\[
+x=+1+kn \Rightarrow x \equiv 1\bmod n.
+\]
+\end{itemize}
+\end{proof}
+
+Il certificato di non primalità è il testimone che garantisce che $n$ è non primo se composto. Questo test funziona anche per i numeri di Carmichael. L'estrazione della base dell'esponenziazione viene effettuata randomicamente: gli $a\in\Znp -\Zns$ sono molto pochi, inoltre, se anche si estraesse un tale numero, poiché non ha inverso moltiplicativo, il certificato di non primalità garantisce che tale numero è un numero composto.
+
+Alcune considerazioni prima di proporre i due algoritmi. Se $n$ è pari, è immediato assumere che $n=2$ è primo e che un qualsiasi $n>2$ è composto. Soffermandoci quindi sui soli numeri dispari, considero la rappresentazione binaria di $n-1$:
+\[
+(n-1)_2\ :\ \underbrace{|\cdots \cdots \cdots \cdots \cdots \cdots |1}_\text{u} \underbrace{|0 \cdots 0 |}_\text{t}
+\]
+dove $u$ rappresenta il numero rappresentato dalla cifre più significative e $t$ è il numero di zeri (consecutivi) alla fine della rappresentazione binaria. Di conseguenza, si ha che $(n-1)=u\cdot 2^{t}$. Allora, definito $d=a^u\bmod n$ e notando che $a^{n-1}\bmod n=a^{u2^t}\bmod n=(a^u)^{2^t}\bmod n$, in \ref{alg:certificate} è descritto l'algoritmo che fornisce il certificato di non primalità (se possibile). Segue in \ref{alg:millerrabin} l'algoritmo di Miller Rabin.
+
+\begin{algorithm}
+\caption{Certificato di non primalità per Miller Rabin}
+\label{alg:certificate}
+\begin{algorithmic}
+\Function{CERTIFICATE}{$a,n$}
+	\State ** $(n-1)=u\cdot 2^t$ **
+	\State $d \gets $MOD\_EXP($a,u,n$)
+	\For{$i\gets 1\ \textbf{to}\ t$}
+		\State $d' \gets (d*d)\bmod n$
+		\If{$d'\equiv 1\bmod n$}
+			\If{$d \not\equiv \pm 1\bmod n$}
+				\State \Return COMPOSITE
+			\Else
+				\State \Return NONWITNESS
+			\EndIf
+		\EndIf
+	\EndFor
+	\State \Return COMPOSITE
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Algoritmo di Miller Rabin}
+\label{alg:millerrabin}
+\begin{algorithmic}
+\Function{MILLER\_RABIN}{$S,n$}
+	\If{$n=2$}
+		\State \Return PRIME
+	\EndIf
+	\If{EVEN($n$)}
+		\State \Return COMPOSITE
+	\EndIf
+	\For{$i \gets 1\ \textbf{to}\ S$}
+		\State $a \gets $ RANDOM($1 \cdots n-1$)
+		\If{CERTIFICATE($a,n$)=COMPOSITE}
+			\State \Return COMPOSITE
+		\EndIf
+	\EndFor
+	\State \Return PRIME
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Analisi} L'algoritmo di Miller Rabin ha un tempo di esecuzione pari a $T_{MR}(S,n)=O(S\cdot |\langle n \rangle|^3)$. La correttezza invece deriva dal seguente teorema.
+\begin{teorema}
+Per qualsiasi $n>2$ dispari e composto
+\[
+|\{a\in\Znp\ :\ \text{CERTIFICATE}(a,n)=\text{NONWITNESS}\}| \leq \frac{n-1}{2}.
+\]
+\end{teorema}
+\begin{proof}
+Si fornisce come prova solo una intuizione per il caso più semplice: si consideri un numero $n$ composto, dispari e \textbf{non di Carmichael}. Allora
+\[
+\exists \bar{a}\in\Zns\ :\ \bar{a}^{n-1}\not\equiv 1\bmod n.
+\]
+Si considerino i valori $b\ |\ b^{n-1} \equiv 1\bmod n$ con $b\in\Zns$. Allora, si può dimostrare che l'insieme $\{$non certificati in $\Zns\}$ forma un sottogruppo proprio di $\Zns$ e sia $T$ la cardinalità di tale insieme. Per il teorema di Lagrange\footnote{Il teorema di Lagrange afferma che la cardinalità di un sottogruppo divide la cardinalità del gruppo da cui ha origine.} si ha $T \mid |\Zns|$, di conseguenza $T\leq|\Zns|$, da cui $T \leq \frac{|\Zns|}{2} \leq \frac{n-1}{2}$ ($|\Zns|\leq n-1$).
+\end{proof}
+
+La probabilità di errore di Miller Rabin è
+\begin{align*}
+&P(\text{Miller Rabin sbaglia}) \\
+&\leq P(\text{Miller Rabin ritorna PRIME per un numero composto} \\
+&\leq \left(\frac{1}{2}\right)^S
+\end{align*}
+poiché per fallire deve sbagliare ad ogni iterazione, le quali sono indipendenti\footnote{Segue dal teorema precedente che $P(\text{CERTIFICATE=NONWITNESS}) \leq \frac{\frac{n-1}{2}}{n-1} = \frac{1}{2}$.})	.
+Se considero $S=k\log_2 |\langle n\rangle|$, allora
+\[
+P(\text{Miller Rabin sbaglia}) \leq \frac{1}{|\langle n\rangle|^k}
+\]
+così da legare la probabilità di errore alla taglia dell'input.

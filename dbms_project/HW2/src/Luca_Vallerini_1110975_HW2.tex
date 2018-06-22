@@ -1,0 +1,755 @@
+\documentclass[a4paper]{scrartcl}
+\usepackage[a4paper,top=2cm,bottom=2cm,left=2cm,right=2cm]{geometry}
+\usepackage[utf8x]{inputenc}
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+\usepackage{tabularx}
+\usepackage{helvet}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{amsfonts}
+\renewcommand{\familydefault}{\sfdefault}
+
+% Informazioni generali
+\newcommand{\corso}{Basi di Dati}
+\newcommand{\anac}{A.A. 2014/2015}
+\newcommand{\laurea}{Corso di Laurea Magistrale in Ingegneria Informatica}
+\newcommand{\matricola}{1110975}
+\newcommand{\nome}{Luca}
+\newcommand{\cognome}{Vallerini}
+\newcommand{\data}{Data di consegna: 30 aprile 2015}
+\newcommand{\consegna}{Homework 2 - Progettazione Concettuale}
+
+\begin{document}
+\begin{footnotesize}
+
+% Intestazione con loghi
+\begin{figure}
+	\begin{minipage}[t]{\textwidth}
+		\includegraphics[height=15mm]{img/logounipd}
+		\hfill
+		\includegraphics[height=15mm]{img/logodei}
+	\end{minipage}
+\end{figure}
+
+% Intestazione corso
+{
+\centering
+\textbf{\corso , \anac} \\
+\textbf{\laurea} \\
+\vspace{5pt}
+\textbf{\consegna} \\
+\textbf{\small\data}
+
+
+% Intestazione dati studente
+\begin{table}[h]
+	\begin{tabularx}{\textwidth}{|X|X|X|}
+		\hline
+		\multicolumn{1}{|c|}{\textbf{Cognome}} &
+		\multicolumn{1}{c|}{\textbf{Nome}} &
+		\multicolumn{1}{c|}{\textbf{Numero di matricola}} \\
+		\centering\cognome &
+		\centering\nome &
+		\centering\matricola \tabularnewline
+		\hline
+	\end{tabularx}
+\end{table}
+
+}	
+
+% Svolgimento
+\subsection*{\color[RGB]{155,0,20}Schema Entità-Associazione}
+È possibile trovare lo schema concettuale in fondo al presente documento.
+
+\subsection*{\color[RGB]{155,0,20}Dizionario dei dati}
+% ENTITÀ - DESCRIZIONE - ATTRIBUTI - IDENTIFICATORI
+\begin{longtable}{p{0.2\columnwidth} p{0.3\columnwidth} p{0.2\columnwidth} p{0.2\columnwidth}}
+	\toprule
+	\multicolumn{1}{l}{\textbf{ENTITÀ}} &
+	\multicolumn{1}{l}{\textbf{DESCRIZIONE}} &
+	\multicolumn{1}{l}{\textbf{ATTRIBUTI}} &
+	\multicolumn{1}{l}{\textbf{IDENTIFICATORI}} \\
+	\midrule
+	\endfirsthead
+	\multicolumn{4}{l}{\textit{\footnotesize continua dalla pagina precedente}} \\
+	\toprule
+	\multicolumn{1}{l}{\textbf{ENTITÀ}} &
+	\multicolumn{1}{l}{\textbf{DESCRIZIONE}} &
+	\multicolumn{1}{l}{\textbf{ATTRIBUTI}}  &
+	\multicolumn{1}{l}{\textbf{IDENTIFICATORI}} \\
+	\midrule
+	\endhead
+	\midrule
+	\multicolumn{4}{r}{\textit{\footnotesize continua nella pagina successiva}} \\
+	\endfoot
+	\bottomrule
+	\endlastfoot
+	
+	% A
+	ABBONAMENTO &
+	Ordine che permette ad un cliente di abbonarsi ad un prodotto di tipo EDIZIONE. L'ordine può essere inserito direttamente dal cliente o tramite un membro dello staff per conto del cliente. L'ordine si conclude con l'inserimento dei prodotti richiesti nella casella del cliente &
+	- &
+	- \\
+	
+	ACCOUNT &
+	Sezione del sito che permette al proprietario dell'account di usufruire dei servizi di cui ha diritto in base al proprio ruolo. Genitore di ACCOUNT\_{CLIENTE} e ACCOUNT\_{STAFF}  &
+	CodAcc, PW, Stato, User &
+	CodAcc \\
+	
+	ACCOUNT\_{CLIENTE} &
+	Account dedicato alla sola figura del cliente. Figlia di ACCOUNT &
+	- &
+	- \\	
+	
+	ACCOUNT\_{STAFF} &
+	Account dedicato alla sola figura dello staff. Figlia di ACCOUNT &
+	Titolare &
+	- \\
+	
+	ACQUISTO &
+	Vendita di prodotti al cliente finale. L'ordine viene inserito e direttamente lavorato da un membro dello staff. Se il cliente che effettua l'acquisto è un cliente tesserato esso viene collegato a tale ordine. Figlia di ORDINE\_{FUMETTERIA} &
+	- &
+	- \\
+	
+	ANIME &
+	Identifica una serie animata giapponese con le sue caratteristiche peculiari. Figlia di SERIE &
+	\#{Ep}, Regista, Studio &
+	- \\
+	
+	ARRETRATO &
+	Ordine che permette ad un cliente di recuperare un prodotto di tipo VOLUME (sia esso già pubblicato o da pubblicare). L'ordine può essere inserito direttamente dal cliente o tramite un membro dello staff per conto del cliente. L'ordine si conclude con l'inserimento dei prodotti richiesti nella casella del cliente. Figlia di ORDINE\_{CLIENTE}  &
+	- &
+	- \\
+	
+	% C
+	CASELLA &
+	Luogo fisico e virtuale nel quale vengono tenuti da parte dei prodotti richiesti dal cliente titolare della casella per un fissato periodo di tempo &
+	CodCas &
+	CodCas \\
+
+	% D
+	DISTRIBUTORE & 
+	Azienda che si occupa della distribuzione dei prodotti editi da una casa editrice &
+	Fax, Mail, Nome, P.IVA, Sito, Tel &
+	P.IVA \\
+	
+	% E
+	EDITORE &
+	Azienda che si occupa della pubblicazione dell'edizione italiana di una SERIE &
+	Fax, Mail, Nome, P.IVA, Sito, Tel &
+	P.IVA \\
+	
+	EDIZIONE &
+	Insieme delle caratteristiche editoriali comuni a tutti i volumi che compongono una pubblicazione italiana di una SERIE. Figlia di PRODOTTO. Genitore di HOMEVIDEO e FUMETTO &
+	\#{VolTot}, Extra, InizPubbl, Period, Stato &
+	- \\
+	
+	% F
+	FORNITURA &
+	Ordine che permette alla fumetteria di rifornirsi dei prodotti da mettere in vendita. La richiesta vera e propria viene effettuata al DISTRIBUTORE &
+	- &
+	- \\
+	
+	FUMETTO &
+	Identifica le caratteristiche peculiari della pubblicazione italiana di un manga. Figlia di EDIZIONE &
+	\#{Pag}, Col, SovraCop &
+	- \\
+	
+	% H
+	HOMEVIDEO &
+	Identifica le caratteristiche peculiari della pubblicazione italiana di una serie animata in DVD o BD. Figlia di EDIZIONE &
+	Audio, Sub, Supporto, Video &
+	- \\
+	
+	% M
+	MAIL &
+	Identifica un messaggio di notifica. Può essere inviato come una vera e propria email &
+	CodMail, DataInvio, Ogg, Text &
+	CodMail \\
+	
+	MANGA &
+	Identifica una serie a fumetti giapponese con le sue caratteristiche specifiche. Figlia di SERIE  &
+	\#{VolTot}, Rivista &
+	- \\
+	
+	% O
+	ORDINE &
+	Categoria generale che racchiude i vari tipi di ordini che è possibile effettuare. Genitore di ORDINE\_{CLIENTE} e ORDINE\_{FUMETTERIA}. L'ordine viene sempre lavorato da un membro dello staff &
+	CodOrd, DataIns, PrezzoTot, Stato &
+	CodOrd, Stato \\
+	
+	ORDINE\_{CLIENTE} &
+	Particolare tipo di ORDINE che può essere inserito sia dal cliente che da un membro dello staff per conto di un cliente. Tale ordine può essere annullato dal cliente se e solo se non è già entrato in lavorazione. Figlia di ORDINE. Genitore di ABBONAMENTO e ARRETRATO &
+	- &
+	- \\	
+	
+	ORDINE\_{FUMETTERIA} &
+	Particolare tipo di ORDINE che può essere inserito solamente da un membro dello staff. Figlia di ORDINE. Genitore di ACQUISTO e FORNITURA &
+	- &
+	- \\
+	
+	% P
+	PRODOTTO &
+	Singola entità che è in vendita. &
+	CodProd, DataIns &
+	CodProd \\
+	
+	% S
+	SERIE &
+	Rappresenta un ANIME o un MANGA e le loro caratteristiche comuni. Genitore di ANIME e MANGA &
+	Anno, Autore, Genere, Stato, Titolo, Trama &
+	Anno, Autore, Titolo \\
+	
+	% T
+	TESSERA &
+	Oggetto fisico che garantisce servizi aggiuntivi ad un cliente &
+	CodTess, DurataCasella, FineVal, InizioVal, Prezzo, Sconto &
+	CodTess \\
+	
+	TESSERATO &
+	Cliente che vuole tesserarsi per usufruire di servizi aggiuntivi &
+	CF, Cognome, Indirizzo (Via, CAP, Città, Provincia), Mail, Nascita, Nome, Tel
+	CF \\
+	
+	% V
+	VOLUME &
+	Singolo elemento di una pubblicazione seriale di un'EDIZIONE di un manga o un anime &
+	\#{Rist}, \#{Vol}, DataPubbl, ISBN, Prezzo, Ristampa &
+	ISBN \\
+	
+\end{longtable}
+
+% ASSOCIAZIONE - DESCRIZIONE - COMPONENTI - ATTRIBUTI
+\begin{longtable}{p{0.2\columnwidth} p{0.4\columnwidth} p{0.2\columnwidth} p{0.1\columnwidth}}
+	\toprule
+	\multicolumn{1}{l}{\textbf{ASSOCIAZIONE}} &
+	\multicolumn{1}{l}{\textbf{DESCRIZIONE}} &
+	\multicolumn{1}{l}{\textbf{COMPONENTI}} &
+	\multicolumn{1}{l}{\textbf{ATTRIBUTI}} \\
+	\midrule
+	\endfirsthead
+	\multicolumn{4}{l}{\textit{\footnotesize continua dalla pagina precedente}} \\
+	\toprule
+	\multicolumn{1}{l}{\textbf{ASSOCIAZIONE}} &
+	\multicolumn{1}{l}{\textbf{DESCRIZIONE}} &
+	\multicolumn{1}{l}{\textbf{COMPONENTI}} &
+	\multicolumn{1}{l}{\textbf{ATTRIBUTI}} \\
+	\midrule
+	\endhead
+	\midrule
+	\multicolumn{4}{r}{\textit{\footnotesize continua nella pagina successiva}} \\
+	\endfoot
+	\bottomrule
+	\endlastfoot
+	
+	% A
+	acquirente &
+	Colui che acquista un prodotto (solo se TESSERATO) &
+	ACQUISTO, TESSERATO &
+	- \\
+	
+	articolazione &
+	Lega una particolare EDIZIONE di una SERIE e i vari VOLUMI che la compongono & 
+	EDIZIONE, VOLUME &
+	- \\
+	
+	associata &
+	Legame tra un ACCOUNT\_{CLIENTE} e la CASELLA ad esso designata &
+	ACCOUNT\_{CLIENTE}, CASELLA &
+	- \\
+	
+	% C
+	coinvolge &
+	La casella (e quindi il cliente tesserato) che beneficia di un ORDINE\_{CLIENTE} (necessario specificarlo poiché può essere un membro dello staff che crea l'ordine per il cliente) &
+	CASELLA, ORDINE\_{CLIENTE} &
+	- \\
+	
+	% D
+	distribuzione &
+	Lega un EDITORE e l'azienda che si fa carico della distribuzione dei suoi prodotti &
+	DISTRIBUTORE, EDITORE &
+	- \\
+	
+	% I
+	incasellamento &
+	Inserimento o rimozione in casella di uno o più prodotti richiesti tramite un ORDINE\_{TESSERATO} &
+	ACCOUNT\_{STAFF}, CASELLA, PRODOTTO &
+	DataIns, DataRim, DataScad, Quantità \\
+	
+	inserimento &
+	Creazione di un ordine &
+	ACCOUNT, ORDINE &
+	Data \\
+	
+	% L
+	lavorazione &
+	Rappresenta le varie fasi della lavorazione di un ordine &
+	ACCOUNT\_{STAFF}, ORDINE &
+	Data \\
+	
+	% M
+	mailbox &
+	Legame tra il destinatario e il mittente di una MAIL  &
+	ACCOUNT, MAIL &
+	Data \\
+	
+	merce &
+	PRODOTTO che viene inserito in un ORDINE &
+	PRODOTTO, ORDINE &
+	Quantità \\
+	
+	% P
+	pubblicazione &
+	Pubblicazione dell'EDIZIONE italiana di una SERIE da parte di un EDITORE &
+	EDITORE, EDIZIONE &
+	- \\
+	
+	% R
+	riguarda &
+	La SERIE oggetto della pubblicazione italiana &
+	EDIZIONE, SERIE &
+	- \\
+	
+	rifornimento &
+	Richiesta ad un distributore di un prodotto di cui la fumetteria vuole rifornirsi &
+	- \\	
+	
+	% T
+	tesseramento &
+	Atto con il quale un cliente ottiene una tessera e i servizi aggiuntivi ad essa collegati &
+	ACCOUNT\_{CLIENTE}, ACCOUNT\_{STAFF}, TESSERA, TESSERATO &
+	Data \\
+	
+	tratto &
+	Descrive un legame tra una serie ANIME e una serie MANGA. Es.: l'anime DRAGONBALL è tratto dal MANGA omonimo &
+	ANIME, MANGA &
+	- \\
+	
+\end{longtable}
+
+% ATTRIBUTO - ENTITÀ/ASSOCIAZIONE - DOMINIO - DESCRIZIONE
+\begin{longtable}{p{0.1\columnwidth} p{0.2\columnwidth} p{0.3\columnwidth} p{0.3\columnwidth}}
+	\toprule
+	\multicolumn{1}{l}{\textbf{ATTRIBUTO}} &
+	\multicolumn{1}{l}{\textbf{COMPONENTE}} &
+	\multicolumn{1}{l}{\textbf{DOMINIO}} &
+	\multicolumn{1}{l}{\textbf{DESCRIZIONE}} \\
+	\midrule
+	\endfirsthead
+	\multicolumn{4}{l}{\textit{\footnotesize continua dalla pagina precedente}} \\
+	\toprule
+	\multicolumn{1}{l}{\textbf{ATTRIBUTO}} &
+	\multicolumn{1}{l}{\textbf{ENTITÀ/ASSOCIAZIONE}} &
+	\multicolumn{1}{l}{\textbf{DOMINIO}} &
+	\multicolumn{1}{l}{\textbf{DESCRIZIONE}} \\
+	\midrule
+	\endhead
+	\midrule
+	\multicolumn{4}{r}{\textit{\footnotesize continua nella pagina successiva}} \\
+	\endfoot
+	\bottomrule
+	\endlastfoot
+	
+	% #
+	\#{Ep} &
+	ANIME &
+	int & 
+	Numero di episodi di cui è composta una serie animata \\
+	
+	\#{Pag} &
+	FUMETTO &
+	int &
+	Numero medio di pagine di cui è composto un volume cartaceo \\
+	
+	\#{Rist} &
+	VOLUME &
+	int &
+	Numero della ristampa \\
+	
+	\#{Vol} &
+	VOLUME &
+	int &
+	Numero del volume all'interno di una serie composta da più volumi \\
+	
+	\#{VolOrig} &
+	MANGA &
+	int &
+	Numero totale di volumi dell'edizione originale \\
+	
+	\#{VolTot} &
+	EDIZIONE &
+	int &
+	Numero totale di volumi di cui è composta un'edizione italiana \\
+	
+	% A
+	Anno &
+	SERIE &
+	int &
+	Anno di inizio pubblicazione dell'edizione giapponese \\
+	
+	Audio &
+	HOMEVIDEO &
+	text &
+	Caratteristiche del comparto audio di un'edizione italiana di una serie animata \\
+	
+	Autore &
+	SERIE &
+	text &
+	Autore originale di un anime o di un manga \\
+	
+	% C
+	CAP &
+	TESSERATO &
+	text &
+	Codice di avviamento postale dell'indirizzo di un cliente \\
+	
+	CF &
+	TESSERATO &
+	text &
+	Codice fiscale del cliente \\
+	
+	Città &
+	TESSERATO &
+	text &
+	Città dell'indirizzo di un cliente \\
+	
+	Civico &
+	TESSERATO &
+	text &
+	Numero civico dell'indirizzo di un cliente \\
+	
+	CodAcc &
+	ACCOUNT &
+	text &
+	Codice che identifica univocamente un account \\
+	
+	CodCas &
+	CASELLA &
+	text &
+	Codice che identifica univocamente una casella \\
+	
+	CodMail &
+	MAIL &
+	text &
+	Codice che identifica univocamente un messaggio di notifica \\
+	
+	CodOrd &
+	ORDINE &
+	text &
+	Codice che identifica univocamente un ordine \\
+	
+	CodProd &
+	PRODOTTO &
+	text &
+	Codice che identifica univocamente un prodotto \\
+	
+	CodTess &
+	TESSERA &
+	text &
+	Codice che identifica univocamente una tessera \\
+	
+	Cognome &
+	TESSERATO &
+	text &
+	Cognome del cliente \\
+	
+	Col &
+	FUMETTO &
+	boolean &
+	Vero se l'edizione contiene pagine a colori, falso altrimenti \\
+	
+	% D
+	Data & 
+	inserimento, lavorazione, mailbox, tesseramento &
+	timestamp &
+	Istante in cui è avvenuta un'operazione \\
+	
+	DataIns &
+	incasellamento, ORDINE, PRODOTTO &
+	timestamp &
+	Data di inserimento \\
+	
+	DataInvio &
+	MAIL &
+	timestamp &
+	Istante dell'invio della notifica \\
+	
+	DataPubbl &
+	VOLUME &
+	date &
+	Giorno di pubblicazione di un volume \\
+	
+	DataRim &
+	incasellamento &
+	date &
+	Data di rimozione di un volume dalla casella \\
+	
+	DataScad &
+	incasellamento &
+	date &
+	Data di termine della giacenza di un prodotto in casella \\
+	
+	Disp &
+	VOLUME &
+	int &
+	Numero di volumi di uno stesso numero disponibili in fumetteria \\
+	
+	DurataCasella &
+	TESSERA &
+	int &
+	Stabilisce la durata massima (in mesi) per le giacenze in casella \\
+	
+	% E
+	Extra &
+	EDIZIONE &
+	text &
+	Altre informazioni sull'edizione \\
+	
+	% F
+	Fax &
+	DISTRIBUTORE, EDITORE &
+	text &
+	Numero di fax \\
+	
+	FineVal &
+	TESSERA &
+	date &
+	Giorno di fine validità della tessera \\
+	
+	% G
+	Genere &
+	SERIE &
+	text &
+	Genere di appartenenza di una serie \\	
+
+	Indirizzo &
+	TESSERATO &
+	- &
+	Indirizzo (Via, Civico, CAP, Città) di un cliente \\
+	
+	InizioVal &
+	TESSERA &
+	date &
+	Giorno di inizio di validità della tessera \\	
+	
+	InizPubbl &
+	EDIZIONE &
+	date &
+	Data di inizio della pubblicazione di un'edizione \\
+		
+	ISBN & 
+	VOLUME &
+	text &
+	Codice univoco mondiale che identifica un determinato volume \\
+		
+	% M
+	Mail &
+	ACCOUNT &
+	text &
+	Indirizzo email di un cliente \\
+	
+	% N
+	Nascita &
+	TESSERATO &
+	date &
+	Data di nascita del cliente \\
+	
+	Nome &
+	DISTRIBUTORE, EDITORE, TESSERATO &
+	text &
+	Nome proprio o di azienda \\
+	
+	% O
+	Ogg &
+	MAIL &
+	text &
+	Oggetto della notifica \\
+	
+	% P
+	Period &
+	EDIZIONE &
+	text &
+	Periodicità della pubblicazione italiana \\
+	
+	P.IVA &
+	DISTRIBUTORE, EDITORE &
+	text &
+	Partita IVA aziendale \\
+	
+	PrezzoFin &
+	VOLUME &
+	money &
+	Prezzo di vendita di un volume \\
+	
+	PrezzoTess &
+	TESSERA &
+	money &
+	Prezzo della tessera \\
+	
+	PrezzoTot &
+	ORDINE &
+	money &
+	Conto totale di un ordine \\
+	
+	Provincia &
+	TESSERATO &
+	text &
+	Sigla della provincia dell'indirizzo di un cliente \\
+	
+	PW &
+	ACCOUNT &
+	text &
+	Password di accesso ad un account \\
+	
+	% Q
+	Quantità &
+	INCASELLAMENTO, MERCE &
+	int &
+	Quantità di un prodotto \\
+	
+	% R
+	Regista &
+	ANIME &
+	text &
+	Regista della serie animata \\
+	
+	Ristampa &
+	VOLUME &
+	boolean &
+	Vero se è una ristampa, falso se è una prima edizione \\
+	
+	Rivista &
+	MANGA &
+	text &
+	Luogo di pubblicazione dell'edizione originale di un manga \\
+	
+	% S
+	Sconto &
+	TESSERA &
+	int &
+	Sconto percentuale su ogni acquisto effettuato \\
+	
+	Sito &
+	DISTRIBUTORE, EDITORE &
+	text &
+	Sito internet \\
+	
+	Studio &
+	ANIME &
+	text &
+	Studio di produzione di un anime \\
+	
+	Sub &
+	HOMEVIDEO &
+	text &
+	Caratteristiche dei sottotitoli di un'edizione italiana di un anime \\
+	
+	SovraCop &
+	FUMETTO &
+	boolean &
+	Vero se l'edizione presenta la sovraccoperta, falso altrimenti \\
+	
+	StatoAcc &
+	ACCOUNT &
+	enum (attivo, sospeso, disattivo) &
+	Stato di un account \\
+	
+	StatoEd &
+	EDIZIONE &
+	enum (in corso, sospesa, interrotta, terminata) &
+	Stato della pubblicazione di un'edizione \\
+	
+	StatoOrd &
+	ORDINE &
+	enum (nuovo, lavorazione, evaso parziale, evaso, annullato)  &
+	Stato di un ordine \\
+	
+	StatoSerie &
+	SERIE &
+	enum (in corso, sospesa, interrotta, terminata) &
+	Stato di una serie in madrepatria \\
+	
+	Supporto &
+	HOMEVIDEO &
+	enum (DVD, BD) &
+	Indica il tipo di supporto fisico sul quale è pubblicata l'edizione italiana di un anime \\
+	
+	% T
+	Tel &
+	DISTRIBUTORE, EDITORE, TESSERATO &
+	text &
+	Numero di telefono \\
+	
+	Text &
+	MAIL &
+	text &
+	Testo della notifica \\	
+
+	Titolare &
+	ACCOUNT\_{STAFF} &
+	boolean &
+	Vero se è l'account di un proprietario, falso se è l'account di un venditore \\	
+	
+	Titolo & 
+	SERIE &
+	text &
+	Titolo di una serie animata o cartacea \\
+	
+	Trama &
+	SERIE &
+	text &
+	Breve sinossi della serie \\
+	
+	% U
+	User &
+	ACCOUNT &
+	text &
+	Nome utente di un account \\
+	
+	% V
+	Via &
+	TESSERATO &
+	text &
+	Via dell'indirizzo di un cliente \\
+	
+	Video &
+	HOMEVIDEO &
+	text &
+	Caratteristiche del comparto video di un'edizione italiana di un anime \\
+	
+\end{longtable}
+
+\subsection*{\color[RGB]{155,0,20}Vincoli esterni}
+\begin{itemize}
+\item \textbf{Calcolo dei prezzi} Per tutti gli ORDINI eccetto FORNITURA il calcolo del prezzo totale dell'ordine viene effettuato come la somma del \textit{PrezzoFin} dei singoli prodotti; se l'ordine inoltre riguarda un cliente tesserato il \textit{PrezzoTot} corrisponde al prezzo scontato in base allo \textit{Sconto}. Per l'ordine di fornitura viene invece inserito manualmente in base al prezzo stipulato di volta in volta con il distributore;
+
+\item \textbf{ORDINE\_{FUMETTERIA}} Gli ordini di questo tipo possono essere creati \textbf{solo ed esclusivamente} da un membro dello staff. In particolare l'ordine FORNITURA può essere creato \textbf{solo} da un proprietario (attributo \textit{Titolare} posto a true);
+
+\item \textbf{ACQUISTO} Se l'acquisto viene effettuato da un cliente tesserato esso \textbf{deve} entrare in partecipazione nell'associazione \textit{acquirente}, altrimenti \textbf{non deve} parteciparvi;
+
+\item Per una più semplice gestione gli identificatori di ACCOUNT\_{CLIENTE}, TESSERA e CASELLA devono coincidere se associati per un medesimo TESSERATO.
+\end{itemize}
+
+
+\subsection*{\color[RGB]{155,0,20}Verifica requisiti funzionali}
+\begin{itemize}
+\item \textbf{Catalogo} Tramite le entità VOLUME, EDIZIONE e SERIE e le relative associazioni che le mettono in relazione è possibile consultare l'intero catalogo dei prodotti, visualizzare le caratteristiche dei prodotti ed effettuare le modifiche richieste. Se si estendono le interrogazioni agli ordini effettuati è anche possibile estrarre opportune statistiche;
+
+\item \textbf{Ordini e vendite} La rappresentazione fornita permette l'inserimento e la lavorazione degli ordini sfruttando le associazioni che legano ORDINI e ACCOUNT. Con le opportune interrogazioni è possibile risalire allo storico degli ordini e in particolare di quello degli acquisti;
+
+\item \textbf{Tesseramento} L'associazione \textit{tesseramento} permette di gestire i clienti che vogliono usufruire di questa possibilità: in particolare è possibile per un membro dello staff tesserare un nuovo cliente registrandolo con i suoi dati anagrafici e di contatto nonché creando i servizi aggiuntivi rappresentati dalle entità TESSERA, CASELLA, ACCOUNT\_{CLIENTE} e MAIL;
+
+\item \textbf{Profilo venditore e profilo proprietario} Gli account dei membri dello staff in particolare possono gestire gli ordini (creazione e lavorazione), sono in grado di inserire o rimuovere i prodotti nelle caselle e hanno la possibilità di tesserare i clienti;
+
+\item \textbf{Stampa} Dai punti precedenti segue che il requisito sulla stampa delle ricerche e delle statistiche è soddisfatto.
+\end{itemize}
+
+
+\subsection*{\color[RGB]{155,0,20}Modifiche all'analisi dei requisiti}
+Non sono avvenute grosse modifiche rispetto all'analisi dei requisti effettuata. Data la natura del progetto si è deciso di non implementare una forma di controllo totale sulle operazioni eseguite dagli utenti che hanno accesso al sistema.
+
+\end{footnotesize}
+\end{document}

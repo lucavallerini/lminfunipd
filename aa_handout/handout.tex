@@ -1,0 +1,80 @@
+\documentclass[a4paper,openright]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel}
+\usepackage{amsmath, amssymb, amsthm, amsfonts, algpseudocode, algorithm, accents, mathtools}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{tikz, tkz-graph}
+\usetikzlibrary{positioning}
+\usepackage{listings, color}
+\hypersetup{hidelinks,colorlinks=false}
+\usepackage{subcaption}
+
+\newtheorem*{definizione}{Definizione}
+\newtheorem*{esempio}{Esempio}
+\newtheorem*{teorema}{Teorema}
+\newtheorem*{proposizione}{Proposizione}
+\newtheorem*{lemma}{Lemma}
+\newtheorem*{corollario}{Corollario}
+
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\argmax}{argmax}
+\DeclareMathOperator*{\lcm}{lcm}
+\DeclareMathOperator*{\divi}{div}
+\DeclareMathOperator*{\ord}{ord}
+\DeclareMathOperator*{\N}{\mathbb{N}}
+\DeclareMathOperator*{\Z}{\mathbb{Z}}
+\DeclareMathOperator*{\Q}{\mathbb{Q}}
+\DeclareMathOperator*{\R}{\mathbb{R}}
+\DeclareMathOperator*{\C}{\mathbb{C}}
+\DeclareMathOperator*{\Zp}{\mathbb{Z}^+}
+\DeclareMathOperator*{\Zn}{\mathbb{Z}_n}
+\DeclareMathOperator*{\Zns}{\mathbb{Z}_n^*}
+\DeclareMathOperator*{\Znp}{\mathbb{Z}_n^+}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+
+\tikzset{main node/.style={circle,draw,minimum size=0.5cm,inner sep=0pt},}
+
+\renewcommand{\listalgorithmname}{Lista degli algoritmi}
+
+\title{Appunti di Algoritmica Avanzata}
+\author{Luca Vallerini}
+\date{A.A. 2016/2017}
+
+\begin{document}
+\maketitle
+
+\chapter*{}
+\thispagestyle{empty}
+I seguenti appunti sono tratti dalle lezioni del corso di \textit{Algoritmica avanzata} tenuto dal professor Geppino Pucci per il corso di laurea magistrale in Ingegneria Informatica presso l'Università degli Studi di Padova nell'A.A. 2016/2017. Vengono date per note le conoscenze e le competenze acquisite durante il corso di \textit{Dati e algoritmi 2}.
+
+Sono stati usati inoltre il libro di riferimento del corso (T.H. Cormen, C.E. Leiserson, R.L. Rivest, C. Stein., \textit{Introduction to Algorithms - Third Edition}, MIT Press, Cambridge Mass. USA, 2009), e le dispense fornite dal docente sul sito del corso (\url{https://www.dei.unipd.it/~geppo/AA/index.html}).
+
+Alcune dimostrazioni presenti nella dispensa sono state lasciate dal docente come esercizio per casa pertanto non ne assicuro la correttezza.
+
+\textbf{La dispensa è stata scritta da me e non è stata né revisionata né concordata con il docente per cui non ne assicuro la correttezza.}
+
+\vfill
+
+Quest'opera è distribuita con licenza Attribution-ShareAlike 4.0 International (\url{http://creativecommons.org/licenses/by-sa/4.0/}).
+
+\pagenumbering{roman}
+\setcounter{page}{0}
+\tableofcontents
+\listofalgorithms
+
+% Algoritmi di approssimazione
+\include{chapters/ch1/ch1}
+
+% Teoria dei numeri
+\include{chapters/ch2/ch2}
+
+% Algoritmi randomizzati
+\include{chapters/ch3/ch3}
+
+% Esercitazioni
+\include{chapters/ch4/ch4}
+
+\end{document}

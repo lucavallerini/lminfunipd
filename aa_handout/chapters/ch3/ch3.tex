@@ -1,0 +1,895 @@
+\chapter{Algoritmi randomizzati}\label{ch:random}
+\section{Introduzione}
+Nel capitolo precedente abbiamo visto un esempio di algoritmo randomizzato con Miller Rabin. Ora, introduciamo gli algoritmi randomizzati in maniera generale, e in seguito forniremo alcuni esempi di algoritmi di questo tipo.
+
+Gli algoritmi randomizzati sono algoritmi che utilizzano la randomizzazione \textbf{al loro interno}. L'analisi viene fatta ad \textbf{input fissato} e tutte le quantità notevoli in un algoritmo randomizzato sono variabili aleatorie: la complessità computazionale $T_A(n)$ e la correttezza (v.a. binaria, vale $1$ se l'algoritmo è corretto, $0$ altrimenti).
+
+Dato il solito problema computazionale $\Pi \subseteq \mathcal{I}\times\mathcal{S}$, possiamo evidenziare due classi di algoritmi randomizzati:
+\begin{enumerate}
+\item \textbf{algoritmi Las Vegas}: sono algoritmi che non sbagliano mai, cioè vale
+\[
+P(A(i)\Pi i)=1;
+\]
+un esempio di algoritmo Las Vegas è il quicksort randomizzato.
+
+Gli algoritmi Las Vegas sfruttano la randomizzazione per migliorare la complessità $T_A(n)$, sia in media che nell'analisi in alta probabilità, fornendo una limitazione superiore alla $P(T_A(n)\geq f(n))$.
+
+\item \textbf{algoritmi Montecarlo}: sono algoritmi che possono sbagliare; un esempio di algoritmo Montecarlo lo abbiamo visto nel precedente capitolo con l'algoritmo di Miller Rabin. Negli algoritmi Montecarlo sia la complessità computazionale che la correttezza sono variabili aleatorie che vengono studiate in media e in alta probabilità. In particolare, per la correttezza si cerca di fornire una limitazione superiore a $P(A(i)\not\Pi i)$.
+\end{enumerate}
+
+\section{Analisi in alta probabilità}
+Nella sezione precedente abbiamo menzionato l'analisi in alta probabilità. Di seguito ne forniamo una definizione e introduciamo gli strumenti matematici necessari.
+
+\begin{definizione}
+Dato un problema computazionale $\Pi \subseteq \mathcal{I}\times\mathcal{S}$, un algoritmo $A_{\Pi}$ ha complessità $T(n)=O(f(n))$ con alta probabilità\footnote{In inglese \textit{with high probability}, abbreviato in \textit{whp}.} se esistono delle costanti $c,d>0,\ n_0\ |\ n>n_0\ \forall n,\ \forall i\ :\ |i|=n$ tali per cui
+\[
+P(A_{\Pi}(i) \text{ termina in tempo } \geq cf(n)) \leq \frac{1}{n^d}.
+\]
+\end{definizione}
+
+\begin{lemma}[Lemma di Markov]
+\label{lemma:markov}
+Sia $T$ una v.a. intera non negativa, con $P(T>b)=0$ per un qualche $b\in\Zp$. Allora per ogni $1\leq t\leq b$ si ha
+\[
+t\cdot P(T\geq t) \leq E[T] \leq t+(b-t)P(T\geq t).
+\]
+\end{lemma}
+
+\begin{proposizione}
+Nelle ipotesi dell'analisi in alta probabilità, se l'algoritmo non può mai esibire esecuzioni di tempo pari o maggiori a $n^a,\ a\leq d$, allora
+\[
+E[T_A(n)]=O(f(n)).
+\]
+\end{proposizione}
+\begin{proof}
+Per dimostrare questa proposizione sfruttiamo il lemma di Markov. Sia $b=n^a$ e applichiamo Markov per $t=cf(n)$:
+\begin{align*}
+E[T_A(n)] &\leq cf(n) + \frac{n^a-cf(n)}{n^d} \\
+&\leq cf(n)+1 \\
+&=O(f(n))
+\end{align*}
+essendo il numeratore dello stesso ordine di $n^a$ e tenendo conto che per ipotesi $a\leq d$.
+\end{proof}
+
+Dal lemma di Markov è possibile estrapolare la seguente limitazione superiore:
+\[
+P(T_A(n)\geq t) \leq \frac{E[T_A(n)]}{t};
+\]
+tale limite superiore tuttavia è estremamente debole. Sia $t=kE[T_A(n)]$, allora
+\[
+P(T_A(n)\geq kE[T_A(n)]) \leq \frac{E[T_A(n)]}{kE[T_A(n)]} = \frac{1}{k}.
+\]
+Questa analisi fornisce la probabilità che il tempo di esecuzione sia concentrato attorno alla sua media: questo tipo di probabilità è molto interessante perché se la probabilità che la concentrazione attorno alla media è alta, a tutti gli effetti pratici l'algoritmo si può considerare quasi deterministico perché non presenta grandi varianze.
+
+Per determinare delle limitazioni più interessanti ci spostiamo dal caso generale del teorema di Markov e ci occupiamo dell'analisi della concentrazione di \textbf{certe} v.a. attorno alla loro media sfruttando i \textit{bound di Chernoff}.
+
+Sia $X=\sum_{i=1}^{n}X_i$ una v.a. dove $X_i$ sono delle v.a. indicatrici (ovvero $P(X_i=1)=p_i$ e $P(X_i=0)=1-p_i$) mutuamente indipendenti ($X_i\perp X_j\ \forall i\neq j$). Segue che $E[X_i]=p_i$, da cui
+\[
+\mu = E[X] = E\left[\sum_{i=1}^{n}X_i\right] = \sum_{i=1}^{n}E[X_i]=\sum_{i=1}^{n}p_i.
+\]
+
+Se consideriamo un $\delta > 0$ e analizziamo lo scostamento di $X$ rispetto alla sua media tramite il lemma di Markov otteniamo una limitazione superiore per niente interessante:
+\[
+P(X > (1+\delta)\mu) \leq \frac{\mu}{(1+\delta)\mu} = \frac{1}{1+\delta}.
+\]
+
+\begin{teorema}[Bound di Chernoff]
+Sia $X=\sum_{i=1}^{n}X_i$ una v.a. dove $X_i$ sono delle v.a. indicatrici mutuamente indipendenti. Allora, $\forall \delta > 0$
+\[
+P(X>(1+\delta)\mu) < \left(\frac{e^\delta}{(1+\delta)^{(1+\delta)}}\right)^\mu.
+\]
+\end{teorema}
+\begin{proof}
+Prendo un valore arbitrario $t>0$ e considero la v.a. $Y_t=e^{tX}$. Allora,
+\begin{align*}
+P(X>(1+\delta)\mu) &= P(tX>t(1+\delta)\mu) \\
+&= P(e^{tX} > e^{t(1+\delta)\mu}) \\
+&= P(Y_t > e^{t(1+\delta)\mu}).
+\end{align*}
+Applicando il lemma di Markov (nella sua formulazione stretta) si ottiene
+\[
+P(Y_t > e^{t(1+\delta)\mu}) < \frac{E[Y_t]}{e^{t(1+\delta)\mu}}.
+\]
+Calcoliamo il valore atteso di $Y_t$:
+\begin{align*}
+E[Y_t]&=E[e^{tX}] \\
+&=E[e^{t\sum_{i=1}^{n}X_i}] \\
+&=E[e^{\sum_{i=1}^{n}tX_i}] \\
+&=E\left[\prod_{i=1}^{n}e^{tX_i}\right] \\
+&=\prod_{i=1}^{n}E[e^{tX_i}] && (X_i\text{ indipendenti})\\
+\end{align*}
+Calcoliamo ora il valore atteso $E[e^{tX_i}]$
+\[
+E[e^{tX_i}]=e^{t\cdot 0}(1-p_i)+e^{t\cdot 1}p_i=1+p_i(e^t-1)
+\]
+e ricordando l'espansione in serie di $e^x$ otteniamo che $1+x < e^x$, pertanto
+\[
+E[e^{tX_i}]=1+p_i(e^t-1)<e^{p_i(e^t-1)}.
+\]
+Da quest'ultimo risultato posso concludere il calcolo di $E[Y_t]$ come segue
+\begin{align*}
+E[Y_t]&=\prod_{i=1}^{n}E[e^{tX_i}] \\
+&=\prod_{i=1}^{n}(1+p_i(e^t-1)) \\
+&< \prod_{i=1}^{n}e^{p_i(e^t-1)} \\
+&=e^{\sum_{i=1}^{n}p_i(e^t-1)} \\
+&=e^{(e^t-1)\sum_{i=1}^{n}p_i} \\
+&=e^{(e^t-1)\mu}.
+\end{align*}
+Ritornando all'applicazione del lemma di Markov, otteniamo
+\[
+P(Y_t > e^{t(1+\delta)\mu)}) < \frac{e^{(e^t-1)\mu}}{e^{t(1+\delta)\mu}}.
+\]
+Studiando la funzione rispetto a $t$ del membro di destra della diseguaglianza per ottenerne un minimo, si ha che
+\[
+\frac{d}{dt}\left(\frac{e^{(e^t-1)\mu}}{e^{t(1+\delta)\mu}}\right)=0 \Leftrightarrow e^t\mu-(1+\delta)\mu=0 \Leftrightarrow t=\ln(1+\delta).
+\]
+Riapplicando il lemma di Markov per $t=\ln(1+\delta)$ otteniamo la tesi:
+\[
+P(Y_t > e^{t(1+\delta)\mu}) < \frac{e^{(e^{\ln(1+\delta)}-1)\mu}}{e^{\ln(1+\delta)[(1+\delta)\mu]}} = \left(\frac{e^\delta}{(1+\delta)^{(1+\delta)}}\right)^\mu.
+\]
+\end{proof}
+
+Da questo teorema seguono due corollari.
+
+\begin{corollario}
+\label{corollario:1chernoff}
+Se $\delta < 1$ si ha
+\[
+P(X>(1+\delta)\mu) < e^{-\frac{\delta^2}{3}\mu}.
+\]
+\end{corollario}
+\begin{proof}
+Dalla dimostrazione del teorema di Chernoff si è ottenuto che
+\[
+P(X>(1+\delta)\mu) < \frac{e^{(e^{\ln(1+\delta)}-1)\mu}}{e^{\ln(1+\delta)[(1+\delta)\mu]}} = e^{[\delta - (1+\delta)\ln(1+\delta)]\mu}.
+\]
+Si consideri l'espansione di Taylor di $\ln(1+\delta)$:
+\[
+\ln(1+\delta)=\sum_{i=1}^{+\infty}(-1)^{i+1}\frac{\delta^i}{i}
+\]
+Allora
+\begin{align*}
+(1+\delta)\ln(1+\delta)&=\delta + \sum_{i=2}^{+\infty}(-1)^i\delta^i\left(\frac{1}{i-1}-\frac{1}{i}\right) \\
+&> \delta +\frac{\delta^2}{2}-\frac{\delta^3}{6} \\
+&\geq \delta + \frac{\delta^2}{2} -\frac{\delta^2}{6} \\
+&\geq \delta + \frac{\delta^2}{3}
+\end{align*}
+da cui segue la tesi
+\[
+P(X>(1+\delta)\mu) < e^{[\delta - \delta - \delta^2/3]\mu} = e^{-\frac{\delta^2}{3}\mu}.
+\]
+\end{proof}
+
+\begin{corollario}
+\label{corollario:2chernoff}
+Se $\delta < 1$ si ha
+\[
+P(X<(1-\delta)\mu) < e^{-\frac{\delta^2}{2}\mu}.
+\]
+\end{corollario}
+\begin{proof}
+Si procede come prima: si ricava un limite superiore alla probabilità seguendo la stessa procedura fatta per dimostrare il teorema di Chernoff e poi si sfrutta l'espansione di Taylor di $\ln{(1-\delta)}$.
+
+Consideriamo un valore arbitrario $t>0$ e consideriamo la v.a. $Y_t=e^{-tX}$. Allora,
+\begin{align*}
+ P(X<(1-\delta)\mu) &= P(-X > -(1-\delta)\mu) \\
+ &= P(e^{-tX} > e^{-t(1-\delta)\mu}) \\
+ &= P(Y_t > e^{-t(1-\delta)\mu})
+\end{align*}
+Applicando il teorema di Markov (formulazione stretta) si ottiene
+\[
+ P(X<(1-\delta)\mu) < \frac{E[Y_t]}{e^{-t(1-\delta)\mu}}.
+\]
+Calcoliamo il valore atteso di $Y_t$:
+\begin{align*}
+ E[Y_t]&=\prod_{i=1}^{n}E[e^{-tX_i}] \\
+ &=\prod_{i=1}^{n}(1+p_i(e^{-t}-1)) \\
+ &< \prod_{i=1}^{n}e^{p_i(e^{-t}-1)} \\
+ &= e^{\sum_{i=1}^n p_i(e^{-t}-1)} \\
+ &= e^{(e^{-t}-1)\mu}
+\end{align*}
+da cui segue
+\[
+ P(X<(1-\delta)\mu) < \frac{e^{(e^{-t}-1)\mu}}{e^{-t(1-\delta)\mu}}.
+\]
+Per ottenere il bound migliore deriviamo l'espressione del membro di destra per ottenere un minimo:
+\[
+ \frac{d}{dt}\left(\frac{e^{(e^{-t}-1)\mu}}{e^{-t(1-\delta)\mu}}\right)=0 \Leftrightarrow -e^{-t}\mu+(1-\delta)\mu=0 \Leftrightarrow t=\ln\frac{1}{(1-\delta)}.
+\]
+Riapplicando quindi il teorema di Markov per $t=\ln(1-\delta)^{-1}$ si ottiene:
+\begin{align*}
+ P(X<(1-\delta)\mu) &< \frac{e^{\left(e^{-\ln\frac{1}{(1-\delta)}}-1\right)\mu}}{e^{-\ln\frac{1}{(1-\delta)}(1-\delta)\mu}} \\ 
+ &= \frac{e^{-\delta\mu}}{e^{-\ln\frac{1}{(1-\delta)}(1-\delta)\mu}} \\
+ &= e^{[-\delta -(1-\delta)\ln(1-\delta)]\mu}.
+\end{align*}
+Non rimane che considerare l'espansione di Taylor di $\ln(1-\delta)$
+\[
+ \ln(1-\delta)=\sum_{i=1}^{+\infty}(-1)\frac{\delta^i}{i}
+\]
+per ottenere che 
+\begin{align*}
+ (1-\delta)\ln(1-\delta)&=-\delta + \sum_{i=2}^{+\infty}\delta^i\left(\frac{1}{i-1}-\frac{1}{i}\right) \\
+ &> -\delta + \frac{\delta^2}{2}
+\end{align*}
+e, infine, la tesi
+\[
+ P(X<(1-\delta)\mu) < e^{[-\delta + \delta - \delta^2/2]\mu} = e^{-\frac{\delta^2}{2}\mu}.
+\]
+\end{proof}
+
+
+\section{Quicksort randomizzato}
+Il quicksort è un algoritmo di ordinamento \textit{in place} basato sulla partizione dell'insieme di chiavi $S$ (si assuma senza perdita di generalità che tutte le chiavi siano distinte). Nel caso randomizzato, la scelta del pivot $y\in S$ è casuale. L'algoritmo riceve quindi in input l'insieme $S$ da ordinare e il pivot $s\in S$ secondo cui effettuare le due partizioni $S_1=\{x\in S\ |\ x<y\}$ e $S_2=\{x\in S\ |\ x>y\}$ e restituisce in output la sequenza ordinata di $S$ come $\ord(S)=\langle \ord(S_1),y,\ord(S_2) \rangle$.
+
+Se il pivot fosse sempre la mediana di $S$, allora $|S_1|,|S_2| \leq \ceil{\frac{n-1}{2}}$. La complessità dell'algoritmo (basata sui confronti) sarebbe quindi
+\[
+T(n)=2T\left(\ceil{\frac{n-1}{2}}\right) +n-1=\Theta(n\log n).
+\]
+Il calcolo della mediana ha un costo almeno lineare del tipo $O(7n)$. Proviamo quindi a rilassare il vincolo richiedendo che $|S_1|,|S_2| \leq \frac{3}{4}n$: dato che $S_1$ e $S_2$ sono una partizione di $S$, allora si ottiene anche che $|S_1|,|S_2| \geq \frac{n}{4}$.
+
+Analizzando l'albero delle chiamate, notiamo che ogni livello contribuisce con lavoro $\leq n$, l'albero ha $n$ foglie e al livello $i$-esimo la taglia di una partizione è $|S'|\leq (\frac{3}{4})^i n$: il numero di livelli è quindi logaritmico nella taglia dell'istanza. Definiamo quindi con $h_{MAX}$ il massimo livello dell'albero delle chiamate:
+\[
+\left(\frac{3}{4}\right)^{h_{MAX}}n \geq 1 \Leftrightarrow h_{MAX} \leq \log_{\frac{4}{3}}n=O(\log n);
+\]
+allora
+\[
+T(n) \leq n\cdot h_{MAX} = O(n\log n).
+\]
+
+Sia $y \leftarrow$ RANDOM($S$) con probabilità uniforme e si consideri la sequenza ordinata degli elementi di $S$
+\[
+x_1 < x_2 < \cdots < x_{\frac{n}{4}} < x_{\frac{n}{4}+1} < \cdots < x_{\frac{3}{4}n} < x_{\frac{3}{4}n+1} < \cdots < x_n;
+\]
+allora
+\[
+P(y\in [x_{\frac{n}{4}+1},x_{\frac{3}{4}n}]) = \frac{1}{2}.
+\]
+Pertanto, se $y\in [x_{\frac{n}{4}+1},x_{\frac{3}{4}n}]$ allora
+\[
+\begin{cases}
+|S_1|\geq \frac{n}{4} \\
+|S_2|\geq \frac{n}{4} \\
+|S_1|+|S_2| \leq n-1
+\end{cases}
+\Rightarrow |S_1|,|S_2|\leq \frac{3}{4}n.
+\]
+
+Quindi, se siamo nel caso fortunato per il quale il pivot viene scelto all'interno dell'intervallo $[x_{\frac{n}{4}+1},x_{\frac{3}{4}n}]$, segue che la lunghezza dei cammini sarà al massimo pari a $\log_{4/3}n$. L'algoritmo quindi "sbaglia" una volta su due e di conseguenza, \textbf{in media}, ogni cammino ha lunghezza $2\log_{4/3}n$.
+
+In \ref{alg:rquicksort} lo pseudocodice del quicksort randomizzato (si assume che tutti gli elementi in $S$ siano distinti).
+
+\begin{algorithm}
+\caption{Quicksort randomizzato}
+\label{alg:rquicksort}
+\begin{algorithmic}
+\Function{R\_QUICKSORT}{$S$}
+	\If{$|S|\leq 1$}
+		\State \Return $\langle S \rangle$
+	\EndIf
+	\State $y \gets $RANDOM($S$)
+	\State $S_1 \gets \{x\in S\ |\ x<y\}$
+	\State $S_2 \gets \{x\in S\ |\ x>y\}$
+	\State $X_1 \gets $R\_QUICKSORT($S_1$)
+	\State $X_2 \gets $R\_QUICKSORT($S_2$)
+	\State \Return $\langle X_1,y,X_2 \rangle$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Analisi in alta probabilità} Consideriamo l'$i$-esimo cammino $\pi_i$ e una costante $a>1$ che fisseremo in seguito con l'analisi. Si consideri l'evento "$|\pi_i|\geq a\log_{4/3}n$": questo evento è equivalente all'evento "durante i primi $a\log_{4/3}n$ livelli del cammino $\pi_i$ il numero di scelte "fortunate" è stato al più uguale a $\log_{4/3}n$". Si noti che in alta probabilità questa implicazione corrisponde ad una maggiorazione del primo evento rispetto al secondo.
+
+Definiamo ora la variabile aleatoria
+\[
+X_i=
+\begin{cases}
+1 & \text{se il pivot al livello } i \text{ è "buono"} \\
+0 & \text{altrimenti}
+\end{cases};
+\]
+poiché la scelta del pivot è i.i.d. rispetto ad ogni iterazione, allora anche la variabile aleatoria $X_i$ è i.i.d.. Osserviamo inoltre che è possibile definire la seguente v.a.
+\[
+X=\sum_{i=1}^{a\log_{4/3}n}X_i
+\]
+con la quale vengono contate il numero di scelte "fortunate" del pivot. Per come è definita $X$, questa soddisfa uno dei lemmi di Chernoff.
+
+Proseguiamo quindi con l'analisi con l'obiettivo di applicare il corollario \ref{corollario:2chernoff}. Il nostro obiettivo è quello di calcolare
+\[
+P(|\pi_i|\geq a\log_{4/3}n)\leq P(X\leq \log_{4/3}n)
+\]
+poiché se il cammino è lungo almeno $a\log_{4/3}n$ allora le scelte fortunate sono al più $\log_{4/3}n$.
+
+Per far ciò abbiamo bisogno del valore atteso di $X$:
+\begin{align*}
+E[X]&=E[\sum_{i=1}^{a\log_{4/3}n}X_i] \\
+&=\sum_{i=1}^{a\log_{4/3}n}E[X_i] \\
+&=\sum_{i=1}^{a\log_{4/3}n}\frac{1}{2} \\
+&=\frac{1}{2}a\log_{4/3}n.
+\end{align*}
+Abbiamo inoltre bisogno di modulare opportunamente $a$ e $\delta$ in modo da poter applicare il corollario: deve quindi essere soddisfatta la relazione
+\[
+\log_{4/3}n=(1-\delta)\mu=(1-\delta)\frac{1}{2}a\log_{4/3}n.
+\]
+Una possibile scelta è quella di fissare $a=8$ e $\delta=3/4$:
+\[
+(1-\delta)\frac{1}{2}a\log_{4/3}n=\left(1-\frac{3}{4}\right)\frac{1}{2}8\log_{4/3}n=\log_{4/3}n.
+\]
+
+Pertanto, con $\delta=3/4$ e $\mu = 4\log_{4/3}n$, si ha
+\begin{align*}
+P(|\pi_i|\geq a\log_{4/3}n)&\leq P(X\leq \log_{4/3}n) \\
+&=P\left(X\leq \left(1-\frac{3}{4}\right)4\log_{4/3}n\right) \\
+&<e^{-\frac{\frac{9}{16}4\log_{4/3}n}{2}} \\
+&=e^{-\frac{9}{8}\log_{4/3}n} \\
+&<e^{-\log_{4/3}n} \\
+&=e^{-\frac{\ln n}{\ln\frac{4}{3}}} \\
+&=(e^{-\ln n})^{\frac{1}{\ln\frac{4}{3}}} \\
+&=\frac{1}{n^{\frac{1}{\ln\frac{4}{3}}}} \\
+&\approx\frac{1}{n^{3,47}} \\
+&<\frac{1}{n^3}
+\end{align*}
+
+Tutto quello che è stato fatto finora è valido per un cammino fissato. Durante l'esecuzione dell'algoritmo vengono percorsi vari cammini e la condizione appena esposta non deve accadere per nessuno dei cammini di esecuzione. Definito l'evento $E_i=$"$|\pi_i|\geq 8\log_{4/3}n$", attraverso l'\textit{union bound} troviamo
+\[
+P\left(\bigcup_{i=1}^{n}E_i\right)\leq \sum_{i=1}^{n}P(E_i)<\frac{n}{n^3}=\frac{1}{n^2}.
+\]
+
+\section{Taglio minimo di un multigrafo}
+In questa sezione vediamo un algoritmo Montecarlo.
+
+\begin{definizione}
+Un \textbf{multigrafo} $\mathcal{G}=(V,\mathcal{E})$ è un grafo definito su un insieme di vertici $V$ e su un multiinsieme\footnote{Un multiinsieme è una generalizzazione di un insieme: in esso sono accettati elementi ripetuti. Di conseguenza è possibile associare ad ogni elemento una molteplicità, definita come il numero di volte che l'elemento compare nel multiinsieme, indicata con la notazione $m(e)$ con $e$ arco del multigrafo. Per i multiinsiemi la classica notazione con parentesi graffe ($\{\}$) viene sostituita con la notazione con doppie parentesi graffe ($\{\{\}\}$)} di archi $\mathcal{E}$ dove ad ogni arco è associata una molteplicità.
+\end{definizione}
+
+In questa sezione considereremo solamente multigrafi non orientati.
+
+\begin{definizione}
+Un \textbf{taglio} $\mathcal{C}\in\mathcal{G}=(V,\mathcal{E})$ è un multiinsieme di archi $\mathcal{C}\subseteq\mathcal{E}$ tali che $\mathcal{G'}=(V,\mathcal{E}-\mathcal{C})$ è disconnesso. Se $\mathcal{G}$ è disconnesso allora $\mathcal{C}=\emptyset$ è un taglio.
+\end{definizione}
+
+Definiamo l'operazione di contrazione su un multigrafo.
+
+\begin{definizione}
+Dato un multigrafo $\mathcal{G}=(V,\mathcal{E})$ e dato un arco $\{u,v\}\in\mathcal{E}$, la \textbf{contrazione} di $\mathcal{G}$ rispetto all'arco $\{u,v\}$ è il multigrafo $\mathcal{G}/\{u,v\} = (V',\mathcal{E'})$ con
+\begin{align*}
+V'&=V-\{u,v\}\cup\{Z_{u,v}\} \\
+\mathcal{E'}&=\mathcal{E}-\{\{\ \{u,x\}\in\mathcal{E}\ \}\} - \{\{\ \{v,x\}\in\mathcal{E}\ \}\} \\
+&\cup \{\{\ \{Z_{u,v},x\}\ :\ (x\neq u,v) \land ((\{u,x\}\in\mathcal{E}) \lor (\{v,x\}\in\mathcal{E}))\ \}\}
+\end{align*}
+\end{definizione}
+
+\begin{figure}
+\begin{subfigure}{.5\textwidth}
+	\centering
+	\begin{tikzpicture}
+    		\node[main node, label=$1$] (1) {};
+    		\node[main node, label=below:$2$] (2) [below =of 1] {};
+    		\node[main node, label=$3$] (3) [right =of 1] {};
+    		\node[main node, label=below:$4$] (4) [left =of 2] {};
+    		\node[main node, label=$5$] (5) [left =of 1] {};
+
+    		\path[draw,thick,bend right]
+    		(1) edge node {} (2)
+    		(2) edge node {} (1)
+    		(2) edge node {} (3)
+    		(3) edge node {} (1)
+    		(1) edge node {} (5)
+    		(2) edge node {} (4)
+    		(4) edge node {} (2)
+    		(4) edge node {} (5)
+    		(5) edge node {} (4);
+	\end{tikzpicture}
+	\label{fig:escontrazionea}
+	\caption{$\mathcal{G}$}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+	\centering
+	\begin{tikzpicture}
+    		\node[main node, label=$Z_{12}$] (1) {};
+    		\node[main node, label=$3$] (3) [right =of 1] {};
+    		\node[main node, label=below:$4$] (4) [below =of 5] {};
+    		\node[main node, label=$5$] (5) [left =of 1] {};
+
+    		\path[draw,thick,bend right]
+    		(3) edge node {} (1)
+    		(1) edge node {} (3)
+    		(1) edge node {} (5)
+    		(4) edge node {} (5)
+    		(5) edge node {} (4)
+    		(3) edge node {} (1)
+    		(4) edge node {} (1)
+    		(1) edge node {} (4);
+	\end{tikzpicture}
+	\label{fig:escontrazioneb}
+	\caption{$\mathcal{G}/\{1,2\}$}
+\end{subfigure}
+\caption{Esempio di una contrazione}
+\label{fig:escontrazione}
+\end{figure}
+
+In figura \ref{fig:escontrazione} è possibile vedere un esempio di contrazione.
+
+Dalla definizione di contrazione segue immediatamente che
+\begin{align*}
+|V'|&=|V|-1 \\
+|\mathcal{E'}|\leq |\mathcal{E}|-1 &\Leftrightarrow |\mathcal{E'}|=|\mathcal{E}|-\text{m}(\{u,v\});
+\end{align*}
+l'ultima espressione deriva dal fatto che gli unici lati che vengono tolti sono quelli tra $u$ e $v$ e questi sono \textbf{almeno} $1$.
+
+Vale la seguente proposizione.
+\begin{proposizione}
+Per un qualsiasi taglio $\mathcal{C'}\in\mathcal{G}/e$ esiste un taglio $\mathcal{C}\in\mathcal{G}$ tale che $|\mathcal{C'}|=|\mathcal{C}|$.
+\end{proposizione}
+\begin{proof}
+Sia $\mathcal{G}/e=(V',\mathcal{E'})$ e si supponga che $\mathcal{C'}\subseteq\mathcal{E'}$ sia un taglio. Considero il multiinsieme $\mathcal{C}$ in $\mathcal{G}$ come il multiinsieme degli archi in $\mathcal{G}$ ottenuto ripristinando gli archi di $\mathcal{C'}$ che contengono il nodo $Z_{uv}$:
+\[
+\{Z_{uv},x\}\in\mathcal{C'} \Rightarrow \{u,x\}\in\mathcal{C}\ \land\ \{v,x\}\in\mathcal{C}.
+\]
+Così facendo si ha che $|\mathcal{C}|=|\mathcal{C'}|$.
+In $\mathcal{G}/e$ la rimozione degli archi in $\mathcal{C'}$ disconnette in particolare il nodo $Z_{uv}$ da un qualche nodo $x\in V'$; ogni cammino $\Pi_{Z_{uv},x}$ in $\mathcal{G}/e$ contiene almeno un arco di $\mathcal{C'}$.
+Supponiamo per assurdo che $\mathcal{C}$ non sia un taglio di $\mathcal{G}$. Allora in $\mathcal{G}$ tra i nodi $u$ e $x$ esiste un cammino $\Pi_{u,x}\subseteq\mathcal{E}-\mathcal{C}$. Di conseguenza, poiché $\Pi_{u,x}$ non contiene archi di $\mathcal{C}$, il corrispondente cammino $\Pi_{Z_{uv},x}$ in $\mathcal{G}/e$ non usa archi di $\mathcal{C'}$ (per costruzione di $\mathcal{C}$): dovendo concludere che $\mathcal{C'}$ non è un taglio, si arriva ad un assurdo.
+\end{proof}
+
+Da questa proposizione segue immediatamente il seguente corollario.
+\begin{corollario}
+\label{corollario:mincut}
+Il processo di contrazione \textbf{non diminuisce} la cardinalità del taglio minimo, ovvero
+\[
+|\emph{MIN\_CUT}(\mathcal{G}/e)|\geq|\emph{MIN\_CUT}(\mathcal{G})|.
+\]
+\end{corollario}
+\begin{proof}
+A seguito della dimostrazione della proposizione precedente, si osserva che
+\[
+\{|\mathcal{C'}|\ :\ \mathcal{C'} \text{ taglio in } \mathcal{G}/e\}\subseteq\{|\mathcal{C}|\ :\ \mathcal{C} \text{ taglio in } \mathcal{G}\}.
+\]
+Poiché il minimo di un sottoinsieme è almeno pari al minimo dell'insieme che lo contiene, segue la tesi.
+\end{proof}
+
+\begin{corollario}
+Se $\mathcal{C}$ è un taglio di $\mathcal{G}$ e $e\notin\mathcal{C}$ allora il multiinsieme di archi $\mathcal{C'}$ corrispondente a $\mathcal{C}$ in $\mathcal{G}/e$ è ancora un taglio.
+\end{corollario}
+\begin{proof}
+Sia $e=\{u,v\}$ l'arco rispetto al quale si effettua la contrazione. Per ipotesi, la rimozione di $\mathcal{C}$ da $\mathcal{E}$ lascia i nodi $u,v$ nella stessa componente connessa (in particolare sono connessi direttamente) e comporterà l'esistenza di almeno un nodo, sia $x$, disconnesso da $u$ e $v$. Tutti i cammini $\Pi_{u,x}$ e $\Pi_{v,x}$ contengono almeno un arco di $\mathcal{C}$.
+In $\mathcal{G}/e$ ogni cammino $\Pi_{Z_{uv},x}$ contiene un arco di $\mathcal{C'}$ per costruzione. Eliminando $\mathcal{C'}$ da $\mathcal{G}/e$ si ottiene la disconnessione di $Z_{uv}$ da $x$, concludendo così che $\mathcal{C'}$ è un taglio.
+\end{proof}
+
+\subsection{L'algoritmo di Karger}
+In questa sezione forniamo l'algoritmo di Karger per il calcolo del taglio minimo di un multigrafo. In \ref{alg:fullcontraction} è descritta la procedura per effettuare la contrazione piena di un multigrafo: essa termina quando il grafo avrà solamente due nodi e verrà restituito il numero di archi presenti nel fascio che connette tali nodi. La randomizzazione è data dalla scelta dell'arco secondo cui fare la contrazione: si noti che per ogni esecuzione, tale scelta è indipendente dalle precedenti. Poiché la costruzione del grafo contratto è costituita da un numero costante di operazioni sui nodi e sugli archi, il tempo di esecuzione dell'algoritmo è lineare nella taglia del multigrafo: $T_{FC}=O(m)$ con $m=|\mathcal{E}|$. Segue un esempio di applicazione dell'algoritmo.
+
+\begin{algorithm}
+\caption{Full contraction}
+\label{alg:fullcontraction}
+\begin{algorithmic}
+\Function{FULL\_CONTRACTION}{$\mathcal{G}=(V,\mathcal{E})$}
+	\For{$i \gets 1\ \mathbf{to}\ |V|-2$}
+		\State $e \gets$RANDOM($\mathcal{E}$)
+		\State $\mathcal{G} \gets \mathcal{G}/e$
+	\EndFor
+	\State \Return $|\mathcal{E}|$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{esempio}
+Un'applicazione dell'algoritmo FULL\_CONTRACTION è possibile vederla in figura \ref{fig:fullcontraction}. L'esempio restituisce un taglio minimo di cardinalità 2 che è proprio la soluzione ottima per il grafo di partenza. Si noti che per il corollario \ref{corollario:mincut} la procedura garantisce solo che il taglio minimo di un grafo contratto non sia mai più piccolo del taglio minimo del grafo originale.
+\end{esempio}
+
+\begin{figure}
+\begin{subfigure}{.5\textwidth}
+	\centering
+	\begin{tikzpicture}
+    		\node[main node, label=$1$] (1) {};
+    		\node[main node, label=below:$2$] (2) [below =of 1] {};
+    		\node[main node, label=$3$] (3) [right =of 1] {};
+    		\node[main node, label=below:$4$] (4) [left =of 2] {};
+    		\node[main node, label=$5$] (5) [left =of 1] {};
+
+    		\path[draw,thick,bend right]
+    		(1) edge node {} (2)
+    		(2) edge node {} (1)
+    		(2) edge node {} (3)
+    		(3) edge node {} (1)
+    		(1) edge node {} (5)
+    		(4) edge node {} (2)
+    		(4) edge node {} (5)
+    		(5) edge node {} (4);
+	\end{tikzpicture}
+	\label{fig:fullcontractiona}
+	\caption{Multigrafo originale $\mathcal{G}$}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+	\centering
+	\begin{tikzpicture}
+    		\node[main node, label=$Z_{12}$] (1) {};
+    		\node[main node, label=$3$] (3) [right =of 1] {};
+    		\node[main node, label=below:$4$] (4) [below =of 5] {};
+    		\node[main node, label=$5$] (5) [left =of 1] {};
+
+    		\path[draw,thick,bend right]
+    		(1) edge node {} (3)
+    		(1) edge node {} (5)
+    		(4) edge node {} (5)
+    		(5) edge node {} (4)
+    		(3) edge node {} (1)
+    		(4) edge node {} (1);
+	\end{tikzpicture}
+	\label{fig:fullcontractionb}
+	\caption{$\mathcal{G'}=\mathcal{G}/\{1,2\}$}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+	\centering
+	\begin{tikzpicture}
+    		\node[main node, label=$Z_{12}$] (1) {};
+    		\node[main node, label=$3$] (3) [right =of 1] {};
+    		\node[main node, label=$Z_{45}$] (5) [left =of 1] {};
+
+    		\path[draw,thick,bend right]
+    		(1) edge node {} (3)
+    		(1) edge node {} (5)
+    		(3) edge node {} (1)
+    		(5) edge node {} (1)
+    		(1) edge node {} (5);
+	\end{tikzpicture}
+	\label{fig:fullcontractionc}
+	\caption{$\mathcal{G''}=\mathcal{G'}/\{4,5\}$}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+	\centering
+	\begin{tikzpicture}
+    		\node[main node, label=$Z_{12,3}$] (1) {};
+    		\node[main node, label=$Z_{45}$] (5) [left =of 1] {};
+
+    		\path[draw,thick,bend right]
+    		(1) edge node {} (5)
+    		(5) edge node {} (1);
+	\end{tikzpicture}
+	\label{fig:fullcontractiond}
+	\caption{$\mathcal{G'''}=\mathcal{G''}/\{Z_{12},3\}$}
+\end{subfigure}
+\caption{Esempio di esecuzione di FULL\_CONTRACTION}
+\label{fig:fullcontraction}
+\end{figure}
+
+In \ref{alg:karger} è descritto l'algoritmo di Karger per il computo del taglio minimo di un multigrafo. L'algoritmo è un semplice algoritmo di accumulazione del minimo. Si noti inoltre che le chiamate alla procedura di contrazione sono tutte indipendenti tra loro. Il secondo parametro di ingresso dell'algoritmo ci permette di regolare il numero di contrazioni da eseguire e di conseguenza, come vedremo dall'analisi, ci permette di limitare la probabilità che l'algoritmo fallisca. Si deduce immediatamente che $T_K=O(km)$.
+
+\begin{algorithm}
+\caption{Algoritmo di Karger}
+\label{alg:karger}
+\begin{algorithmic}
+\Function{KARGER}{$\mathcal{G}=(V',\mathcal{E}),k$}
+	\State $min \gets +\infty$
+	\For{$i \gets 1\ \mathbf{to}\ k$}
+		\State $t \gets$FULL\_CONTRACTION($\mathcal{G}=(V',\mathcal{E})$)
+		\If{$t<min$}
+			\State $min \gets t$
+		\EndIf
+	\EndFor
+	\State \Return $min$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+Prima di proseguire con l'analisi effettuiamo alcuni richiami di probabilità.
+
+\paragraph{Richiami di probabilità}
+
+Dati due eventi $E_1$ e $E_2$ tra loro indipendenti, la probabilità che si verifichino entrambi è
+\[
+P(E_1\cap E_2)=P(E_1)P(E_2).
+\]
+
+Dati due eventi $E_1$ e $E_2$, con $P(E_1)\neq0$, la probabilità che il secondo evento si verifichi sapendo che si è verificato il primo (\textbf{probabilità condizionale}) è
+\[
+P(E_2|E_1)=\frac{P(E_1\cap E_2)}{P(E_1)} \Leftrightarrow P(E_1\cap E_2)=P(E_2|E_1)P(E_1).
+\]
+
+L'ultima formulazione è possibile generalizzarla per una sequenza di $k$ eventi (si dimostra per induzione su $k$):
+\[
+P\left(\bigcap_{i=1}^{k}E_i\right)=P(E_1)\prod_{i=2}^kP\left(E_i|\bigcap_{j=1}^{i-1}E_j\right).
+\]
+
+\paragraph{Analisi}
+Fissiamo un dato taglio minimo $\mathcal{C^*}$ di $\mathcal{G}$. Vogliamo studiare la probabilità che nessun arco di $\mathcal{C^*}$ venga selezionato per una contrazione (altrimenti tale arco verrebbe eliminato dalla contrazione e non potrebbe far parte del taglio).
+
+\begin{definizione}
+In un multigrafo, il \textbf{grado} di un nodo è
+\[
+d(v)=\sum_{v\in e}m(e)=|\{\{\ \{v,x\}\in\mathcal{E},\ x\in V,\ x\neq v\}\}|.
+\]
+\end{definizione}
+
+Dalle definizione si osserva che $\{\{\ \{v,x\}\in\mathcal{E}\ \}\}$ è un taglio (se si elimina questo multiinsieme si disconnette $v$ dal resto del multigrafo). Da questo segue immediatamente che $|\mathcal{C^*}|\leq d(v)\ \forall v\in V$.
+
+\begin{proposizione}
+Sia $\mathcal{G}=(V,\mathcal{E})$ un multigrafo. Se $\mathcal{G}$ ha un taglio minimo $\mathcal{C^*}$ con $|\mathcal{C^*}|=t$, allora
+\[
+|\mathcal{E}|\geq t\frac{n}{2},
+\]
+con $n=|V|$.
+\end{proposizione}
+\begin{proof}
+La dimostrazione segue immediatamente dall'osservazione precedente:
+\[
+|\mathcal{E}|=\frac{\sum_{v\in V}d(v)}{2}\geq \sum_{v\in V}\frac{t}{2}=t\frac{n}{2}.
+\]
+\end{proof}
+
+Definiamo l'evento $E_i=$"l'$i$-esima scelta di arco casuale in FULL\_CONTRACTION non tocca un arco di $\mathcal{C^*}$". Allora quello che vogliamo studiare
+è
+\[
+P\left(\bigcap_{i=1}^{n-2}E_i\right).
+\]
+Calcoliamo le probabilità passo per passo:
+\begin{enumerate}
+\item alla prima iterazione la probabilità di selezionare un arco del taglio è
+\[
+P(E_1)\geq 1-\frac{t}{n\frac{t}{2}}=1-\frac{2}{n},
+\]
+ovvero è estremamente improbabile;
+\item alla seconda iterazione la probabilità diviene
+\[
+P(E_2|E_1)\geq 1-\frac{t}{(n-1)\frac{t}{2}}=1-\frac{2}{n-1},
+\]
+notando che la probabilità comincia a crescere;
+\item all'$i$-esima iterazione, dato l'andamento mostrato dalle probabilità, si ha
+\[
+P\left(E_i|\bigcap_{j=1}^{i-1}E_j\right)\geq 1-\frac{2}{n-i+1}.
+\]
+\end{enumerate}
+Quindi
+\begin{align*}
+P\left(\bigcap_{i=1}^{n-2}E_i\right)&\geq\prod_{i=1}^{n-2}\left(1-\frac{2}{n-i+1}\right) \\
+&=\prod_{i=1}^{n-2}\frac{n-i-1}{n-i+1} && \text{(prodotto telescopico)} \\
+&=\frac{2}{n(n-1)} \\
+&=\frac{1}{\binom{n}{2}} \\
+&\geq \frac{2}{n^2}
+\end{align*}
+
+La probabilità non è molto grande ma nemmeno così pessima: facendo girare l'algoritmo $\Theta(n^2)$ volte si ha la certezza che non fallisca. L'algoritmo infatti privilegia i tagli minimi poiché un taglio minimo viene selezionato con una probabilità che è solo inversamente proporzionale ad un polinomio mentre i tagli in generale sono in numero esponenziale. Scegliamo $k=\frac{n^2}{2}d\ln n$ (il fattore logaritmico ci servirà per l'analisi in alta probabilità). Allora\footnote{Si ricordi che \[ \lim_{x\to\infty}\left(1+\frac{1}{x}\right)^x=e. \]}
+\begin{align*}
+P(\text{KARGER non ritorna }|\mathcal{C^*}|)&=P(\text{tutte le }k\text{ contrazioni falliscono}) \\
+&\leq \left(1-\frac{2}{n^2}\right)^{\frac{n^2}{2}d\ln n} \\
+&< e^{-d\ln n} \\
+&=\frac{1}{n^d}
+\end{align*}
+e in questo modo è possibile rendere la probabilità che l'algoritmo di Karger fallisca piccola a piacere pilotando la costante $d$.
+
+In conclusione si ottiene che $T_K(n,m)=O(mn^2\log n)$. Questa complessità non è molto lontana da quelle ottenute attraverso altri approcci di risoluzione (ad esempio il calcolo del flusso): l'algoritmo di Karger in questo fallisce perché, sebbene all'inizio le probabilità che per una contrazione venga scelto un arco del taglio minimo siano molto basse, presto queste degradano. Nella prossima sezione vedremo un miglioramento dell'algoritmo.
+
+\subsection{L'algoritmo di Karger-Stein}
+Un approccio migliorativo dell'algoritmo di Karger è dato dall'algoritmo di Karger-Stein. L'idea è quella di effettuare molte contrazioni parziali (circa $n^2\ln n$) in parallelo: l'obiettivo è quello di fare in modo che l'algoritmo valorizzi le prime contrazioni in alta probabilità.
+
+L'approccio è di carattere ricorsivo: in \ref{alg:partialcontraction} è descritta la procedura per eseguire una contrazione parziale che verrà utilizzata nell'algoritmo \textit{devide and conquer} \ref{alg:kargerstein}. Si noti che l'algoritmo considera come caso base un multigrafo di non più di 8 nodi: ciò sarà motivato dalla successiva analisi. È inoltre possibile dimostrare che la scelta migliore di $k$ è
+\[
+k^*=n-\ceil{n/\sqrt{2}+1}.
+\]
+
+\begin{algorithm}
+\caption{Partial contraction}
+\label{alg:partialcontraction}
+\begin{algorithmic}
+\Function{PARTIAL\_CONTRACTION}{$\mathcal{G}=(V,\mathcal{E}),k$}
+	\For{$i \gets 1\ \mathbf{to}\ k$}
+		\State $e \gets$RANDOM($\mathcal{E}$)
+		\State $\mathcal{G} \gets \mathcal{G}/e$
+	\EndFor
+	\State \Return $\mathcal{G}$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Algoritmo di Karger-Stein}
+\label{alg:kargerstein}
+\begin{algorithmic}
+\Function{KARGER\_STEIN}{$\mathcal{G}=(V,\mathcal{E})$}
+	\If{$|V|\leq 8$}
+		\State ** risolvi direttamente **
+	\EndIf
+	\State $k\gets f(|V|)$
+	\State $\mathcal{G}_1\gets $PARTIAL\_CONTRACTION($\mathcal{G},k$)
+	\State $\mathcal{G}_2\gets $PARTIAL\_CONTRACTION($\mathcal{G},k$)
+	\State \Return MIN(KARGER\_STEIN($\mathcal{G}_1$), KARGER\_STEIN($\mathcal{G}_2$))
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph*{Analisi}
+Dall'analisi di Karger svolta nella sezione precedente possiamo calcolare la probabilità che il taglio minimo sopravviva alla contrazione parziale:
+\begin{align*}
+P(\text{"min cut sopravvive in }\mathcal{G}_1\text{"})&=P(\text{"min cut sopravvive in }\mathcal{G}_2\text{"}) \\
+&\geq \prod_{i=1}^{n-\ceil{n/\sqrt{2}+1}} \left( \frac{n-i-1}{n-i+1} \right) \\
+&=\frac{\ceil{n/\sqrt{2}+1}(\ceil{n/\sqrt{2}+1}-1)}{n(n-1)} \\
+&\geq \frac{\frac{n}{\sqrt{2}}\cdot\frac{n}{\sqrt{2}}}{n(n-1)} \\
+&=\frac{n^2}{2n(n-1)} \\
+&\geq \frac{n^2}{2n^2} \\
+&=\frac{1}{2}
+\end{align*}
+
+Questa probabilità è valida per tutti i livelli della ricorsione essendo indipendente rispetto ai nodi.
+
+Il tempo di esecuzione invece \textbf{non} è una variabile aleatoria:
+\[
+T(n)=\begin{cases}
+c_1 & n\leq 8 \\
+2T(\ceil{n/\sqrt{2}+1}) + O(n^2) & n>8
+\end{cases}
+\]
+dove la contrazione abbassa la taglia a $n-k$ nodi e il lavoro svolto dalla fase di \textit{conquer} è data dalle due contrazioni parziali $O(m)=O(n^2)$.
+Ignorando il "$+1$" nella taglia dell'istanza è possibile studiare questa ricorrenza con il Master Theorem: $a=2$, $b=\sqrt{2}$, $w(n)=n^2$ e con la funzione di soglia $n^{\log_b{a}}=n^{\log_{\sqrt{2}}{2}}=n^2$ tale ricorrenza rientra nel caso due del Master Theorem, pertanto $T(n)=\Theta(n^2\log n)$.
+
+Ora dimostreremo che $P(n)=P(\text{"Karger-Stein è corretto"})\geq c/\ln n$: assunto ciò è sufficiente eseguire l'algoritmo $(d/c)\ln^2 n$ per ottenere l'alta probabilità, infatti
+\begin{align*}
+P(\text{"nessuna esecuzione non ritorna il min cut"})&\leq \left(1-\frac{c}{\ln n}\right)^{\frac{d}{c}\ln^2 n }\\
+&=\left[\left(1-\frac{c}{\ln n}\right)^\frac{\ln n}{c}\right]^{d\ln n} \\
+&<e^{-d\ln n} \\
+&=\frac{1}{n^d}
+\end{align*}
+
+Per dimostrare ciò sfrutto la ricorrenza anche per il calcolo delle probabilità: $P(n)=P(\text{"successo se }|V|=n\text{"})$, quindi
+\[
+P(n)=1\ \ \text{ se }\ \ n\leq 8
+\]
+mentre, per $n>8$,
+\begin{align*}
+P(n)&=1-P(\text{"falliscono entrambe le contrazioni parziali o le chiamate ricorsive"}) \\
+&=(1-P(\text{"una contrazione parziale o la relativa chiamata ricorsiva falliscono"}))^2 \\
+&=1-(1-P(\text{"ha successo sia la contrazione parziale che la relativa chiamata ricorsiva"}))^2 \\
+&\geq 1-\left(1-\frac{1}{2}P(\ceil{n/\sqrt{2}+1})\right)^2
+\end{align*}
+
+Com'è la progressione delle taglie dalla radice dell'albero delle chiamate (livello $0$) fino al raggiungimento di una foglia (livello $h-1$)? È possibile dimostrare che al livello $i$ la taglia dell'istanza vale
+\[
+S_i\leq\frac{n}{(\sqrt{2})^i}+7.
+\]
+Il numero massimo di livelli è $h=\ceil{2\ln n+1}$, per cui $h-1=\ceil{2\ln n}$ e
+\begin{align*}
+S_{h-1}&\leq \frac{n}{(\sqrt{2})^{\ceil{2\ln n}}}+7 \\
+&\leq \frac{n}{(\sqrt{2})^{2\ln n}}+7 \\
+&\leq \frac{n}{(\sqrt{2})^{\log_{\sqrt{2}} n}}+7 \\
+&=\frac{n}{n}+7 \\
+&=8
+\end{align*}
+motivando così perché come caso base consideriamo $n\leq 8$.
+
+Consideriamo ora la funzione di probabilità non in funzione della taglia dell'istanza ma in funzione del numero di livelli. Allora, essendo $P(n)=\bar{P}(\ceil{2\ln n+1})$, si ha
+\[
+\begin{cases}
+\bar{P}(h)\geq 1-\left(1-\frac{1}{2}P(h-1)\right)^2 \\
+\bar{P}(1)=1
+\end{cases}
+\]
+Per induzione parametrica dimostriamo che $\bar{P}(h)\geq 1/h$:
+\subparagraph*{Base}
+Per $h=1$ si ha $\bar{P}(1)=1=1/h$, quindi il predicato è vero.
+\subparagraph*{Ipotesi induttiva}
+Assumo il predicato vero fino a $h-1$, $\bar{P}(h-1)\geq 1/(h-1)$.
+\subparagraph*{Induzione}
+\begin{align*}
+\bar{P}(h)&\geq 1-\left(1-\frac{1}{2}\bar{P}(h-1)\right)^2 \\
+&=1-1-\frac{1}{4}\bar{P}^2(h-1)+P(h-1) \\
+&=\bar{P}(h-1)-\frac{1}{4}\bar{P}^2(h-1).
+\end{align*}
+Considerando la funzione $f(x)=x-\frac{1}{4}x^2$ ristretta all'intervallo $[0,1]$ osservo che la funzione è monotona crescente. Segue
+\begin{align*}
+\bar{P}(h)&\geq\bar{P}(h-1)-\frac{1}{4}\bar{P}^2(h-1) \\
+&\geq \frac{1}{h-1}-\frac{1}{4}\left(\frac{1}{h-1}\right)^2 \\
+&\geq \frac{1}{h-1}-\frac{1}{2(h-1)^2} \\
+&=\frac{1}{h-1}-\frac{1}{2(h-1)(h+1)} \\
+&\geq \frac{1}{h-1}-\frac{1}{h(h-1)} && (2(h-1)\geq h \text{ per } h\geq 2) \\
+&=\frac{1}{h}.
+\end{align*}
+\qed
+
+Dimostrato che $\bar{P}(h)\geq 1/h$, segue che per $n>1$
+\begin{align*}
+P(\text{"Karger-Stein è corretto"})&\geq \frac{1}{\ceil{2\ln n+1}} \\
+&\geq \frac{1}{2\log_2 n+\log_2 n} \\
+&=\frac{1}{3\log_2 n} \\
+&=\frac{1}{3\frac{\ln n}{\ln 2}} \\
+&=\frac{(\ln n)/3}{\ln n}
+\end{align*}
+con $(\ln n)/3=c$, come volevamo.
+
+\section{Polling: simulazione Montecarlo}
+Sia data una urna $U$ contentente palline bianche (B, successo) e nere (N, tutto il resto). Sia $|U|=n$. Sia data inoltre una stima deterministica conservativa del numero delle palline bianche: $|B|\geq \alpha_{min}n$, $0\leq\alpha_{min}\leq 1$. L'interesse è nel determinare $|B|=\alpha n$, con $0\leq\alpha_{min}\leq\alpha\leq 1$.
+
+Ogni approccio deterministico richiede l'estrazione di tutte le palline dall'urna. Un approccio randomizzato invece effettua una estrazione casuale (uniforme) di palline dall'urna con reinserimento. Nella pratica è difficile mantenere l'uniformità dell'estrazione (si pensi agli \textit{exit poll}).
+
+In \ref{alg:approxalpha} è descritto un algoritmo randomizzato. Il parametro $\epsilon$ è un parametro di confidenza che rappresenta l'errore relativo che si commette nell'approssimare $\alpha$ con $x/k$.
+
+\begin{algorithm}
+\caption{Algoritmo di polling}
+\label{alg:approxalpha}
+\begin{algorithmic}
+\Function{APPROXIMATE\_$\alpha$}{$U,\epsilon,\alpha_{min}$}
+	\State $n\gets |U|$
+	\State $k\gets f(n,\epsilon,\alpha_{min})$
+	\State $x\gets 0$
+	\For{$i \gets 1\ \mathbf{to}\ k$}
+		\State $p \gets$RANDOM($U$)
+		\If{$p.color = B$}
+			\State $x \gets x+1$
+		\EndIf
+	\EndFor
+	\State \Return $x/k$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Analisi}
+Supponiamo di voler fornire una garanzia sull'errore relativo, ovvero che
+\[
+P\left(\frac{|\frac{x}{k}-\alpha|}{\alpha}>\epsilon\right)<\frac{1}{n}.
+\]
+Sia $X_i=1$ la v.a. che rappresenta l'$i$-esima estrazione risultata come bianca (e $X_i=0$ altrimenti). Allora il numero totale di estrazioni avvenute con successo è pari a $X=\sum_{i=}^{k}X_i$. Inoltre, si ha che $P(X_i=1)=\frac{\alpha n}{n}=\alpha$, da cui segue che $E[X_i]=\alpha$, ovvero che $E[X]=k\alpha=\mu$. Essendo $X$ una somma di Bernoulli possiamo applicare i bound di Chernoff:
+\begin{align*}
+P\left(\frac{|\frac{x}{k}-\alpha|}{\alpha}>\epsilon\right)&=P\left(\frac{|X-k\alpha|}{k\alpha}>\epsilon\right) \\
+&=P\left(\frac{|X-\mu|}{\mu}>\epsilon\right) \\
+&<2e^{-\frac{\epsilon^2\mu}{3}} \\
+&=2e^{-\frac{\epsilon^2k\alpha}{3}} \\
+&<2e^{-\frac{k\epsilon^2\alpha_{min}}{3}} \\
+\end{align*}
+poiché valgono le seguenti uguaglianze tra eventi
+\begin{align*}
+"\frac{|X-\mu|}{\mu}>\epsilon" &\Leftrightarrow "\frac{X-\mu}{\mu}>\epsilon" \cup "\frac{\mu -X}{\mu}>\epsilon" \\
+&\Leftrightarrow "X>(1+\epsilon)\mu" \cup "X<(1-\epsilon)\mu"
+\end{align*}
+ed effettuo la maggiorazione considerando l'elemento più grande (corollario \ref{corollario:1chernoff}).
+Ora, scegliendo
+\[
+k=\frac{3}{\alpha_{min}\epsilon^2}\ln{(2n)}
+\]
+si ottiene
+\begin{align*}
+2e^{-\frac{3}{\alpha_{min}\epsilon^2}\ln{(2n)}\frac{\epsilon^2\alpha_{min}}{3}} = 2e^{-\ln{(2n)}}=2\frac{1}{2n}=\frac{1}{n}
+\end{align*}
+confermando la garanzia che volevamo ottenere.
+
+Il numero di estrazioni da effettuare è $k=\Theta(\log n)$: con l'approccio randomizzato abbiamo ottenuto un guadagno esponenziale rispetto allo spoglio deterministico. Questo tipo di tecnica è anche detta \textbf{simulazione Montecarlo}.
+
+\section{Coupon collecting: enumerazione randomizzata}
+Sia dato l'insieme $U=\{1,\cdots,n\}$ e la primitiva RANDOM($1,n$) che effettua una estrazione casuale (uniforme) di un intero tra $1$ e $n$. Si vuole determinare il numero di estrazioni (con reinserimento) necessarie per vedere tutti gli elementi dell'insieme.
+
+Sia $Z_i\sim Geom(p_i)$ una v.a. geometrica\footnote{Una variabile aleatoria geometrica conta il numero di lanci fino al primo successo. Il parametro rappresenta la probabilità di successo, quindi $P(Z_i=j)=(1-p_i)^{j-1}p_i$. Segue immediatamente che $E[Z_i]=1/p_i$.} di parametro $p_i$ che rappresenta il numero di estrazioni necessarie a scoprire un nuovo elemento dopo averne scoperti $i-1$. Il numero di estrazioni complessive per scoprire tutti gli elementi è dato da $Z=\sum_{i=1}^nZ_i$, da cui $E[Z]=\sum_{i=1}^n(1/p_i)$. La probabilità $p_i$ rappresenta la probabilità che venga estratto un nuovo elemento dopo averne scoperti $i-1$:
+\[
+p_i=\frac{n-(i-1)}{n}=\frac{n-i+1}{n}.
+\]
+Allora
+\begin{align*}
+E[Z]&=\sum_{i=1}^n\frac{n}{n-i+1} \\
+&=n\sum_{i=1}^n\frac{1}{n-i+1} \\
+&=n\sum_{j=1}^n\frac{1}{j} && (j=n-i+1) \\
+&=nH_n \\
+&=n(\ln n+O(1)) \\
+&=n\ln n+O(n).
+\end{align*}
+
+Fissiamo un elemento $j\in\{1,\cdots,n\}$. Allora
+\begin{align*}
+P(\text{"non aver scoperto }j\text{ dopo }r\text{ estrazioni"})=\left(1-\frac{1}{n}\right)^r<e^{-r/n}.
+\end{align*}
+Se $r=2n\ln n$ otteniamo
+\[
+P(\text{"non aver scoperto }j\text{ dopo }r\text{ estrazioni"})<e^{-r/n}=\frac{1}{n^2}.
+\]
+
+Quindi
+\begin{align*}
+P(\text{"successo"})&=P(\text{"scoperti tutti gli elementi con }2n\ln n\text{ estrazioni"}) \\
+&=1-P(\text{"insuccesso"}) \\
+&=1-P(\text{"un qualche elemento non è stato scoperto"}).
+\end{align*}
+Definendo l'evento $A$="un qualche elemento non è stato scoperto" esso può essere espresso come
+\[
+A=\bigcup_{i=1}^nA_i
+\]
+dove $A_i$="l'elemento $i$ non è stato scoperto".
+Allora
+\begin{align*}
+1-P(A)&=1-P\left(\bigcup_{i=1}^nA_i\right) \\
+&\geq 1-\sum_{i=1}^nP(A_i) \\
+&\geq 1-n\frac{1}{n^2} \\
+&=1-\frac{1}{n}
+\end{align*}
+ottenendo la probabilità di successo in alta probabilità.

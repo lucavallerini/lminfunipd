@@ -1,0 +1,742 @@
+\chapter{Esercitazioni}
+Vediamo ora una serie di esercitazioni sugli argomenti trattati durante il corso.
+
+\section{Approssimazione}
+\subsection{Il problema SUBSET-SUM}
+In \ref{alg:subsetsum2} proponiamo un secondo algoritmo di approssimazione per il problema SUBSET-SUM (vedi sezione \ref{sez:subsetsum}).
+
+\begin{algorithm}
+\caption{Algoritmo di approssimazione per SUBSET-SUM}
+\label{alg:subsetsum2}
+\begin{algorithmic}
+\Function{APPROX\_SUBSET-SUM}{$S,t$}
+   \State $\langle s_1, \cdots, s_n \rangle \gets$SORT\_DECREASING(S)
+   \State $sum\gets 0$
+   \State $i\gets 1$
+   \While{$sum+s_i \leq t\ \land\ i\leq n$}
+      \State $sum \gets sum + s_i$
+      \State $i \gets i + 1$
+   \EndWhile
+   \State \Return $sum$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+L'algoritmo proposto è un algoritmo di 2-approssimazione. Se la variabile $sum=\sum_{i=1}^n s_i$ allora $\rho=1$ poiché $sum^*=\sum_{i=1}^n s_i$. Altrimenti, $\exists\bar{i}\ :\ 2\leq \bar{i} \leq n\ |\ sum=\sum_{i=1}^{\bar{i}-1}s_i$ ($sum+s_{\bar{i}}>t$). Vale inoltre la seguente proposizione.
+\begin{proposizione}
+Vale sempre $sum\geq t/2$.
+\end{proposizione}
+\begin{proof}
+Suppongo per assurdo che $sum<t/2$. Allora $s_1<t/2 \Rightarrow \forall j\ s_j<t/2$. L'algoritmo termina all'iterazione $\bar{i}$ poiché $sum+s_{\bar{i}}>t$. Otteniamo
+\[
+\begin{cases}
+sum < t/2 \\
+s_{\bar{i}}<t/2
+\end{cases}
+\Rightarrow sum+s_{\bar{i}}<t
+\]
+condizione per la quale l'algoritmo non terminerebbe.
+\end{proof}
+
+Da tutto ciò segue
+\[
+\rho = \frac{c(S^*)}{sum} \leq \frac{t}{t/2} = 2.
+\]
+
+\subsection{Il problema TRIANGLE-TSP}
+\begin{proposizione}
+Nell'ipotesi P$\neq$NP, non può esistere un FPTAS per il problema TRIANGLE-TSP.
+\end{proposizione}
+\begin{proof}
+Per questo genere di dimostrazione sfrutto ancora una volta il problema HAMILTON. Anche per TRIANGLE-TSP vale la riduzione polinomiale da HAMILTON vista nella sezione \ref{sez:tsp} poiché la funzione di costo associata ai lati del grafo soddisfa la disuguaglianza triangolare.
+
+Supponiamo che l'FPTAS esista e che sia A($\langle G^c,c\rangle,\epsilon$): per definizione di FPTAS, $T_A$ è polinomiale rispetto sia alla taglia dell'istanza che a $1/\epsilon$. Se seleziono $\epsilon=1/2|V|$, ottengo che $T_A=poly(1/\epsilon)=poly(2|V|)=poly(|\langle G^c,c\rangle|)$, potendo così spingere molto con l'approssimazione.
+
+Procedo quindi applicando la funzione di riduzione polinomiale a HAMILTON e in seguito eseguo l'algoritmo. Allora:
+\begin{enumerate}
+\item se $\langle G=(V,E) \rangle\in$ HAMILTON allora esiste un ciclo hamiltoniano in G, ovvero esiste un tour in $G^c$ di costo $|V|$. Allora l'algoritmo ritorna una soluzione di costo al più $(1+\epsilon)|V|=(1+\frac{1}{2|V|})|V|=|V|+\frac{1}{2}$: poiché tale valore non è intero la soluzione avrà necessariamente costo minore di $|V|+1$;
+\item se $\langle G=(V,E) \rangle\notin$ HAMILTON allora in $G^c$ il tour di costo minimo usa almeno un arco di costo 2, pertanto il costo della soluzione ottima è almeno pari a $|V|+1$. Allora l'algoritmo restituisce una soluzione di costo pari ad almeno $|V|+1$.
+\end{enumerate}
+
+Si è instaurato un \textit{se e solo se} che permetterebbe di testare HAMILTON in tempo polinomiale, il che è assurdo essendo nell'ipotesi che P$\neq$NP. Da ciò segue che non può esistere un FPTAS per TRIANGLE-TSP.
+\end{proof}
+
+\subsection{Il problema del LOAD-BALANCING}
+Siano dati $n$ \textit{job} $J_1, J_2, \cdots, J_n$ che richiedono tempo, rispettivamente, $t_1, t_2, \cdots, t_n$. Si supponga che tutte le attività siano indipendenti e che qualsiasi \textit{job} possa essere eseguito su una qualsiasi delle $m$ macchine disponibili. Una soluzione ammissibile del problema è una partizione degli indici dei \textit{job} tra $m$ insiemi rappresentanti le macchine: $\mathcal{P}=\{M_1, M_2, \cdots, M_m\}$. Per la macchina $i$ il tempo complessivo di occupazione è $T_i=\sum_{j\in M_i}t_j$. L'obiettivo è quello di minimizzare $T^*=\max\{T_i\ :\ 1\leq i\leq m\}$. Si osservi che per qualsiasi soluzione ammissibile vale $\sum_{j=1}^nt_j=\sum_{k=1}^mT_k$. In \ref{alg:loadbalancing} lo pseudocodice dell'algoritmo.
+
+\begin{algorithm}
+\caption{Algoritmo di approssimazione per LOAD-BALANCING}
+\label{alg:loadbalancing}
+\begin{algorithmic}
+\Function{GREEDY\_SCHEDULING}{$\vec{t},m$}
+   \For{$i\gets 1 \textbf{ to } m$}
+      \State $T_i \gets 0$
+      \State $M_i \gets \emptyset$
+      \EndFor
+      \For{$j\gets 1 \textbf{ to } n$}
+         \State $k \gets \argmin\{T_i\ :\ 1\leq i\leq m\}$
+         \State $M_k \gets M_k \cup \{j\}$
+         \State $T_k \gets T_k + t_j$
+      \EndFor
+      \State \Return MAX($\vec{T}$)
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{proposizione}
+Vale
+\[
+T^* \geq \max\left\lbrace\frac{1}{m}\sum_{j=1}^nt_j, \max_{1\leq j \leq n}\{t_j\}\right\rbrace.
+\]
+\end{proposizione}
+\begin{proof}
+Nella soluzione ottima esiste una macchina $h$ che esegue $t_j$, quindi $T_h^*\geq t_j$. Quindi $T^*=\max_{1\leq i\leq m}{T_i}\geq\max_{1\leq j\leq n}{t_j}$.
+
+Per assurdo suppongo che $T^*<\frac{1}{m}\sum_{j=1}^n t_j$. Allora $T_i^*<\frac{1}{m}\sum_{j=1}^n t_j$, da cui
+\[
+\sum_{i=1}^mT_i^*<\sum_{i=1}^m\frac{1}{m}\sum_{j=1}^nt_j=\sum_{j=1}^nt_j
+\]
+giungendo così ad un assurdo.
+\end{proof}
+
+\begin{proposizione}
+L'algoritmo proposto è un algoritmo di 2-approssimazione.
+\end{proposizione}
+\begin{proof}
+Sia $T^G=\max_{1\leq i\leq m}\{T_i^G\}=T_{\bar{i}}^G$ e sia $\bar{j}$ l'indice dell'ultimo \textit{job} assegnato alla macchina $\bar{i}$. All'iterazione $\bar{j}$ il tempo $T_{\bar{i}}^G-t_{\bar{j}}$ era il minimo tra tutti i tempi $T_{i}^G$, ovvero $T_i^G\geq T_{\bar{i}}^G-t_{\bar{j}}$ per $1\leq i\leq m$. Allora
+\[
+m(T_{\bar{i}}^G-t_{\bar{j}})\leq \sum_{i=1}^mT_i^G\leq \sum_{j=1}^nt_j\leq mT^*
+\]
+dove l'ultima relazione segue dalla proposizione precedente. Da ciò segue che $T_{\bar{i}}^G-t_{\bar{j}}\leq T^*$, ovvero
+\[
+T^G=T_{\bar{i}}^G\leq T^*+t_{\bar{j}} \leq T^*+T^*=2T^*.
+\]
+Concludendo si ottiene la tesi
+\[
+\rho = \frac{T^G}{T^*}\leq 2.
+\]
+\end{proof}
+
+\section{Aritmetica intera}
+\subsection{Divisione intera e modulo}
+\label{sez:divisione}
+Ora proponiamo un algoritmo \textit{divide and conquer} con il quale risolvere il calcolo della divisione intera e del modulo tra due interi. Ragioniamo con la rappresentazione binaria degli interi.
+
+Dati due interi $a$ e $b$, per il teorema di divisione $\exists !\ q,r$ interi tali che $a=qb+r$, con $0\leq r<b$. È possibile osservare come il resto della divisione sia robusto rispetto alla sottrazione di multipli di $b$:
+\begin{align*}
+a&=qb+r \\
+a-mb&=qb-mb+r \\
+a'&=(q-m)b+r
+\end{align*}
+L'algoritmo che verrà qui proposto si basa proprio su questa osservazione. Perché esso sia efficiente è conveniente che $m$ sia multiplo della base in modo da poter applicare il velocissimo algoritmo di \textit{shift}.
+
+L'algoritmo si delinea secondo queste idee:
+\begin{itemize}
+\item \textbf{caso di base}: se $a<b$ allora la coppia quoziente e resto vale $(q,r)=(0,a)$;
+\item \textbf{caso non di base}: se $a\geq b$, allora sia $k\ |\ 2^kb\leq a < 2^{k+1}b$. Quindi
+\[
+a=qb+r \Rightarrow a-2^kb=(q-2^k)b+r \Rightarrow (q',r')=(q-2^k,r)
+\]
+\end{itemize}
+
+Perché l'algoritmo funziona a dovere? Ricordiamo infatti che è un algoritmo \textit{divide and conquer}, il quale richiede la riduzione della taglia dell'istanza di ingresso ad ogni iterazione ricorsiva. Infatti, essendo $a<2^{k+1}b \Leftrightarrow a/2<2^kb$ si ha
+\[
+a-a^{2b} < a-\frac{a}{2}=\frac{a}{2}
+\]
+garantendo così almeno il dimezzamento della taglia. In questo modo è anche possibile stabilire che il numero di iterazioni è logaritmico nella taglia dell'istanza. In \ref{alg:quozienteresto} lo pseudocodice dell'algoritmo. Considerata come taglia il numero di bit del dividendo, la complessità dell'algoritmo è
+\[
+T(n)=T(n-1)+O(n)=O(n^2)
+\]
+dove il dimezzamento del dividendo è rappresentato dalla diminuzione di una unità del numero di bit della sua rappresentazione binaria, mentre il lavoro delle procedure di SHIFT, SUM e SUB, come noto, è lineare.
+
+\begin{algorithm}
+\caption{Algoritmo \textit{divide and conquer} per il calcolo di quoziente e resto}
+\label{alg:quozienteresto}
+\begin{algorithmic}
+\Function{R\_QR}{$a,b$}
+	\If{$a<b$}
+		\State \Return $(0,a)$
+	\EndIf
+	\State $k \gets a$.length $- b.$length
+	\If{SHIFT($b,k$)$>a$}
+		\State $k\gets k-1$
+		\State $(q',r')\gets$R\_QR(SUB($a$, SHIFT($b,k$)), $b$)
+	\EndIf
+	\State \Return (SUM($q'$, SHIFT($1,k$)), $r'$)
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Il minimo comune multiplo}
+In questa sezione forniamo un algoritmo per il calcolo del minimo comune multiplo tra due interi.
+
+\begin{definizione}
+Il \textbf{minimo comune multiplo} (\textit{least common multiple}) è definito come segue
+\[
+\lcm(a,b)=\min\{c>0\ |\ (a|c)\ \land\ (b|c)\}.
+\]
+\end{definizione}
+
+Vale la seguente proposizione.
+
+\begin{proposizione}
+Per qualsiasi intero $a,b>0$ si ha
+\[
+\lcm(a,b)=\frac{ab}{\gcd(a,b)}.
+\]
+\end{proposizione}
+\begin{proof}
+Dalla relazione proposta segue che
+\[ab=\gcd(a,b)\lcm(a,b)=dm
+\]
+con $d=\gcd(a,b)$ e $m=\lcm(a,b)$. Poiché $(d|a)\ \land\ (d|b)$ allora $d|ab$ e di conseguenza, per definizione, $\exists n\ :\ ab=dn$. La dimostrazione verte quindi nel dimostrare che $m=\lcm(a,b)=n$.
+
+Valgono le seguenti considerazioni
+\begin{align*}
+\begin{cases}
+d|a \Rightarrow a=kd \\
+d|b \Rightarrow b=hd
+\end{cases}
+\Rightarrow ab=kdb=ahd=dn
+\end{align*}
+da cui segue che $(n=kb)\ \land\ (n=ah)$, ovvero che $n$ è multiplo comune di $a$ e $b$, quindi $n\geq \lcm(a,b)=m$.
+
+Dato che $m=\lcm(a,b)$, $(m=ar)\ \land\ (m=bs)$. Per l'identità di Bézout $\exists d\ |\ d=ax+by$. Quindi
+\begin{align*}
+md&=axm+bym \\
+&=axbs+byar \\
+&=ab(xs+yr) \\
+&=dn(xs+yr)
+\end{align*}
+da cui, semplificando, si ottiene che $m=n(xs+yr)$, ed essendo $(xs+yr)>0$, si ha che $n|m$ e quindi $n\leq m$.
+
+Mettendo insieme i due risultati ottenuti si ottiene la tesi.
+\end{proof}
+
+Forti della dimostrazione appena fornita, in \ref{alg:lcm} è proposto l'algoritmo per il calcolo del minimo comune multiplo.
+
+\begin{algorithm}
+\caption{Algoritmo per il calcolo del minimo comune multiplo}
+\label{alg:lcm}
+\begin{algorithmic}
+\Function{LCM}{$a,b$}
+   \State \Return $ab$/EUCLID($a,b$)
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Unicità dell'inverso moltiplicativo in $\Zns$}
+In questa sezione dimostreremo l'unicità dell'inverso moltiplicativo in $\Zns$.
+
+\begin{proposizione}
+Dato $n\in \Z$, $\forall a,b\in \Zp$, si ha
+\[
+(n|ab)\ \land\ (\gcd(a,n)=1) \Rightarrow n|b.
+\]
+\end{proposizione}
+\begin{proof}
+Dalla prima ipotesi ($n|ab$) segue che $\exists k\in \Zp\ |\ ab=kn$. Dalla seconda ipotesi, per l'identità di Bézout $\exists x,y\in\Z\ |\ 1=ax+ny$. Quindi
+\begin{align*}
+b&=b\cdot 1 \\
+&=bax+bny \\
+&=abx+nby \\
+&=knx+nby \\
+&=n(kx+by)
+\end{align*}
+da cui segue che $n|b$.
+\end{proof}
+
+\begin{proposizione}[Unicità dell'inverso moltiplicativo]
+In $\Zn$, se $ax_1\equiv ax_2\equiv 1\bmod n$, con $a\in\Zns$, allora $x_1\equiv x_2\bmod n$.
+\end{proposizione}
+\begin{proof}
+\[
+ax_1\equiv ax_2\bmod n \Leftrightarrow (ax_1-ax_2)\equiv 0\bmod n
+\]
+ovvero $\exists k\in\Z\ |\ a(x_1-x_2)=kn$. Poiché $a\in\Zns$, allora $\gcd(a,n)=1$, ed avendo appena dimostrato che $n|a(x_1-x_2)$, per la proposizione precedente segue che $n|(x_1-x_2)$, ovvero che $x_1-x_2=hn$, da cui $x_1\equiv x_2\bmod n$.
+\end{proof}
+
+\section{Randomizzazione}
+\subsection{Il problema INDIPENDENT-SET}
+Forniamo le seguenti definizioni.
+\begin{definizione}
+Dato un grafo $G=(V,E)$, un \textbf{indipendent set} è un insieme $V'\subseteq V\ :\ \forall u,v\in V',u\neq v$ si ha $\{u,v\}\notin E$.
+\end{definizione}
+\begin{definizione}
+Dato un grafo $G=(V,E)$, un arco $e=\{u,v\}\in E$ è \textbf{interno} ad un insieme $V'\subseteq V$ se $\{u,v\}\in V'$.
+\end{definizione}
+
+Dato un grafo $G=(V,E)$, con $n=|V|$ e $m=|E|$, si vuole determinare (se esiste) un suo insieme indipendente. Per la risoluzione di questo problema forniamo due approcci, entrambi basati sulla randomizzazione.
+
+\paragraph*{Approccio Montecarlo}
+La risoluzione parte da un'idea banale: si estraggono casualmente $r$ nodi dall'insieme $V$ e si verifica se questo sottoinsieme di nodi forma un insieme indipendente del grafo. L'algoritmo \ref{alg:ismontecarlo} è un algoritmo Montecarlo in quanto la verifica di $V'$ può fallire. La primitiva RANDOM($V,r$) indica l'estrazione senza reinserimento di $r$ elementi dall'insieme $V$.
+
+\begin{algorithm}
+\caption{Algoritmo Montecarlo per INDIPENDENT-SET}
+\label{alg:ismontecarlo}
+\begin{algorithmic}
+\Function{IS1}{$G(V,E),r$}
+	\State $V'\gets$RANDOM($V,r$)
+	\If{$V'$ è indipendente}
+		\State \Return $V'$
+	\Else
+		\State \Return FAILURE
+	\EndIf
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+Non rimane che dimensionare il valore di $r$ in modo che sia garantito che $P(\text{IS1 non fallisce})\geq 1/2$. Fissiamo un arco $e\in E$. Allora
+\begin{align*}
+P(e \text{ interno in } V')&=\frac{\binom{n-2}{r-2}}{\binom{n}{r}} \\
+&=\frac{(n-2)!}{(r-2)!(n-r)!}\cdot\frac{r!(n-r)!}{n!} \\
+&=\frac{(r-1)r}{n(n-1)} \\
+&\leq\frac{r^2}{n^2} && (\text{se } r<n)
+\end{align*}
+Si definisca la v.a. indicatrice $X_e=1 \Leftrightarrow e$ è interno a $V'$. Allora, per quanto visto prima, $P(X_e=1)\leq\frac{r^2}{n^2}$. Sia $X=\sum_{e\in E}X_e$. La probabilità che l'algoritmo non fallisca è equivalente alla probabilità che non vi siano archi interni all'insieme indipendente:
+\[
+P(X=0)=1-P(X\geq 1)
+\]
+e
+\begin{align*}
+P(X\geq 1)&=P(\exists e\in E\ |\ X_e=1) \leq mP(X_e=1) \leq \frac{mr^2}{n^2}
+\end{align*}
+grazie all'applicazione dello \textit{union bound}.
+Lo stesso risultato è possibile ottenerlo applicando il lemma di Markov\footnote{Si noti che per $T=1$ il lemma di Markov fornisce lo \textit{union bound}.} (lemma \ref{lemma:markov}):
+\begin{align*}
+P(X\geq 1)&\leq \frac{E[X]}{1}=E[X]=mE[X_e]=mP(X_e=1)\leq\frac{mr^2}{n^2}.
+\end{align*}
+Proseguendo
+\begin{align*}
+P(X=0)&=1-P(X\geq 1) \geq 1-\frac{mr^2}{n^2} \overset{?}{\geq} \frac{1}{2}
+\end{align*}
+che avviene quando
+\begin{align*}
+r^2\leq \frac{n^2}{2m} \Leftrightarrow r\leq\sqrt{\frac{n^2}{2m}}=\frac{n}{\sqrt{2m}} \Rightarrow r_{max}=\floor{n/\sqrt{2m}}.
+\end{align*}
+Il risultato ottenuto non è strabiliante. Infatti, se consideriamo un grafo denso dove $m=\Theta(n^2)$ ($m=cn^2, c<1$) si ottiene
+\[
+r=\floor{n/n\sqrt{2c}}=\floor{1/\sqrt{2c}}=O(1).
+\]
+Nel caso sparso invece, dove $m=O(n)$, si ottiene un buon risultato:
+\[
+r=\floor{n/\sqrt{2m}}\geq\floor{n/\sqrt{2cn}}=\floor{\sqrt{n}/\sqrt{2c}}=\Omega(\sqrt{n}).
+\]
+Dov'è che l'algoritmo non si comporta intelligentemente? L'algoritmo tira a caso $r$ vertici e fallisce se vi è un arco interno a questi $r$ vertici: questo non è un atteggiamento particolarmente furbo perché costringe a considerare un $n$ piccolo se si ottenere una probabilità che non vi sia un arco interno all'insieme dei nodi selezionati che è abbastanza grande.
+
+\paragraph*{Approccio Las Vegas}
+In questo secondo approccio forniamo un algoritmo Las Vegas (algoritmo \ref{alg:islasvegas}). L'idea è quella di effettuare un \textit{sampling} $S$ dell'insieme dei nodi $V$, selezionando ogni nodo di $V$ e aggiungendolo ad $S$ con probabilità $p$. Successivamente effettuiamo una "pulitura" dell'insieme $S$: per ogni arco di $E$, se l'arco è interno ad $S$ elimino da tale insieme uno dei due nodi (in questo modo l'arco diventa esterno). Alla fine della fase di pulitura l'insieme ottenuto è un insieme indipendente in quanto tutti gli archi interni sono stati eliminati.
+
+\begin{algorithm}
+\caption{Algoritmo Las Vegas per INDIPENDENT-SET}
+\label{alg:islasvegas}
+\begin{algorithmic}
+\Function{IS2}{$G(V,E),p$}
+	\State $S\gets\emptyset$
+	\For{$i\gets 1 \textbf{ to } |V|$}
+		\State ** aggiungi $v_i$ a $S$ con probabilità $p$ **
+	\EndFor
+	\For{$j\gets 1 \textbf{ to } |E|$}
+		\If{$e_j=\{u,v\}$ interno a $S$}
+			\State $S\gets S-\{u\}$
+		\EndIf
+	\EndFor
+	\State \Return $S$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+Sia $X$ la v.a. rappresentante il numero di nodi selezionati dalla fase di sampling: $E[X]=np$. Sia $Y=\sum_{e\in E}Y_e$ la v.a. che rappresenta il numero di elementi eliminati dalla fase di \textit{cleaning}, con $Y_e=1$ se e solo se l'arco $e$ è interno a $S$ all'inizio della fase di pulitura. L'analisi non cattura il fatto che un arco inizialmente interno possa diventare esterno mano a mano che la fase di pulitura avanza, conseguentemente l'algoritmo andrà meglio (in generale) rispetto a quanto verrà evidenziato dall'analisi. In sostanza, la probabilità che un arco sia interno al \textit{sample} prima della fase di pulitura è più piccola della probabilità che esso sia interno anche alla fine di tale fase perché questo arco potrebbe essere stato rimosso durante il processo di pulitura. Proprio per questo motivo possiamo scrivere la seguente maggiorazione:
+\begin{align*}
+P(Y_e=1)&\leq P(e=\{u,v\} \text{ interno alla fine della fase di sampling}) \\
+&=P(u,v \text{ vengano selezionati durante il sampling}) \\
+&=p^2
+\end{align*}
+poiché la selezione dei nodi è indipendente.
+Allora $E[Y]=E[\sum_{e\in E}Y_e]\leq mp^2$, da cui $E[|S|]=E[X-Y]\geq np-mp^2$.
+
+Studiando la funzione $f(p)=np-mp^2$ in $[0,1]$ (essendo una distribuzione di probabilità) osservo che tale funzione è una parabola e che ha un massimo in $p=n/2m$. Allora
+\begin{align*}
+E[|S|]|_{p=\frac{n}{2m}} &\geq n\frac{n}{2m} -m\frac{n^2}{4m^2} \\
+&=\frac{n^2}{4m} \\
+&=\Theta(\floor{n/\sqrt{2m}}^2).
+\end{align*}
+
+Con questo algoritmo si ottiene un insieme indipendente di cardinalità quadratica rispetto alla versione Montecarlo. Le prestazioni nel caso di grafi sparsi rimangono equivalenti mentre otteniamo un netto miglioramento nel caso di grafi densi poiché $n^2/4m=\Theta(n)$.
+
+\subsection{Somma di variabili aleatorie geometriche}
+Sia data una sequenza $Z_1, Z_2,\cdots, Z_n$ di variabili aleatorie geometriche\footnote{Una variabile aleatoria geometrica $Z\sim Geom(p)$ è tale per cui $P(Z=j)=p(1-p)^{j-1}$, con $j\geq 1$. Inoltre la sua media vale $E[Z]=1/p$.} indipendenti e identicamente distribuite. Forniremo un bound sulla coda della distribuzione $Z=\sum_{i=1}^kZ_i$: segue immediatamente che $E[Z]=\sum_{i=1}^kE[Z_i]=k/p=\mu$.
+
+Effettuo un cambio dello spazio di probabilità portandoci nel mondo dei lanci di monete. In particolare eseguo il seguente esperimento ($p$ è la probabilità che la moneta restituisca una testa):
+\begin{enumerate}
+\item lancio una moneta fino alla prima testa e associo tale esperimento alla v.a. $Z_1$;
+\item lancio una moneta fino alla prima testa e associo tale esperimento alla v.a. $Z_2$;
+\item ...
+\item lancio una moneta fino alla prima testa e associo tale esperimento alla v.a. $Z_k$.
+\end{enumerate}
+
+Si vuole maggiorare $P(Z>t\mu)$ per $t>1$. L'evento "$Z>t\mu$" implica l'evento $E_Z=$"nei primi $t\mu$ lanci di moneta sono uscite meno di $k$ teste", pertanto $P(Z>t\mu)\leq P(E_Z)$. Si considerino le v.a. indicatrici $X_1, X_2,\cdots, X_{t\mu}$. Allora
+\begin{align*}
+P(E_Z)&=P\left(\sum_{j=1}^{t\mu}X_j<k\right) \\
+E[X]&=E\left[\sum_{j=1}^{t\mu}X_j\right]=t\mu p=tk \Rightarrow k=E[X]/t
+\end{align*}
+
+Quindi, essendo $1/t<1$ e dovendo esprimere $1/t=1-\delta$, ponendo $\delta=1-1/t$ e applicando il terzo bound di Chernoff si ottiene
+\begin{align*}
+P(X<k)&=P(X<E[X]/t) \\
+&=P(X<(1-\delta)E[x]) \\
+&< e^{-\frac{\delta^2}{2}E[X]} && (Chernoff) \\
+&= e^{-\frac{1}{2}\left(1-\frac{1}{t}\right)^2kt} \\
+&>P(Z>t\mu)
+\end{align*}
+
+Si osservi che nel bound non compare la probabilità $p$. Quando $p\rightarrow 1$ allora $P(Z>t\mu)\rightarrow 0$ (bastano $k$ lanci): il bound però "non garantisce" ciò ma questo non è un problema, semplicemente il bound non è ottimale per $p\rightarrow 1$.
+
+Nella successiva sezione vedremo un esempio di applicazione di questo bound nel caso di $p$ costante.
+
+\subsection{Ricerca binaria tollerante ai guasti in lettura}
+Sia dato un vettore ordinato $A$ e si voglia effettuare una ricerca binaria su di esso. L'aleatorietà in questo problema è data dal possibile fallimento di una lettura: in particolare, la procedura $A.$read$(i)$ restituirà la componente $A[i]$ con $p=1/2$ e restituirà ERROR con probabilità $1-p$. L'algoritmo che proponiamo in \ref{alg:ricercabinaria} è un algoritmo Las Vegas. La correttezza dell'algoritmo segue immediatamente da quella dell'algoritmo di ricerca binaria e dal fatto che il ciclo dell'algoritmo non è infinito. La struttura delle chiamate è in ogni caso una catena con le istanze che mano a mano vengono al più dimezzate. L'algoritmo è lineare, con il caso peggiore rappresentato dalla ricerca senza successo.
+
+\begin{algorithm}
+\caption{Algoritmo Las Vegas per la ricerca binaria}
+\label{alg:ricercabinaria}
+\begin{algorithmic}
+\Function{SEARCH}{$A,i,j,k$}
+	\If{$i>j$}
+		\State \Return NOT FOUND
+	\EndIf
+	\State $m\gets \floor{(i+j)/2}$
+	\State $temp\gets A.$read$(m)$
+	\While{$temp=$ ERROR}
+		\State $temp\gets A.$read$(m)$
+	\EndWhile
+	\If{$temp=k$}
+		\State \Return $m$
+	\EndIf
+	\If{$temp>k$}
+		\State \Return SEARCH($A,i,m-1,k$)
+	\Else
+		\State \Return SEARCH($A,m+1,j,k$)
+	\EndIf
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+La lettura dell'elemento di mezzo del vettore per ogni chiamata può essere rappresentato tramite una v.a. geometrica: ogni variabile $Z_i$ rappresenterà il numero di letture effettuate al livello $i$-esimo. Poiché ad ogni livello la chiamata ricorsiva accetta in ingresso una istanza di taglia al più dimezzata, il numero di chiamate totali sarà al più $\log_2 n$. Considerato come lavoro dell'algoritmo la lettura della componente del vettore, la somma di tutte queste v.a. restituirà il lavoro complessivo dell'algoritmo. Pertanto
+\[
+E\left[\sum_{i=0}^{\log_2 n-1}Z_i\right]=\log_2 n\frac{1}{p}=2\log_2 n
+\]
+da cui segue, per l'analisi svolta nella sezione precedente,
+\[
+P\left(\sum_{i=0}^{\log_2 n-1}Z_i > t2\log_2 n\right) < e^{-\left(1-\frac{1}{t}\right)^2\frac{t}{2}\log_2 n} \overset{?}{>} \frac{1}{n}
+\]
+Dimensionando opportunamente $t$ si ottiene la garanzia voluta. Ad esempio, per $t=4$:
+\[
+e^{-\frac{9}{16}\cdot\frac{4}{2}\log_2 n}=e^{-\frac{9}{8}\log_2 n} < e^{-\ln n} = \frac{1}{n}.
+\]
+
+\subsection{Scostamento dalla media di v.a. con valori in $\{-1,+1\}$}
+Siano date $n$ variabili aleatorie $X_1, X_2,\cdots, X_n$, i.i.d., con $X_i\in\{-1,+1\}$ e con $P(X_i=-1)=P(X_i=1)=p=1/2$. Si vuole studiare la variabile aleatoria $X=\sum_{i=1}^nX_i$: in particolare si vuole trovare un bound per $P(X\geq \delta)$, con $\delta > 0$, e si vuole determinare un $\bar{\delta}$ tale che $P(X\geq\bar{\delta})<1/n$.
+
+Per far ciò trasformo le variabili aleatorie $X_i$ in variabili aleatorie indicatrici $Y_i$. Effettuo questo tramite una trasformazione affine:
+\[
+Y_i=\frac{X_i+1}{2} \Rightarrow P(Y_i=0)=P(Y_i=1)=p=\frac{1}{2};
+\]
+poiché la funzione applicata è lineare, le v.a. $Y_i$ rimangono mutuamente indipendenti.
+
+Allora
+\begin{align*}
+P(X\geq\delta)&=P\left(\sum_{i=1}^nX_i\geq\delta\right) \\
+&=P\left(\sum_{i=1}^n(2Y_i-1)\geq\delta\right) \\
+&=P\left(\sum_{i=1}^nY_i\geq\frac{n+\delta}{2}\right) \\
+&=P\left(\sum_{i=1}^n(2Y_i-1)\geq\mu\left(1+\frac{\delta}{2\mu}\right)\right) \\
+&<e^{-\left(\frac{\delta}{2\mu}\right)^2\frac{\mu}{3}} \\
+&=e^{-\frac{\delta^2}{6n}} \\
+&\overset{?}{<}\frac{1}{n}
+\end{align*}
+e ponendo
+\[
+\frac{\delta^2}{6n}=\ln n \Leftrightarrow \bar{\delta}=\sqrt{6n\ln n}
+\]
+si ottiene quanto richiesto.
+
+\subsection{($\epsilon, \delta$)-approssimazione}
+Si voglia testare la realizzazione di un esperimento: testa la realizzazione di un evento $E_v$, con $P(E_v)=v$, $0<v<1$ (escludiamo i casi degeneri). Si vuole stimare $v$ eseguendo un certo numero di volte $m=m_{\epsilon,\delta}$ l'esperimento. Si vuole inoltre limitare superiormente tale numero in modo che garantisca che la stima $X$ di $v$ sia tale per cui
+\[
+P\left(\frac{|X-v|}{v}>\epsilon\right) < \delta, \ \ \ \ \ 0<\epsilon,\delta<1
+\]
+
+L'algoritmo è proposto in \ref{alg:experiment}. La procedura EXPERIMENT(), che rappresenta l'esperimento che realizza l'evento $E_v$, restituisce 1 se ha avuto successo e 0 altrimenti.
+
+\begin{algorithm}
+\caption{Algoritmo di ($\epsilon, \delta$)-approssimazione}
+\label{alg:experiment}
+\begin{algorithmic}
+\Function{ESTIMATE}{$m$}
+	\State $COUNT\gets 0$
+	\For{$i\gets 1 \textbf{ to } m$}
+		\State $b\gets$ EXPERIMENT()
+		\State $COUNT\gets COUNT+b$
+	\EndFor
+	\State \Return $COUNT/m$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+Si ha
+\begin{align*}
+\left(\frac{|X-v|}{v}>\epsilon\right)&=P\left(\frac{|\frac{COUNT}{m}-v|}{v} > \epsilon\right) \\
+&=P\left(\frac{|COUNT -mV|}{mV}>\epsilon\right) \\
+&\geq P(COUNT>(1+\epsilon)mV) + P(COUNT<(1-\epsilon)mV) \\
+&<e^{-\frac{\epsilon^2mV}{3}}+e^{-\frac{\epsilon^2mV}{2}} \\
+&<2e^{-\frac{\epsilon^2mV}{3}} \\
+&\overset{?}{<}\delta
+\end{align*}
+da cui
+\begin{align*}
+2e^{-\frac{\epsilon^2mV}{3}}&<\delta \\
+e^{-\frac{\epsilon^2mV}{3}}&<\frac{\delta}{2} \\
+e^{\frac{\epsilon^2mV}{3}}&>\frac{2}{\delta} \\
+\frac{\epsilon^2mV}{3}&>\ln\frac{2}{\delta} \\
+m_{\epsilon,\delta}&>\frac{3}{\epsilon^2}\ln{\frac{2}{\delta}}\left(\frac{1}{v}\right)
+\end{align*}
+
+\subsection{Generazione di bit senza bias}
+Si voglia generare dei bit senza bias a partire da bit con bias. Si consideri la procedura BIAS() che restituisce 1 con probabilità $p$ e 0 con probabilità $1-p$. Effettuando due lanci di moneta, posso ottenere i seguenti risultati:
+\begin{align*}
+00 &\text{ con probabilità } (1-p)^2 \\
+11 &\text{ con probabilità } p^2 \\
+10 &\text{ con probabilità } p(1-p) \\
+01 &\text{ con probabilità } (1-p)p \\
+\end{align*}
+osservando che le ultime due configurazioni sono equiprobabili pur partendo da una moneta con bias.
+
+In \ref{alg:bitsenzabias} è presentato l'algoritmo per la generazione di bit senza bias a partire da bit con bias. In particolare tale algoritmo termina con probabilità 1, ovvero non è possibile che l'algoritmo non termini a causa di un loop infinito.
+
+\begin{algorithm}
+\caption{Algoritmo per la generazione di bit senza bias}
+\label{alg:bitsenzabias}
+\begin{algorithmic}
+\Function{UNBIAS}{}
+	\State $\textbf{repeat}$
+		\State $a\gets$ BIAS()
+		\State $b\gets$ BIAS()
+	\State $\textbf{until } a\neq b$
+	\State \Return $a$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{proposizione}
+L'algoritmo di generazione di bit senza bias termina con probabilità 1.
+\end{proposizione}
+
+Si definiscano gli eventi
+\[
+A_i=\text{"UNBIAS() termina all'}i\text{-esima iterazione"} \,\,\,\,\, i\geq 1
+\]
+e si osservi che per tali eventi
+\begin{align*}
+A_i\cap A_j &= \emptyset \,\,\,\,\, i\neq j \\
+\bigcup_{i=1}^\infty A_i &= \Omega
+\end{align*}
+Allora
+\begin{align*}
+P(\text{UNBIAS() ritorni 0})&=\sum_{i=1}^\infty P(\text{UNBIAS() ritorni 0}|A_i)P(A_i) \\
+&=\frac{1}{2}\sum_{i=1}^\infty P(A_i) \\
+&=\frac{1}{2}
+\end{align*}
+dimostrando così che il risultato di UNBIAS() è senza bias.
+
+La probabilità che l'iterazione termina il repeat è
+\begin{align*}
+P(\text{"iterazione termina il repeat"})&=P(a=0\ \land\ b=1) + P(a=1\ \land\ b=0) \\
+&=(1-p)p + p(1-p) \\
+&=2p(1-p)
+\end{align*}
+ed è una v.a. geometrica (si cerca la probabilità del primo successo dopo una serie di soli insuccessi), quindi
+\[
+E[\text{numero iterazioni}]=\frac{1}{2p(1-p)}.
+\]
+Infine
+\[
+E[\text{UNBIAS()}]=2E[\text{numero iterazioni}]=\frac{1}{p(1-p)}.
+\]
+
+\section{Randomizzazione e approssimazione}
+Un algoritmo $A(i)$ è un algoritmo randomizzato di $\rho$-approssimazione se
+\[
+\max\left\lbrace\frac{E[c(A(i))]}{c(S^*)},\frac{c(S^*)}{E[c(A(i))]}\right\rbrace\leq\rho.
+\]
+
+\subsection{Il problema MAX-SAT}
+Il problema MAX-SAT è definito come segue
+\[
+\begin{cases}
+I:\ \langle \phi(x_1,\cdots,x_2),k\rangle\ :\  \phi(x_1,\cdots,x_2)=c_1 \land \cdots \land c_m \in 3-CNF, 0\leq k \leq m\\
+\\
+D:\ \exists\vec{b}\in\{0,1\}^n\ |\ \phi(\vec{b}) \text{ contiene almeno }k\text{ clausole vere?}
+\end{cases}
+\]
+
+È banale dimostrare che MAX-SAT è NP-hard sfruttando la riduzione da 3-CNF-SAT ponendo $k=m$.
+
+Un possibile algoritmo randomizzato di approssimazione è descritto in \ref{alg:approxmaxsat}.
+
+\begin{algorithm}
+\caption{Algoritmo per MAX-SAT}
+\label{alg:approxmaxsat}
+\begin{algorithmic}
+\Function{APPROX\_MAX-SAT}{$\phi(x_1,\cdots,x_2)$}
+	\State ** sia $ \phi(x_1,\cdots,x_2)=c_1 \land \cdots \land c_m $ **
+	\For{$i \gets 1\ \mathbf{to}\ n$}
+		\State $b_i\gets$RANDOM($\{0,1\}$)
+	\EndFor
+	\State $count\gets 0$
+	\For{$j \gets 1\ \mathbf{to}\ m$}
+		\If{$c_j(\vec{b}) = 1$}
+			\State $count \gets count+1$
+		\EndIf
+	\EndFor
+	\State \Return $count$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+Dall'algoritmo segue che
+\[
+\rho(\phi)=\frac{\text{"massimo numero di clausole soddisfacibili"}}{E[count]}\leq\frac{m}{E[count]}.
+\]
+
+Ancora una volta ci appoggiamo ad un v.a. indicatrice $X_i$: essa vale $1$ se la clausola $c_i$ è soddisfatta dall'assegnamento (randomico) $\vec{b}_R$, per $1\leq i\leq m$. Segue quindi che $count=\sum_{i=1}^mX_i$. Allora
+\begin{align*}
+E[count]&=E\left[\sum_{i=1}^mX_i\right] \\
+&=\sum_{i=1}^mE[X_i] \\
+&=\sum_{i=1}^mP(X_i=1) \\
+&=\sum_{i=1}^mP(c_i \text{ soddisfatta da } \vec{b}_R).
+\end{align*}
+
+Si ha
+\begin{align*}
+P(c_i \text{ soddisfatta da } \vec{b}_R)&=1-P(c_i \text{ non è soddisfatta da} \vec{b}_R) \\
+&=1-P(y_i^1=0)P(y_i^2=0)P(y_i^3=0)  \\
+&=1-\frac{1}{8} \\
+&=\frac{7}{8}
+\end{align*}
+essendo $(P(y_i^j=0)=1/2)$, per $1\leq i\leq m$ e $1\leq j\leq 3$.
+
+Riprendendo la sequenza di uguaglianze precedente si ottiene
+\begin{align*}
+E[count]&=\sum_{i=1}^mP(c_i \text{ soddisfatta da } \vec{b}_R) \\
+&=\sum_{i=1}^m\frac{7}{8} \\
+&=\frac{7}{8}m.
+\end{align*}
+
+Segue quindi che
+\[
+\rho(\phi)\leq\frac{m}{\frac{7}{8}m}=\frac{8}{7}.
+\]
+
+\subsection{Il problema MAX-CUT}
+Si fornisce la seguente definizione.
+
+\begin{definizione}
+Dato un grafo $G=(V,E)$ non orientato, un NODE-CUT è una partizione di $V$, $(W,V-W)$, con $W\subseteq V$. La taglia del node-cut è
+\[
+s(W,V-W)=|\{e=\{u,v\}\in E\ |\ (u\in W) \land (v\in V-W)\}|.
+\]
+\end{definizione}
+
+Il problema MAX-CUT è un problema di ottimo che richiede, dato un grafo, di trovare il node-cut di taglia massima. Si può osservare che l'algoritmo di Karger restituisce sempre un node-cut e in particolare esso è un node-cut di taglia minima. Si può dimostrare che il problema MAX-CUT è un problema NP-hard.
+
+\paragraph{Algoritmo di 2-approssimazione}
+Un possibile approccio risolutivo basato sull'approssimazione parte da una semplice idea: considero il node-cut iniziale vuoto, ovvero $(\emptyset, V)$ e man mano miglioro il taglio corrente con una strategia di \textit{local search}, spostando un nodo da una parte all'altra della partizione. In \ref{alg:maxcutapprox} è proposto lo pseducodice dell'algoritmo. L'algoritmo non presenta un loop infinito poiché la funzione di costo è monotona crescente; inoltre al massimo l'algoritmo esegue $m$ iterazioni. Il taglio ottimo è quindi $s(W^*,V-W^*)\leq m$. Dimostrando che l'algoritmo restituisce un taglio pari ad almeno $m/2$ si ottiene la tesi per cui l'algoritmo proposto è di 2-approssimazione.
+
+\begin{algorithm}
+\caption{Algoritmo di 2-approssimazione per MAX-CUT}
+\label{alg:maxcutapprox}
+\begin{algorithmic}
+\Function{DET\_APPROX\_MAX-CUT}{$G(V,E)$}
+	\State $W\gets\emptyset$
+	\While{$\textbf{true}$}
+		\If{$(\exists v\in W\ |\ s(W-\{v\},V-W\cup \{v\}) > s(W,V-W))\ \lor\ (\exists v\in V-W\ |\ s(W\cup \{v\}, V-W-\{v\}) > s(W,V-W))$}
+			\State ** sposto il nodo **
+		\Else
+			\State \textbf{exit}
+		\EndIf
+	\EndWhile
+	\State \Return $s(W,V-W)$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\begin{proposizione}
+Considerato un nodo $v\in W$, e sia $d(v)$ il grado di $v$, si ha che $t_v\geq d(v)/2$ vicini di $v$ sono in $V-W$.
+\end{proposizione}
+\begin{proof}
+Per assurdo, suppongo che $t_v < d(v)/2 \Leftrightarrow 2t_v < d(v)$. Considero il taglio $(W', V-W')=(W-\{v\},V-W\cup\{v\})$. Allora
+\begin{align*}
+s(W', V-W')&=s(W, V-W)-t_v+(d(v)-t_v) \\
+&=s(W, V-W) + (d(v)-2t_v) \\
+&>s(W, V-W)
+\end{align*}
+tuttavia ciò non è possibile perché l'algoritmo, se c'è qualcosa di migliorabile, non terminerebbe.
+\end{proof}
+
+La proposizione è ovviamente simmetrica e quindi vale anche per l'altra parte del taglio. Da questa proposizione segue
+\begin{align*}
+s(W, V-W)&=\frac{1}{2}\sum_{v\in V}t_v \\
+&\geq \frac{1}{2}\sum_{v\in V}\frac{d(v)}{2} \\
+&=\frac{1}{2}\cdot\frac{2|E|}{2}\\
+&=\frac{m}{2}
+\end{align*}
+da cui
+\begin{align*}
+\rho = \frac{s(W^*, V-W^*)}{s(W, V-W)} \leq \frac{m}{\frac{m}{2}} = 2.
+\end{align*}
+
+\paragraph*{Approccio randomizzato}
+In \ref{alg:randommaxcut} è proposto un algoritmo randomizzato per MAX-CUT.
+
+\begin{algorithm}
+\caption{Algoritmo randomizzato per MAX-CUT}
+\label{alg:randommaxcut}
+\begin{algorithmic}
+\Function{RANDOM\_APPROX\_MAX-CUT}{$G(V,E)$}
+	\State $W\gets\emptyset$
+	\For{$i\gets 1 \textbf{ to } |V|$}
+		\State $b\gets$ RANDOM($\{0,1\}$)
+		\If{$b=0$}
+			\State $W\gets W\cup \{v_i\}$
+		\EndIf
+	\EndFor
+	\State \Return $s(W,V-W)$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+Per analizzare l'algoritmo proposto introduciamo la v.a. $X_e=1$, $\forall e=\{u,v\}\in E$, se
+\[
+\{[(u\in W)\ \land\ (v\in V-W)]\ \lor\ [(u\in V-W)\ \land\ (v\in W)]\}.
+\]
+Allora, dalla definizione di node-cut, segue che
+\[
+s(W,V-W)=\sum_{e\in E}X_e
+\]
+da cui
+\[
+E[s(W,V-W)]=\sum_{e\in E}E[X_e]=\sum_{e\in E}P(X_e=1)
+\]
+dove
+\begin{align*}
+P(X_e=1)&=P([(u\in W)\ \land\ (v\in V-W)]\ \lor\ [(u\in V-W)\ \land\ (v\in W)]) \\
+&=P([(b_u=0)\ \land\ (b_v=1)]\ \lor\ [(b_u=1)\ \land\ (b_v=0)]) \\
+&=P(b_u=0)P(b_v=1) + P(b_u=1)P(b_v=0) \\
+&=\frac{1}{2}\cdot\frac{1}{2} + \frac{1}{2}\cdot\frac{1}{2} \\
+&=\frac{1}{2}.
+\end{align*}
+Da ciò segue che $E[s(W,V-W)]=m/2$, ovvero
+\[
+\rho = \frac{c(S^*)}{E[c(A(i))]} \leq \frac{m}{\frac{m}{2}} = 2.
+\]
+L'algoritmo proposto ha quindi la stessa qualità dell'algoritmo dell'algoritmo precedente tuttavia permette di risparmiare tempo in quanto esegue una semplice scansione lineare.

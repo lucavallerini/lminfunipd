@@ -1,0 +1,23 @@
+## Core tex files
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+.*.lb
+*.tex.bak
+*.tex.backup
+
+## Files from other packages
+# algorithms
+*.alg
+*.loa
+
+## Others
+.directory

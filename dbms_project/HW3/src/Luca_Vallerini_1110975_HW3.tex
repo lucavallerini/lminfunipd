@@ -1,0 +1,114 @@
+\documentclass[a4paper]{scrartcl}
+\usepackage[a4paper,top=2cm,bottom=2cm,left=2cm,right=2cm]{geometry}
+\usepackage[utf8x]{inputenc}
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+\usepackage{tabularx}
+\usepackage{helvet}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{amsfonts}
+\renewcommand{\familydefault}{\sfdefault}
+
+% Informazioni generali
+\newcommand{\corso}{Basi di Dati}
+\newcommand{\anac}{A.A. 2014/2015}
+\newcommand{\laurea}{Corso di Laurea Magistrale in Ingegneria Informatica}
+\newcommand{\matricola}{1110975}
+\newcommand{\nome}{Luca}
+\newcommand{\cognome}{Vallerini}
+\newcommand{\data}{Data di consegna: 27 maggio 2015}
+\newcommand{\consegna}{Homework 3 - Progettazione Logica}
+
+\begin{document}
+\begin{footnotesize}
+
+% Intestazione con loghi
+\begin{figure}
+	\begin{minipage}[t]{\textwidth}
+		\includegraphics[height=15mm]{img/logounipd}
+		\hfill
+		\includegraphics[height=15mm]{img/logodei}
+	\end{minipage}
+\end{figure}
+
+% Intestazione corso
+{
+\centering
+\textbf{\corso , \anac} \\
+\textbf{\laurea} \\
+\vspace{5pt}
+\textbf{\consegna} \\
+\textbf{\small\data}
+
+
+% Intestazione dati studente
+\begin{table}[h]
+	\begin{tabularx}{\textwidth}{|X|X|X|}
+		\hline
+		\multicolumn{1}{|c|}{\textbf{Cognome}} &
+		\multicolumn{1}{c|}{\textbf{Nome}} &
+		\multicolumn{1}{c|}{\textbf{Numero di matricola}} \\
+		\centering\cognome &
+		\centering\nome &
+		\centering\matricola \tabularnewline
+		\hline
+	\end{tabularx}
+\end{table}
+
+}	
+
+% Svolgimento
+\subsection*{\color[RGB]{155,0,20}Ristrutturazione Schema Entità-Associazione}
+Lo schema ER ristrutturato è riportato in fondo al documento.
+
+In prima battuta sono state corrette le sviste e gli errori della progettazione concettuale: è stata eliminata l'entità \textit{CASELLA} in quanto ridondante, l'associazione \textit{tratto} è stata portata ad essere una molti-a-molti (anziché l'errata uno-a-uno) ed è stato aggiunto un nuovo identificatore all'entità \textit{SERIE} in modo da evitare di utilizzare la tripla \textit{Titolo, Autore, Anno}. 
+
+Successivamente sono stati aggiunti un attributo all'entità \textit{EDIZIONE} e un attributo all'entità \textit{VOLUME}, rispettivamente \textit{Nome} (dominio: testo) con il quale fornire un nome all'edizione (ad esempio \textit{Perfect Edition}) e \textit{Cop} (dominio: immagine) che riporta la scannerizzazione della copertina del volume. È stato inoltre aggiunto l'attributo \textit{PrezzoElem} all'associazione \textit{merce} così da poter aggiornare il prezzo di un prodotto senza che questo influenzi il dettaglio di un ordine (ad esempio, l'aumento del prezzo di un prodotto non deve riflettersi sul dettaglio degli ordini precedenti nei quali tale prodotto compare): \textit{PrezzoElem} quindi corrisponderà a \textit{PrezzoFin} di \textit{VOLUME} al momento della creazione dell'\textit{ORDINE} per gli ordini di tipo \textit{acquisto, abbonamento} e \textit{arretrato}, mentre viene specificato manualmente (se necessario) per gli ordini di tipo \textit{fornitura}.
+
+Per tutte le generalizzazioni/specializzazioni - eccettuata la specializzazione di \textit{PRODOTTO} -  è stato scelto di utilizzare solo l'entità padre, aggiungendo opportunamente un ulteriore attributo con il quale identificare le (ex) figlie. Per la specializzazione di \textit{EDIZIONE}, l'attributo della figlia \textit{Supporto} è stato reso facoltativo dovendo identificare se si tratta di una pubblicazione in DVD o in BR, mentre gli attributi multivalore \textit{Audio, Video, Sub} sono stati riportati con cardinalità (0,1) non trovando di grande utilità avere delle nuove entità le cui istante sono le caratteristiche della traccia video, delle traccie audio e sottotitoli di un'edizione home video.
+
+A causa dell'accorpamento delle entità figlie nell'entità \textit{ACCOUNT}, è stata accorpata l'associazione \textit{inserimento} in \textit{lavorazione}, intendendo l'inserimento di un nuovo ordine come primo tipo di lavorazione: per tal motivo la partecipazione nell'associazione dell'entità \textit{ORDINE} è stata resa obbligatoria.
+
+Gli attributi multivalore \textit{Telefono}, \textit{Fax}, \textit{Mail}, \textit{Indirizzo} delle entità \textit{DISTRIBUTORE}, \textit{EDITORE} e \textit{TESSERATO} sono stati realizzati opportunamente con entità separate. In particolare, per l'attributo \textit{Indirizzo} si è scelto di utilizzare come identificare un codice anziché tutti e cinque gli attributi della nuova omonima entità. Per i numeri di telefono e i numeri di fax, essendo essi fondamentalmente la stessa cosa, sono stati realizzati con un'unica entità \textit{TEL\_{FAX}} aggiungendo un opportuno attributo booleano \textit{fax} che, se posto a \textit{true}, identifica che il relativo numero di telefono è il numero di un fax. Inoltre, poiché nello schema originale esisteva già un'entità di nome \textit{MAIL} è stato deciso di rinominare la vecchia identità in \textit{NOTIFICA}.
+
+L'attributo \textit{TipoAcc} dell'entità \textit{ACCOUNT} identifica il tipo di account (e di conseguenza i suoi privilegi) e può assumere i valori \textit{titolare, venditore, tesserato}.
+
+L'attributo \textit{TipoOrd} dell'entità \textit{ORDINE} identifica il tipo di ordine e può assumere i valori \textit{acquisto, abbonamento, fornitura, arretrato}.
+
+L'attributo \textit{Media} dell'entità \textit{SERIE} può assumere i seguenti valori: \textit{anime, manga, drama, live action, light novel, romanzo}.
+
+\paragraph*{Vincoli esterni}
+\begin{itemize}
+\item Un account di tipo \textit{tesserato} può solo inserire gli ordini di tipo \textit{arretrato} e \textit{abbonamento}; un account di tipo \textit{venditore} può inserire e lavorare qualsiasi tipo di ordine eccetto l'ordine \textit{fornitura}, il quale può essere inserito e annullato solo da un account di tipo \textit{titolare}, mentre il resto della lavorazione può essere effettuata anche da un venditore; per un ordine di tipo \textit{acquisto}, se l'acquirente è un cliente tesserato allora questo deve essere specificato (ovvero l'entità \textit{ORDINE} deve partecipare nell'associazione \textit{acquirente}), mentre l'\textit{acquirente} è sempre specificato per gli ordini di tipo \textit{arretrato} e \textit{abbonamento}, mentre non viene mai specificato per gli ordini di tipo \textit{fornitura};
+\item un'istanza dell'entità \textit{PRODOTTO} ha una partecipazione di tipo XOR alle associazioni \textit{gen\_{prod}\_{vol}} e \textit{gen\_{prod}\_{ed}};
+\item l'identificatore \textit{CodSerie} dell'entità \textit{SERIE} sarà un codice univoco ricavato dagli attributi \textit{Titolo, Autore, Anno} e \textit{Media};
+\item se si tratta di una pubblicazione di \textit{manga, romanzo, light novel}, gli attributi \textit{Audio}, \textit{Video}, \textit{Sub}, \textit{Supporto} dell'entità \textit{EDIZIONE} devono essere nulli, analogamente per la pubblicazione di \textit{anime, drama, live action} devono essere nulli gli attributi \textit{Col}, \textit{SovraCop}, \textit{{\#}Pag};
+\item per l'entità \textit{ORDINE}, l'attributo \textit{PrezzoTot} viene calcolato come somma dei prodotti di \textit{PrezzoElem} e \textit{Quantità} dei prodotti acquistati, con eventuale aggiunta dello \textit{Sconto} per un cliente tesserato (entità \textit{TESSERA}); se l'ordine è di tipo \textit{abbonamento} invece il \textit{PrezzoTot} corrisponde al prezzo del \textit{VOLUME} di prossima pubblicazione che articola l'\textit{EDIZIONE} a cui si è abbonati;
+\item per l'entità \textit{SERIE}, se \textit{Media} è \textit{manga, light novel, romanzo}, allora \textit{{\#}Ep, Regista, Studio} devono essere nulli, se invece vale \textit{anime, drama, live action}, allora devono essere nulli gli attributi \textit{{\#}VolOrig, Rivista};
+\item l'inserimento di un nuovo ordine viene effettuato tramite l'associazione \textit{lavorazione}, riportando come \textit{StatoOrd} \textit{nuovo}: è ragionevole imporre un ordine non possa essere presente in nessun altro modo se prima non è stato inserito.
+\end{itemize}
+
+\subsection*{\color[RGB]{155,0,20}Schema Relazionale}
+Lo schema relazione è riportato in fondo al documento.
+
+Ovunque possibile le relazioni delle associazioni sono state accorpate nelle relazioni di una delle entità che partecipano all'associazione.
+
+\paragraph*{Vincoli}
+\begin{itemize}
+\item \textit{PrezzoFin}, \textit{PrezzoTess}, \textit{PrezzoElem} e \textit{PrezzoTot} (relazioni \textit{ORDINE}, \textit{TESSERA}, \textit{MERCE} e \textit{VOLUME}) rappresentano dei prezzi, pertanto dovranno essere dei numeri in virgola mobile non negativi;
+\item \textit{Sconto} della relazione \textit{TESSERA} è un intero compreso nell'intervallo $[0,100]$, rappresentante la percentuale di sconto associata al tesseramento;
+\item tutti i campi che fanno riferimento agli attributi delle entità e associazioni del modello ER ristrutturato sono non nulli se obbligatori;
+\item nella relazione \textit{EDIZIONE}, \textit{Editore} e \textit{Serie} non possono essere nulli;
+\item nella relazione \textit{VOLUME}, \textit{Edizione} non può essere nulla;
+\item nella relazione \textit{NOTIFICA}, \textit{Mittente} e \textit{Destinatario} non possono essere nulli;
+\item nella relazione \textit{TESSERATO}, \textit{Mail} non può essere nullo;
+\item \textit{DataScad} della relazione \textit{INCASELLAMENTO} viene calcolato come la somma di \textit{DataIns} della stessa relazione e \textit{DurataCasella} della relazione \textit{TESSERA};
+\item \textit{PrezzoElem} della relazione \textit{MERCE} è la copia di \textit{PrezzoFin} della relazione \textit{PRODOTTO} al momento della creazione di un ordine; può essere nullo nel caso di un ordine di tipo \textit{fornitura};
+\item \textit{PrezzoTot} della relazione \textit{ORDINE} viene calcolato come la somma del prodotto \textit{PrezzoElem} e \textit{Quantità} della relazione \textit{MERCE} che referenzia \textit{ORDINE}.
+\end{itemize}
+
+\end{footnotesize}
+\end{document}

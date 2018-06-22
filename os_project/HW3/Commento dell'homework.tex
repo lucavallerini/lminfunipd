@@ -1,0 +1,94 @@
+\documentclass[a4paper]{scrartcl}
+\usepackage[utf8x]{inputenc}
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+\usepackage{tabularx}
+\usepackage{lastpage}
+\usepackage{fancyhdr}
+\usepackage{helvet}
+\usepackage{longtable}
+\usepackage{booktabs}
+\renewcommand{\familydefault}{\sfdefault}
+
+% Informazioni generali
+\newcommand{\corso}{Sistemi Operativi}
+\newcommand{\anac}{ A.A. 2014/2015}
+\newcommand{\laurea}{Corso di Laurea Magistrale in Ingegneria Informatica}
+\newcommand{\matricola}{1110975}
+\newcommand{\nome}{Luca}
+\newcommand{\cognome}{Vallerini}
+\newcommand{\data}{Data di consegna: 31 maggio 2015}
+\newcommand{\consegna}{Homework 3 - Programmazione concorrente in ADA-Java}
+
+\pagestyle{fancy}
+\fancyhf{}% to clear existing header/footer if you don't want it
+\renewcommand\headrulewidth{0pt}
+\cfoot{\flushright Pagina [\thepage] di [\pageref{LastPage}]}
+
+\begin{document}
+
+% Intestazione con loghi
+\begin{figure}
+	\begin{minipage}[t]{\textwidth}
+		\includegraphics[height=25mm]{img/logounipd}
+		\hfill
+		\includegraphics[height=25mm]{img/logodei}
+	\end{minipage}
+\end{figure}
+
+% Intestazione corso
+{
+
+\vspace{5pt}
+\centering
+\textbf{\corso ,\anac} \\
+\textbf{\laurea} \\
+\vspace{15pt}
+\textbf{\consegna} \\
+\textbf{\small\data}
+
+
+% Intestazione dati studente
+\vspace{5pt}
+\begin{table}[h]
+	\begin{tabularx}{\textwidth}{|X|X|c|}
+		\hline
+		\multicolumn{1}{|c|}{\textbf{Cognome}} &
+		\multicolumn{1}{c|}{\textbf{Nome}} &
+		\multicolumn{1}{c|}{\textbf{Numero di matricola}} \\
+		\centering\cognome &
+		\centering\nome &
+		\matricola \\
+		\hline
+	\end{tabularx}
+\end{table}
+
+}
+
+% Documento vero e proprio
+\subsection*{Autolavaggio - Tema tipo proposto}
+Questo esercizio prevede la simulazione di un autolavaggio che esegue due tipi di servizi:
+\begin{itemize}
+\item \textit{lavaggioParziale}: l'auto viene lavata solo esternamente;
+\item \textit{lavaggioTotale}: l'auto viene lavata sia esternamente che internamente (in quest'ordine) \textbf{senza attesa} tra le due fasi.
+\end{itemize}
+
+Il lavaggio esterno viene effettuato nella zona A dell'autolavaggio con capienza massima di otto auto (\texttt{MAX\_{ZONA}\_{A}}), mentre il lavaggio interno viene effettuato nella zona B con capienza massima di quattro auto (\texttt{MAX\_{ZONA}\_{B}}).
+
+Le richieste per un lavaggio totale hanno la priorità su quelle per un lavaggio parziale.
+
+Seguendo le specifiche dell'esercizio, il lavaggio parziale è costituito da due chiamate e il lavaggio totale da tre. In entrambi i casi l'ultima chiamata è costituita dal pagamento e dal conseguente abbandono del sistema: tali chiamate non hanno guardie, ovvero hanno sempre guardia aperta. Similmente, poiché il passaggio tra il lavaggio esterno e quello interno del lavaggio completo deve avvenire senza attesa, la seconda chiamata del lavaggio completo ha guardia sempre aperta: ciò è possibile perché all'atto della prima chiamata, una volta che questa viene accettata, vengono occupati sia un posto nella zona A che un posto nella zona B.
+
+Per simulare la priorità dei lavaggi completi sui lavaggi parziali, la guardia alla prima chiamata di un lavaggio parziale non solo controlla che ci sia (almeno) un posto libero nella zona A, ma anche che non ci siano auto in coda alla prima chiamata del lavaggio completo o che la zona B sia satura: se la prima condizione e almeno una delle ultime due sono soddisfatte, allora è possibile procedere con il lavaggio parziale dell'auto, altrimenti è necessario attendere.
+
+Per l'ingresso di un auto che richiede il lavaggio completo viene semplicemente controllato che ci sia (almeno) un posto libero sia nella zona A che nella zona B.
+
+\subsection*{Ferrovia - Esercizio B compitino 05/12/2003}
+Il circuito ferroviario a otto è diviso in sei tratte ($A,\cdots , F$, trasposte nel codice in $0,\cdots , 5$), con ognuna un semaforo al suo ingresso. Tale circuito viene modellato tramite due array booleani rappresentanti uno l'occupazione (\texttt{true}) o meno (\texttt{false}) di una tratta, l'altro lo stato del semaforo all'ingresso della tratta (\texttt{true}=\textit{verde}, \texttt{false}=\textit{rosso}).
+
+Le tratte $B$ ($1$) e $E$ ($4$) non possono essere occupate contemporaneamente e nel circuito sono presenti due treni, inizialmente nelle tratte $A$ ($0$) e $C$ ($2$).
+
+Ogni treno ha conoscenza della tratta in cui si trova (\texttt{trattaCorrente}) e in base ad essa chiede di poter procedere nella tratta successiva: tale richiesta viene soddisfatta se e solo se il semaforo all'ingresso della tratta su cui il treno vuole procedere è verde (\texttt{semafori[$\cdot$]=true}). Se il semaforo è rosso, il treno rimane in attesa che diventi verde, altrimenti gli viene data l'abilitazione per procedere: il corrispettivo \textit{task} chiamato si occuperà di aggiornare la situazione dei semafori e l'occupazione delle tratte nonché di restituire al treno la sua nuova posizione.
+
+\end{document}

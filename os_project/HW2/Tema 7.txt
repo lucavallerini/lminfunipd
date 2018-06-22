@@ -1,0 +1,12 @@
+Modellare l'attesa ad uno sportello unico con il monitor di Java ma con una attesa ordinata. 
+
+A tale scopo si modelli la prenotazione con prelievo di un ticket numerato progressivo 
+(si pensi a talune attuali sale d'attesa di uffici pubblici). 
+
+Prevedere anche un ticket urgente che ha priorità su quello normale, 
+assumendo che i clienti urgenti siano sporadici. 
+
+Il servizio allo sportello venga modellato con un'opportuna attesa casuale. 
+
+Prevedere anche brevi intervalli di tempo casuali durante i quali lo sportello v(r) è fuori servizio, 
+nonché la possibilità che il cliente precisi un timeout (massima attesa in coda).
